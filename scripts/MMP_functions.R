@@ -123,6 +123,8 @@ MMP_define_paths <- function() {
     OUTPUT_PATH <<- '../outputs'
     ## location of folder containing generated documents 
     DOCS_PATH <<- '../docs'
+
+    STATUS$PATHS$status <<- 'success'
 }
 
 eval_parse <- function(x) {
@@ -167,97 +169,104 @@ MMP_prepare_paths <- function() {
 ## displays the a range of settings associated with the analysis       ##
 #########################################################################
 MMP_openning_banner <- function(){
-  currentTime <- format(Sys.time(),'%d/%m/%Y %H:%M:%S')
-  ## maxStringLength <- max(nchar(c(
-  ##     DATA_PATH,
-  ##     PARAMS_PATH,
-  ##     OUTPUT_PATH,
-  ##     DOCS_PATH,
-  ##     reportYear,
-  ##     currentTime)))
-  ## cat(paste0(
-  ##     paste0(rep('*', 19 + maxStringLength + 1), collapse = ''), '*\n',
-  ##     '* Data path:       ', DATA_PATH, paste0(rep(' ', maxStringLength-nchar(DATA_PATH)), collapse=''), ' *\n',
-  ##     '* Parameters path: ', PARAMS_PATH, paste0(rep(' ', maxStringLength-nchar(PARAMS_PATH)), collapse=''), ' *\n',
-  ##     '* Output path:     ', OUTPUT_PATH, paste0(rep(' ', maxStringLength-nchar(OUTPUT_PATH)), collapse=''), ' *\n',
-  ##     '* Docs path:       ', DOCS_PATH, paste0(rep(' ', maxStringLength-nchar(DOCS_PATH)), collapse=''), ' *\n',
-  ##     '* Report Year:     ', reportYear, paste0(rep(' ', maxStringLength-nchar(reportYear)), collapse=''), ' *\n',
-  ##     '* Date:            ', currentTime, paste0(rep(' ', maxStringLength-nchar(currentTime)), collapse=''), ' *\n',
-  ##   paste0(rep('*',19 + maxStringLength + 2),collapse=''),'\n',
-  ##   collapse=''
-  ## ))
+    system('clear')
+    currentTime <- format(Sys.time(),'%d/%m/%Y %H:%M:%S')
+    ## maxStringLength <- max(nchar(c(
+    ##     DATA_PATH,
+    ##     PARAMS_PATH,
+    ##     OUTPUT_PATH,
+    ##     DOCS_PATH,
+    ##     reportYear,
+    ##     currentTime)))
+    ## cat(paste0(
+    ##     paste0(rep('*', 19 + maxStringLength + 1), collapse = ''), '*\n',
+    ##     '* Data path:       ', DATA_PATH, paste0(rep(' ', maxStringLength-nchar(DATA_PATH)), collapse=''), ' *\n',
+    ##     '* Parameters path: ', PARAMS_PATH, paste0(rep(' ', maxStringLength-nchar(PARAMS_PATH)), collapse=''), ' *\n',
+    ##     '* Output path:     ', OUTPUT_PATH, paste0(rep(' ', maxStringLength-nchar(OUTPUT_PATH)), collapse=''), ' *\n',
+    ##     '* Docs path:       ', DOCS_PATH, paste0(rep(' ', maxStringLength-nchar(DOCS_PATH)), collapse=''), ' *\n',
+    ##     '* Report Year:     ', reportYear, paste0(rep(' ', maxStringLength-nchar(reportYear)), collapse=''), ' *\n',
+    ##     '* Date:            ', currentTime, paste0(rep(' ', maxStringLength-nchar(currentTime)), collapse=''), ' *\n',
+    ##   paste0(rep('*',19 + maxStringLength + 2),collapse=''),'\n',
+    ##   collapse=''
+    ## ))
 
-  STATUS$PATHS$items <- c(STATUS$PATHS$items, 'currentTime')
-  STATUS$PATHS$names <- c(STATUS$PATHS$names, 'Date/Time')
+    STATUS$PATHS$items <- c(STATUS$PATHS$items, 'currentTime')
+    STATUS$PATHS$names <- c(STATUS$PATHS$names, 'Date/Time')
+    
+    box.style <- cli:::box_styles()
+    box.width <- 80
+    box.margins <- 1
   
-  box.style <- cli:::box_styles()
-  box.width <- 80
-  box.margins <- 1
-  
-  ## get the width of the path box
-  path.box.nchar <-nchar(
-          paste0(STATUS$PATHS$names, ': ',sapply(STATUS$PATHS$items, function(x) eval(parse(text = x))))
-      )
-  path.box.width <- max(path.box.nchar) +
-  2 +              # add one for the status character
-  box.margins*2    # add the left and right margin
-  
-  ## Outer box (top)
-  top <- paste0(box.style["double", "top_left"],
-                strrep(box.style["double", "horizontal"], path.box.width),
-                '\u2564',
-                strrep(box.style["double", "horizontal"], box.width - path.box.width),
-                box.style["double", "top_right"],
-                "\n"
-                )
-  cat(top)
-  path.box.text <- NULL
-  keys <- STATUS$PATH$names
-  values <- sapply(STATUS$PATHS$items, function(x) eval(parse(text = x)))           
-  for (i in 1:length(keys)) {
-      path.box.text <- c(path.box.text,
-                         paste0(box.style["double", "vertical"],
-                                strrep(" ", box.margins),
-                                crayon::green(cli::symbol$tick), " ", crayon::blue(keys[i]), ": ",
-                                crayon::white(values[i]),
-                                strrep(" ", path.box.width - (path.box.nchar[i])-box.margins*2 -1),
-                                box.style["single", "vertical"],
-                                strrep(" ", box.margins)
-                                )
-                         )
-  }
+    ## get the width of the path box
+    path.box.nchar <-nchar(
+        paste0(STATUS$PATHS$names, ': ',sapply(STATUS$PATHS$items, function(x) eval(parse(text = x))))
+    )
+    path.box.width <- max(path.box.nchar) +
+        2 +              # add one for the status character
+        box.margins*2    # add the left and right margin
+    
+    ## Outer box (top)
+    top <- paste0(box.style["double", "top_left"],
+                  strrep(box.style["double", "horizontal"], path.box.width),
+                  '\u2564',
+                  strrep(box.style["double", "horizontal"], box.width - path.box.width),
+                  box.style["double", "top_right"],
+                  "\n"
+                  )
+    cat(top)
+    path.box.text <- NULL
+    keys <- STATUS$PATH$names
+    values <- sapply(STATUS$PATHS$items, function(x) eval(parse(text = x)))
+    status <- STATUS$PATH$status
+    for (i in 1:length(keys)) {
+        path.box.text <- c(path.box.text,
+                           paste0(box.style["double", "vertical"],
+                                  strrep(" ", box.margins),
+                                  switch(status,
+                                         'pending' = crayon::white(""),
+                                         'success' = crayon::green(cli::symbol$tick),
+                                         'failure' = crayon::red(cli::symbol$cross)
+                                         ),
+                                  " ", crayon::blue(keys[i]), ": ",
+                                  crayon::white(values[i]),
+                                  strrep(" ", path.box.width - (path.box.nchar[i])-box.margins*2 -1),
+                                  box.style["single", "vertical"],
+                                  strrep(" ", box.margins)
+                                  )
+                           )
+    }
 
-  title.box.text <- c("MMP Water Quality Report Analysis", "")
-  title.box.nchar <- nchar(title.box.text)
-  
-  for (i in 1:max(length(path.box.text), length(title.box.text))) {
-      cat(paste0(path.box.text[i],
-                 ifelse(i>length(title.box.text),
-                        cli::ansi_align("", width = box.width - path.box.width - 1, align = 'center'),
-                        cli::ansi_align(title.box.text[i], width = box.width - path.box.width - 1, align = 'center')),
-                 box.style["double", "vertical"],
-                 "\n"))
-  }
+    title.box.text <- c("MMP Water Quality Report Analysis", "")
+    title.box.nchar <- nchar(title.box.text)
+    
+    for (i in 1:max(length(path.box.text), length(title.box.text))) {
+        cat(paste0(path.box.text[i],
+                   ifelse(i>length(title.box.text),
+                          cli::ansi_align("", width = box.width - path.box.width - 1, align = 'center'),
+                          cli::ansi_align(title.box.text[i], width = box.width - path.box.width - 1, align = 'center')),
+                   box.style["double", "vertical"],
+                   "\n"))
+    }
 
-  ## Outer box (bottom)
-  bottom <- paste0(box.style["double", "bottom_left"],
-                strrep(box.style["double", "horizontal"], path.box.width),
-                '\u2567',
-                strrep(box.style["double", "horizontal"], box.width - path.box.width),
-                box.style["double", "bottom_right"],
-                "\n"
-                )
-  cat(bottom)
-  
-  
+    ## Outer box (bottom)
+    bottom <- paste0(box.style["double", "bottom_left"],
+                     strrep(box.style["double", "horizontal"], path.box.width),
+                     '\u2567',
+                     strrep(box.style["double", "horizontal"], box.width - path.box.width),
+                     box.style["double", "bottom_right"],
+                     "\n"
+                     )
+    cat(bottom)
+    
+    
 }
 
 MMP_test <- function() {
     for (i in 1:10) {
         for (j in 1:100000000) {
         }
-        system('clear')
         MMP_openning_banner()
         cat(paste0(i,'\n'))
+        if (i > 5) STATUS$PATHS$status <<- 'failure'
         }
     }

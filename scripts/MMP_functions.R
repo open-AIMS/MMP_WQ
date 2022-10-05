@@ -21,7 +21,7 @@ MMP_startMatter <- function(args = commandArgs()) {
     MMP_define_paths()         ## define the location of paths/files
     if (runStage == 1) {
         ## clear data and outputs from previous runs
-        MMP_clear_paths(paths = c('DATA_PATH', 'PARAMS_PATH', 'OUTPUT_PATH',
+        MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH',
                                   'DOCS_PATH'
                                   ))      
         MMP_prepare_paths()    ## prepare file structure
@@ -79,7 +79,7 @@ eval_parse <- function(x) {
 ## effectively returning the filesystem to a pre-run state in          ##
 ## preparation for a clean run start.                                  ##
 #########################################################################
-MMP_clear_paths <- function(paths = c('DATA_PATH', 'PARAMS_PATH', 'OUTPUT_PATH')) {
+MMP_clear_paths <- function(paths = c('DATA_PATH', 'OUTPUT_PATH')) {
     for (d in paths) {
         if (dir.exists(eval_parse(d))) 
             unlink(eval_parse(d), recursive = TRUE)
@@ -95,7 +95,14 @@ MMP_clear_paths <- function(paths = c('DATA_PATH', 'PARAMS_PATH', 'OUTPUT_PATH')
 #########################################################################
 MMP_prepare_paths <- function() {
     if (!dir.exists(DATA_PATH)) dir.create(DATA_PATH)
+    if (!dir.exists(paste0(DATA_PATH, '/primary')))
+        dir.create(paste0(DATA_PATH, '/primary'))
+
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
+    if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
+        dir.create(paste0(OUTPUT_PATH, '/tables'))
+
+    if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
 }
 
 
@@ -110,6 +117,7 @@ MMP_openning_banner <- function(){
       PARAMS_PATH,
       OUTPUT_PATH,
       DOCS_PATH,
+      reportYear,
       currentTime)))
   cat(paste0(
       paste0(rep('*', 19 + maxStringLength + 1), collapse = ''), '*\n',
@@ -117,6 +125,7 @@ MMP_openning_banner <- function(){
       '* Parameters path: ', PARAMS_PATH, paste0(rep(' ', maxStringLength-nchar(PARAMS_PATH)), collapse=''), ' *\n',
       '* Output path:     ', OUTPUT_PATH, paste0(rep(' ', maxStringLength-nchar(OUTPUT_PATH)), collapse=''), ' *\n',
       '* Docs path:       ', DOCS_PATH, paste0(rep(' ', maxStringLength-nchar(DOCS_PATH)), collapse=''), ' *\n',
+      '* Report Year:     ', reportYear, paste0(rep(' ', maxStringLength-nchar(reportYear)), collapse=''), ' *\n',
       '* Date:            ', currentTime, paste0(rep(' ', maxStringLength-nchar(currentTime)), collapse=''), ' *\n',
     paste0(rep('*',19 + maxStringLength + 2),collapse=''),'\n',
     collapse=''

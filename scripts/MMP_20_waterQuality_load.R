@@ -9,4 +9,7 @@ if (MMP_isParent()) {
 STATUS[["STAGE2"]][["status"]][1] <- "success"
 assign("STATUS", STATUS, env = globalenv())
 
+for (i in 1:100000000) {}
+
+assign("CURRENT_STAGE", 2, env = globalenv())
 MMP_openning_banner()

@@ -58,14 +58,16 @@ MMP_initialise_status <- function() {
                       items = c("aimsNiskin","jcuNiskin","jcuCYNiskin",
                                 "jcuEventNiskin","jcuCYEventNiskin",
                                 "flntu", "cairnsTransect",
-                                "waterTemp","salinity","dhd","disturbances"),
+                                "waterTemp","salinity","dhd","disturbances",
+                                "DataReport"),
                       names = c("AIMS niskin data","JCU niskin data","JCY CY niskin data",
                                 "JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers","Cairns transect data",
                                 "Water temperature loggers","Salinity loggers",
-                                "Degree heating weeks","Disturbance table"),
+                                "Degree heating weeks","Disturbance table",
+                                "Data report"),
                       status = c("pending","pending","pending","pending","pending",
-                                 "pending","pending","pending","pending","pending","pending")
+                                 "pending","pending","pending","pending","pending","pending","pending")
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -87,24 +89,21 @@ MMP_parseCLA <- function(args) {
     if(length(report_year) == 0)
         stop('A final report year must be supplied as a command line argument, such as: Rscript <script.R> --reportYear=2022')
     reportYear <- args[report_year]
-    reportYear <<- gsub('--reportYear=(.*)','\\1', reportYear)
-
-    STATUS$SETTINGS$items <- c(STATUS$SETTINGS$items, 'reportYear')
-    STATUS$SETTINGS$names <- c(STATUS$SETTINGS$names, 'Report year')
-    STATUS$SETTINGS$status <- c(STATUS$SETTINGS$status, 'success')
+    reportYear <- gsub('--reportYear=(.*)','\\1', reportYear)
+    assign("reportYear", reportYear, env = globalenv())
+    mmp__add_status(stage = "SETTINGS", item = "reportYear", name = "Report year", status = "success")
     
     runStage <- grep('--runStage=.*', args)
     if(length(runStage) == 0)
         stop('A run stage must be supplied as a command line argument, such as: Rscript <script.R> --runStage=1')
     runStage <- args[runStage]
-    runStage <<- eval(parse(text=gsub('--runStage=(.*)','\\1', runStage)))
-    STATUS$SETTINGS$items <- c(STATUS$SETTINGS$items, 'runStage')
-    STATUS$SETTINGS$names <- c(STATUS$SETTINGS$names, 'Run stage')
-    STATUS$SETTINGS$status <- c(STATUS$SETTINGS$status, 'success')
-
-    STATUS$STAGE1$status[which(STATUS$STAGE1$name == "Parse command line args")] <- 'success'
-
-    assign("STATUS", STATUS, env = globalenv())
+    runStage <- eval(parse(text=gsub('--runStage=(.*)','\\1', runStage)))
+    assign("runStage", runStage, env = globalenv())
+    assign("CURRENT_STAGE", runStage[1], env = globalenv())
+    mmp__add_status(stage = "SETTINGS", item = "runStage", name = "Run stages", status = "success")
+    mmp__add_status(stage = "SETTINGS", item = "CURRENT_STAGE", name = "Current stage", status = "success")
+    
+    mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "success")
 }
 
 ####################################################################
@@ -131,8 +130,7 @@ MMP_loadPackages <- function(log = TRUE) {
                                p,"))"))) 
     }
 
-    STATUS$STAGE1$status[which(STATUS$STAGE1$name == "Load packages")] <- 'success'
-    assign("STATUS", STATUS, env = globalenv())
+    mmp__change_status(stage = "STAGE1", item = "Load packages", status = "success")
 
     if(missing!="") 
         stop(paste('The following required package(s) are missing: ',paste(missing, collapse=', ')))
@@ -145,15 +143,16 @@ MMP_loadPackages <- function(log = TRUE) {
 MMP_define_paths <- function() {
     ## location of folder containing R data objects
     DATA_PATH <<- '../data'
+    mmp__change_status(stage = "SETTINGS", item = "DATA_PATH", status = "success")
     ## location of folder containing perpetual data used in this project
     PARAMS_PATH <<- '../parameters'
+    mmp__change_status(stage = "SETTINGS", item = "PARAMS_PATH", status = "success")
     ## location of folder containing outputs (individual figures and tables)
     OUTPUT_PATH <<- '../outputs'
+    mmp__change_status(stage = "SETTINGS", item = "OUTPUT_PATH", status = "success")
     ## location of folder containing generated documents 
     DOCS_PATH <<- '../docs'
-
-    STATUS$SETTINGS$status[1:4] <- 'success'
-    assign("STATUS", STATUS, env = globalenv())
+    mmp__change_status(stage = "SETTINGS", item = "DOCS_PATH", status = "success")
 }
 
 eval_parse <- function(x) {
@@ -191,8 +190,7 @@ MMP_prepare_paths <- function() {
 
     if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
 
-    STATUS$STAGE1$status[which(STATUS$STAGE1$name == "Prepare file system")] <- 'success'
-    assign("STATUS", STATUS, env = globalenv())
+    mmp__change_status(stage = "STAGE1", item = "Prepare file system", status = "success")
 }
 
 
@@ -223,6 +221,7 @@ MMP_openning_banner <- function(){
     ##   collapse=''
     ## ))
 
+    ## Leave this as is
     STATUS$SETTINGS$items <- c(STATUS$SETTINGS$items, 'currentTime')
     STATUS$SETTINGS$names <- c(STATUS$SETTINGS$names, 'Date/Time')
     STATUS$SETTINGS$status <- c(STATUS$SETTINGS$status, 'success')
@@ -357,21 +356,24 @@ mmp__mainBox <- function(settings.box.text, box.width, settings.box.width, box.m
                                                width = box.width - settings.box.width - 1,
                                                align = 'left')
                                )
-        for (i in 1:length(STATUS[[paste0("STAGE",runStage[j])]]$items)) {
-            main.box.text <- c(main.box.text,
-                               cli::ansi_align(
-                                        paste0(strrep(" ", box.margins),      
-                                               switch(STATUS[[paste0("STAGE",runStage[j])]]$status[i],
-                                                      'pending' = crayon::white(cli::symbol$line),
-                                                      'success' = crayon::green(cli::symbol$tick),
-                                                      'failure' = crayon::red(cli::symbol$cross)
-                                                      ),
-                                               " ", crayon::blue(STATUS[[paste0("STAGE",runStage[j])]]$name[i])
-                                               ),
-                                        width = box.width - settings.box.width - 1,
-                                        align = 'left'
-                                    )
-                               )
+            for (i in 1:length(STATUS[[paste0("STAGE",runStage[j])]]$items)) {
+                if (j == CURRENT_STAGE | STATUS[[paste0("STAGE",runStage[j])]]$status[i] == 'failure') {
+                    main.box.text <- c(main.box.text,
+                                       cli::ansi_align(
+                                                paste0(strrep(" ", box.margins),      
+                                                       switch(STATUS[[paste0("STAGE",runStage[j])]]$status[i],
+                                                              'pending' = crayon::white(cli::symbol$line),
+                                                              'success' = crayon::green(cli::symbol$tick),
+                                                              'failure' = crayon::red(cli::symbol$cross)
+                                                              ),
+                                                       " ", crayon::blue(STATUS[[paste0("STAGE",runStage[j])]]$name[i])
+                                                       ),
+                                                width = box.width - settings.box.width - 1,
+                                                align = 'left'
+                                            )
+                                       )
+                }
+                
         } 
     }
     main.box.nchar <- nchar(main.box.text)
@@ -396,6 +398,18 @@ mmp__combinedBoxes <- function(top,settings.box.text, main.box.text, bottom, box
                                "\n"))
         }
     combined.text <- c(top,combined.text,bottom)
+}
+
+mmp__add_status <- function(stage, item, name, status) {
+    STATUS[[stage]]$items <- c(STATUS[[stage]]$items, item)
+    STATUS[[stage]]$names <- c(STATUS[[stage]]$names, name)
+    STATUS[[stage]]$status <- c(STATUS[[stage]]$status, status)
+    assign("STATUS", STATUS, env = globalenv())
+}
+
+mmp__change_status <- function(stage, item, status) {
+    STATUS[[stage]]$status[which(STATUS[[stage]]$item == item)] <- status
+    assign("STATUS", STATUS, env = globalenv())
 }
 
 MMP_test <- function() {

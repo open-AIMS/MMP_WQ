@@ -58,21 +58,31 @@ RUN R -e "options(repos = \
   install.packages('geojsonsf'); \
   install.packages('s2'); \
 "
+#############################################################################
+## NOTE: we could opt for installing specific versions of packages
+## RUN R -e "install.packages('remotes');"
+## RUN R -e "remotes::install_version('dplyr', '1.0.5');"
+#############################################################################
 
 ## Install INLA
 RUN  wget https://inla.r-inla-download.org/R/stable/src/contrib/INLA_21.02.23.tar.gz \
   && R CMD INSTALL --clean --no-multiarch --without-keep.source --byte-compile --resave-data --compact-docs --no-demo INLA_21.02.23.tar.gz \
   && rm INLA_21.02.23.tar.gz
 
+## Create project directory in docker image
+RUN mkdir ~/MMP
+
+## Copy scripts and parameters (folders and contents) into docker image project directory
+COPY scripts/ ~/MMP/scripts/
+COPY scripts/ ~/MMP/parameters/
+WORKDIR ~/MMP/scripts/
+
+
+
+
+
 
 #############################################################################
-## Alternatively, we could opt for installing specific versions of packages
-## RUN R -e "install.packages('remotes');"
-## RUN R -e "remotes::install_version('dplyr', '1.0.5');"
-#
-# RUN mkdir ~/MMP
-# COPY scripts/ ~/MMP/scripts/
-# COPY scripts/ ~/MMP/parameters/
 ## COPY tests/ ~/reefCloud/tests/
 ## COPY Makefile ~/reefCloud/
 ## COPY docs/resources ~/reefCloud/resources

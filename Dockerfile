@@ -70,15 +70,16 @@ RUN  wget https://inla.r-inla-download.org/R/stable/src/contrib/INLA_21.02.23.ta
 ## RUN R -e "install.packages('remotes');"
 ## RUN R -e "remotes::install_version('dplyr', '1.0.5');"
 #
-# RUN mkdir ~/reefCloud
-# COPY scripts/ ~/reefCloud/scripts/
-# COPY tests/ ~/reefCloud/tests/
-# COPY Makefile ~/reefCloud/
-# COPY docs/resources ~/reefCloud/resources
-# RUN mkdir -p docs/Reports
-# ##RUN cp docs/Reports/*.editME ~/reefCloud/docs/Reports
-# COPY docs/Reports/*.editMe ~/reefCloud/docs/Reports/
-# WORKDIR ~/reefCloud
-# COPY stats_wrapper.sh ~/reefCloud/stats_wrapper.sh
-# ENTRYPOINT ["~/reefCloud/stats_wrapper.sh"]
+# RUN mkdir ~/MMP
+# COPY scripts/ ~/MMP/scripts/
+# COPY scripts/ ~/MMP/parameters/
+## COPY tests/ ~/reefCloud/tests/
+## COPY Makefile ~/reefCloud/
+## COPY docs/resources ~/reefCloud/resources
+## RUN mkdir -p docs/Reports
+## ##RUN cp docs/Reports/*.editME ~/reefCloud/docs/Reports
+## COPY docs/Reports/*.editMe ~/reefCloud/docs/Reports/
+# WORKDIR ~/MMP
+## COPY stats_wrapper.sh ~/reefCloud/stats_wrapper.sh
+## ENTRYPOINT ["~/reefCloud/stats_wrapper.sh"]
 #############################################################################

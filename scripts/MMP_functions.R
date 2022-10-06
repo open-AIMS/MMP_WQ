@@ -21,7 +21,7 @@ MMP_startMatter <- function(args = commandArgs()) {
     MMP_loadPackages()         ## load required packages
     MMP_parseCLA(args)         ## parse command line arguments
     MMP_define_paths()         ## define the location of paths/files
-    if (runStage == 1) {
+    if (1 %in% runStage) {
         ## clear data and outputs from previous runs
         MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH',
                                   'DOCS_PATH'
@@ -43,13 +43,32 @@ MMP_startMatter <- function(args = commandArgs()) {
 ##     - status: the status of the item (determines symbol)            ##
 #########################################################################
 MMP_initialise_status <- function() {
-    STATUS <<- list(
-        PATHS = list(title = 'Create paths',
+    STATUS <- list(
+        SETTINGS = list(title = 'Create paths',
                       items = c('DATA_PATH', 'OUTPUT_PATH', 'PARAMS_PATH', 'DOCS_PATH'),
                       names = c('Data path', 'Output path', 'Parameters path', 'Documents path'),
-                      status = 'pending'
+                      status = c('pending', 'pending', 'pending', 'pending')
+                      ),
+        STAGE1 = list(title = "Stage 1 - prepare environment",
+                      names = c("Load packages", "Parse command line args", "Prepare file system"),
+                      items = c("Load packages", "Parse command line args", "Prepare file system"),
+                      status = c("pending", "pending", "pending")
+                      ),
+        STAGE2 = list(title = "Stage 2 - extract data from DBs",
+                      items = c("aimsNiskin","jcuNiskin","jcuCYNiskin",
+                                "jcuEventNiskin","jcuCYEventNiskin",
+                                "flntu", "cairnsTransect",
+                                "waterTemp","salinity","dhd","disturbances"),
+                      names = c("AIMS niskin data","JCU niskin data","JCY CY niskin data",
+                                "JCU Event niskin data","JCU CY Event niskin data",
+                                "AIMS FLNTU loggers","Cairns transect data",
+                                "Water temperature loggers","Salinity loggers",
+                                "Degree heating weeks","Disturbance table"),
+                      status = c("pending","pending","pending","pending","pending",
+                                 "pending","pending","pending","pending","pending","pending")
                       )
     )
+    assign("STATUS", STATUS, env = globalenv())
 }
 
 #########################################################################
@@ -70,16 +89,22 @@ MMP_parseCLA <- function(args) {
     reportYear <- args[report_year]
     reportYear <<- gsub('--reportYear=(.*)','\\1', reportYear)
 
-    STATUS$PATHS$items <<- c(STATUS$PATHS$items, 'reportYear')
-    STATUS$PATHS$names <<- c(STATUS$PATHS$names, 'Report year')
+    STATUS$SETTINGS$items <- c(STATUS$SETTINGS$items, 'reportYear')
+    STATUS$SETTINGS$names <- c(STATUS$SETTINGS$names, 'Report year')
+    STATUS$SETTINGS$status <- c(STATUS$SETTINGS$status, 'success')
     
     runStage <- grep('--runStage=.*', args)
     if(length(runStage) == 0)
         stop('A run stage must be supplied as a command line argument, such as: Rscript <script.R> --runStage=1')
     runStage <- args[runStage]
-    runStage <<- gsub('--runStage=(.*)','\\1', runStage)
-    STATUS$PATHS$items <<- c(STATUS$PATHS$items, 'runStage')
-    STATUS$PATHS$names <<- c(STATUS$PATHS$names, 'Run stage')
+    runStage <<- eval(parse(text=gsub('--runStage=(.*)','\\1', runStage)))
+    STATUS$SETTINGS$items <- c(STATUS$SETTINGS$items, 'runStage')
+    STATUS$SETTINGS$names <- c(STATUS$SETTINGS$names, 'Run stage')
+    STATUS$SETTINGS$status <- c(STATUS$SETTINGS$status, 'success')
+
+    STATUS$STAGE1$status[which(STATUS$STAGE1$name == "Parse command line args")] <- 'success'
+
+    assign("STATUS", STATUS, env = globalenv())
 }
 
 ####################################################################
@@ -106,6 +131,9 @@ MMP_loadPackages <- function(log = TRUE) {
                                p,"))"))) 
     }
 
+    STATUS$STAGE1$status[which(STATUS$STAGE1$name == "Load packages")] <- 'success'
+    assign("STATUS", STATUS, env = globalenv())
+
     if(missing!="") 
         stop(paste('The following required package(s) are missing: ',paste(missing, collapse=', ')))
 }
@@ -124,7 +152,8 @@ MMP_define_paths <- function() {
     ## location of folder containing generated documents 
     DOCS_PATH <<- '../docs'
 
-    STATUS$PATHS$status <<- 'success'
+    STATUS$SETTINGS$status[1:4] <- 'success'
+    assign("STATUS", STATUS, env = globalenv())
 }
 
 eval_parse <- function(x) {
@@ -161,6 +190,9 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(OUTPUT_PATH, '/tables'))
 
     if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
+
+    STATUS$STAGE1$status[which(STATUS$STAGE1$name == "Prepare file system")] <- 'success'
+    assign("STATUS", STATUS, env = globalenv())
 }
 
 
@@ -170,6 +202,7 @@ MMP_prepare_paths <- function() {
 #########################################################################
 MMP_openning_banner <- function(){
     system('clear')
+    cat(" ")
     currentTime <- format(Sys.time(),'%d/%m/%Y %H:%M:%S')
     ## maxStringLength <- max(nchar(c(
     ##     DATA_PATH,
@@ -190,75 +223,179 @@ MMP_openning_banner <- function(){
     ##   collapse=''
     ## ))
 
-    STATUS$PATHS$items <- c(STATUS$PATHS$items, 'currentTime')
-    STATUS$PATHS$names <- c(STATUS$PATHS$names, 'Date/Time')
+    STATUS$SETTINGS$items <- c(STATUS$SETTINGS$items, 'currentTime')
+    STATUS$SETTINGS$names <- c(STATUS$SETTINGS$names, 'Date/Time')
+    STATUS$SETTINGS$status <- c(STATUS$SETTINGS$status, 'success')
     
     box.style <- cli:::box_styles()
     box.width <- 80
     box.margins <- 1
   
     ## get the width of the path box
-    path.box.nchar <-nchar(
-        paste0(STATUS$PATHS$names, ': ',sapply(STATUS$PATHS$items, function(x) eval(parse(text = x))))
+    settings.box.nchar <-nchar(
+        paste0(STATUS$SETTINGS$names, ': ',sapply(STATUS$SETTINGS$items, function(x) eval(parse(text = x))))
     )
-    path.box.width <- max(path.box.nchar) +
+    settings.box.width <- max(settings.box.nchar) +
         2 +              # add one for the status character
         box.margins*2    # add the left and right margin
     
     ## Outer box (top)
-    top <- paste0(box.style["double", "top_left"],
-                  strrep(box.style["double", "horizontal"], path.box.width),
-                  '\u2564',
-                  strrep(box.style["double", "horizontal"], box.width - path.box.width),
-                  box.style["double", "top_right"],
+    top <- mmp__outerBox.top(box.width, settings.box.width)
+    ## cat(top)
+
+    ## Settings box
+    settings.box.text <- mmp__settingsBox(settings = STATUS$SETTINGS,
+                                     box.width = settings.box.width,
+                                     box.nchar = settings.box.nchar,
+                                     box.margins = box.margins,
+                                     currentTime)
+    
+    ## Main box
+    main.box.text <- mmp__mainBox(settings.box.text,
+                                  box.width,
+                                  settings.box.width,
+                                  box.margins)
+
+    ## Outer box (bottom)
+    bottom <- mmp__outerBox.bottom(box.width, settings.box.width)
+    
+    ## bottom <- paste0(box.style["double", "bottom_left"],
+    ##                  strrep(box.style["double", "horizontal"], settings.box.width),
+    ##                  '\u2567',
+    ##                  strrep(box.style["double", "horizontal"], box.width - settings.box.width),
+    ##                  box.style["double", "bottom_right"],
+    ##                  "\n"
+    ##                  )
+
+    ## Combine boxes
+    combined.boxes.text <- mmp__combinedBoxes(
+        top,
+        settings.box.text,
+        main.box.text,
+        bottom,
+        box.width,
+        settings.box.width,
+        box.margins)
+
+    cat(combined.boxes.text) 
+    ## for (i in 1:max(length(settings.box.text), length(main.box.text))) {
+    ##     cat(paste0(
+    ##         ifelse(i>length(settings.box.text),
+    ##                cli::ansi_align("", width = box.width - settings.box.width - 1, align = 'center'),
+    ##                settings.box.text[i]),
+    ##         ifelse(i>length(main.box.text),
+    ##                cli::ansi_align("", width = box.width - settings.box.width - 1, align = 'center'),
+    ##                main.box.text[i]),
+    ##         "\u2551",
+    ##         "\n"))
+    ## }
+
+    
+    
+}
+
+mmp__outerBox.top <- function(outer.box.width, this.box.width) {
+    top <- paste0("\u2554",
+                  strrep("\u2550", this.box.width),
+                  "\u2564",
+                  strrep("\u2550", outer.box.width - this.box.width),
+                  "\u2557",
                   "\n"
                   )
-    cat(top)
-    path.box.text <- NULL
-    keys <- STATUS$PATH$names
-    values <- sapply(STATUS$PATHS$items, function(x) eval(parse(text = x)))
-    status <- STATUS$PATH$status
+    top
+}
+
+mmp__outerBox.bottom <- function(outer.box.width, this.box.width) {
+    bottom <- paste0("\u255A",
+                     strrep("\u2550", this.box.width),
+                     '\u2567',
+                     strrep("\u2550", outer.box.width - this.box.width),
+                     "\u255D",
+                     "\n"
+                     )
+    bottom
+}
+
+
+mmp__settingsBox <- function(settings, box.width, box.nchar, box.margins, currentTime) {
+    box.text <- NULL
+    keys <- settings$names
+    values <- sapply(settings$items, function(x) eval(parse(text = x)))
+    status <- settings$status
     for (i in 1:length(keys)) {
-        path.box.text <- c(path.box.text,
-                           paste0(box.style["double", "vertical"],
+        box.text <- c(box.text,
+                           paste0("\u2551",
                                   strrep(" ", box.margins),
-                                  switch(status,
-                                         'pending' = crayon::white(""),
+                                  switch(status[i],
+                                         'pending' = crayon::white(cli::symbol$line),
                                          'success' = crayon::green(cli::symbol$tick),
                                          'failure' = crayon::red(cli::symbol$cross)
                                          ),
                                   " ", crayon::blue(keys[i]), ": ",
                                   crayon::white(values[i]),
-                                  strrep(" ", path.box.width - (path.box.nchar[i])-box.margins*2 -1),
-                                  box.style["single", "vertical"],
+                                  strrep(" ", box.width - (box.nchar[i])-box.margins*2 -1),
+                                  "\u2502",
                                   strrep(" ", box.margins)
                                   )
                            )
     }
+    box.text
+}
 
-    title.box.text <- c("MMP Water Quality Report Analysis", "")
-    title.box.nchar <- nchar(title.box.text)
-    
-    for (i in 1:max(length(path.box.text), length(title.box.text))) {
-        cat(paste0(path.box.text[i],
-                   ifelse(i>length(title.box.text),
-                          cli::ansi_align("", width = box.width - path.box.width - 1, align = 'center'),
-                          cli::ansi_align(title.box.text[i], width = box.width - path.box.width - 1, align = 'center')),
-                   box.style["double", "vertical"],
-                   "\n"))
+mmp__mainBox <- function(settings.box.text, box.width, settings.box.width, box.margins) {
+    main.box.text <- c("MMP Water Quality Report Analysis", "")
+    ## format the title to be centered
+    for (i in 1:length(main.box.text))
+        main.box.text[i] <- cli::ansi_align(main.box.text[i],
+                                            width = box.width - settings.box.width - 1,
+                                            align = 'center')
+
+    ## add the stages as left justified 
+    for (j in 1:length(runStage)) {
+            main.box.text <- c(main.box.text,
+                               cli::ansi_align(STATUS[[paste0("STAGE",runStage[j])]]$title,
+                                               width = box.width - settings.box.width - 1,
+                                               align = 'left')
+                               )
+        for (i in 1:length(STATUS[[paste0("STAGE",runStage[j])]]$items)) {
+            main.box.text <- c(main.box.text,
+                               cli::ansi_align(
+                                        paste0(strrep(" ", box.margins),      
+                                               switch(STATUS[[paste0("STAGE",runStage[j])]]$status[i],
+                                                      'pending' = crayon::white(cli::symbol$line),
+                                                      'success' = crayon::green(cli::symbol$tick),
+                                                      'failure' = crayon::red(cli::symbol$cross)
+                                                      ),
+                                               " ", crayon::blue(STATUS[[paste0("STAGE",runStage[j])]]$name[i])
+                                               ),
+                                        width = box.width - settings.box.width - 1,
+                                        align = 'left'
+                                    )
+                               )
+        } 
     }
+    main.box.nchar <- nchar(main.box.text)
+    main.box.text
+}
 
-    ## Outer box (bottom)
-    bottom <- paste0(box.style["double", "bottom_left"],
-                     strrep(box.style["double", "horizontal"], path.box.width),
-                     '\u2567',
-                     strrep(box.style["double", "horizontal"], box.width - path.box.width),
-                     box.style["double", "bottom_right"],
-                     "\n"
-                     )
-    cat(bottom)
-    
-    
+mmp__combinedBoxes <- function(top,settings.box.text, main.box.text, bottom, box.width, settings.box.width, box.margins) {
+    combined.text <- NULL
+    for (i in 1:max(length(settings.box.text), length(main.box.text))) {
+        combined.text <- c(combined.text,
+                           paste0(
+                               ifelse(i>length(settings.box.text),
+                                      paste0("\u2551",
+                                             cli::ansi_align("", width = settings.box.width, align = 'center'),
+                                             "\u2502",
+                                             strrep(" ", box.margins)), 
+                                      settings.box.text[i]),
+                               ifelse(i>length(main.box.text),
+                                      cli::ansi_align("", width = box.width - settings.box.width - 1, align = 'center'),
+                                      main.box.text[i]),
+                               "\u2551",
+                               "\n"))
+        }
+    combined.text <- c(top,combined.text,bottom)
 }
 
 MMP_test <- function() {
@@ -267,6 +404,6 @@ MMP_test <- function() {
         }
         MMP_openning_banner()
         cat(paste0(i,'\n'))
-        if (i > 5) STATUS$PATHS$status <<- 'failure'
+        if (i > 5) STATUS$SETTINGS$status[4] <<- 'failure'
         }
     }

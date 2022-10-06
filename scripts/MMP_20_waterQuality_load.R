@@ -5,10 +5,8 @@ source("MMP_functions.R")
 if (MMP_isParent()) {
     MMP_startMatter()
 }
-print(runStage)
-if (2 %in% runStage) {
-    print('hello')
-    source("MMP_20_waterQuality_load.R")
-}
 
-## MMP_test()
+STATUS[["STAGE2"]][["status"]][1] <- "success"
+assign("STATUS", STATUS, env = globalenv())
+
+MMP_openning_banner()

@@ -7,8 +7,9 @@ MMP Water Quality Analyses
    > docker build  ..
 2. to run image interactively
    > docker run -it -rm <name> Rscript MMP_00_main.R --reportYear=2022 --runStage=1
-4. to execute a container
+3. to execute a container
    > docker exec <name> Rscript MMP_00_main.R --reportYear=2022 --runStage=1
+4. list images / containers
 5. delete image
 6. clear cache
 

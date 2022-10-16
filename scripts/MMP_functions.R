@@ -1,3 +1,4 @@
+source("MMP_functions_boxes.R")
 
 #########################################################################
 ## The following function determines whether the current script is the ##
@@ -18,9 +19,10 @@ MMP_isParent <- function() {
 #########################################################################
 MMP_startMatter <- function(args = commandArgs()) {
     MMP_initialise_status()    ## create the status list
+    MMP_initialise_log()       ## create the log 
     MMP_loadPackages()         ## load required packages
-    MMP_parseCLA(args)         ## parse command line arguments
     MMP_define_paths()         ## define the location of paths/files
+    MMP_parseCLA(args)         ## parse command line arguments
     if (1 %in% runStage) {
         ## clear data and outputs from previous runs
         MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH',
@@ -84,18 +86,35 @@ MMP_initialise_status <- function() {
 ##      1. preparation stage, also performs a complete clearout        ##
 #########################################################################
 MMP_parseCLA <- function(args) {
+    runStage <<- 1   ## this is a temp incase it is not specified on the command line - it is required for the openning banner
+    CURRENT_STAGE <<- 1
+    if(length(args)<7) {
+        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+        MMP_openning_banner()
+        stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers>'),
+             call. = FALSE)
+    }
     ## args <- commandArgs()
     report_year <- grep('--reportYear=.*', args)
-    if(length(report_year) == 0)
-        stop('A final report year must be supplied as a command line argument, such as: Rscript <script.R> --reportYear=2022')
+    if(length(report_year) == 0) {
+        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+        MMP_openning_banner()
+        stop('A final report year must be supplied as a command line argument, such as: Rscript <script.R> --reportYear=2022', call. = FALSE)
+    }
     reportYear <- args[report_year]
     reportYear <- gsub('--reportYear=(.*)','\\1', reportYear)
     assign("reportYear", reportYear, env = globalenv())
     mmp__add_status(stage = "SETTINGS", item = "reportYear", name = "Report year", status = "success")
     
     runStage <- grep('--runStage=.*', args)
-    if(length(runStage) == 0)
-        stop('A run stage must be supplied as a command line argument, such as: Rscript <script.R> --runStage=1')
+    if(length(runStage) == 0) {
+        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+        MMP_openning_banner()
+        stop('A run stage must be supplied as a command line argument, such as: Rscript <script.R> --runStage=1', call. = FALSE)
+    }
     runStage <- args[runStage]
     runStage <- eval(parse(text=gsub('--runStage=(.*)','\\1', runStage)))
     assign("runStage", runStage, env = globalenv())
@@ -104,6 +123,10 @@ MMP_parseCLA <- function(args) {
     mmp__add_status(stage = "SETTINGS", item = "CURRENT_STAGE", name = "Current stage", status = "success")
     
     mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "success")
+    MMP_log(status = "SUCCESS", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+
+
+    
 }
 
 ####################################################################
@@ -119,7 +142,7 @@ MMP_parseCLA <- function(args) {
 MMP_loadPackages <- function(log = TRUE) {           
     missing <- ''
     options(tidyverse.quiet = TRUE)
-    pkgs <- c('tidyverse','testthat','cli','rlang','crayon'
+    pkgs <- c('tidyverse','testthat','cli','rlang','crayon', 'assertthat'
               )
 
     for (p in pkgs) {
@@ -130,10 +153,22 @@ MMP_loadPackages <- function(log = TRUE) {
                                p,"))"))) 
     }
 
-    mmp__change_status(stage = "STAGE1", item = "Load packages", status = "success")
 
-    if(missing!="") 
+    if(missing!="") { 
+        MMP_log(status = "FAILURE",
+                logFile = LOG_FILE,
+                Category = "Loading the necessary R packages",
+                msg=NULL) 
+        mmp__change_status(stage = "STAGE1", item = "Load packages", status = "failure")
+        MMP_openning_banner()
         stop(paste('The following required package(s) are missing: ',paste(missing, collapse=', ')))
+    } else {
+        mmp__change_status(stage = "STAGE1", item = "Load packages", status = "success")
+        MMP_log(status = "SUCCESS",
+                logFile = LOG_FILE,
+                Category = "Loading the necessary R packages",
+                msg=NULL) 
+    }
 }
 
 #########################################################################
@@ -153,6 +188,20 @@ MMP_define_paths <- function() {
     ## location of folder containing generated documents 
     DOCS_PATH <<- '../docs'
     mmp__change_status(stage = "SETTINGS", item = "DOCS_PATH", status = "success")
+
+}
+
+#########################################################################
+## The following function initialises a log file.  This log file is    ##
+## placed in the root of the project as it needs to be in a location   ##
+## that is guarenteed to exist from a freshly cloned instance of this  ##
+## codebase.                                                           ##
+#########################################################################
+MMP_initialise_log <- function() {
+    ##Log file
+    LOG_FILE <<- paste0("../.mmp.log")
+    if (file.exists(LOG_FILE)) unlink(LOG_FILE)
+    mmp__add_status(stage = "SETTINGS", item = "LOG_FILE", name = "Log file", status = "success")
 }
 
 eval_parse <- function(x) {
@@ -183,6 +232,8 @@ MMP_prepare_paths <- function() {
     if (!dir.exists(DATA_PATH)) dir.create(DATA_PATH)
     if (!dir.exists(paste0(DATA_PATH, '/primary')))
         dir.create(paste0(DATA_PATH, '/primary'))
+    if (!dir.exists(paste0(DATA_PATH, '/primary/niskin')))
+        dir.create(paste0(DATA_PATH, '/primary/niskin'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
@@ -191,6 +242,8 @@ MMP_prepare_paths <- function() {
     if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
 
     mmp__change_status(stage = "STAGE1", item = "Prepare file system", status = "success")
+
+    MMP_log(status = "SUCCESS", logFile = LOG_FILE, Category = "Preparing file system", msg=NULL) 
 }
 
 
@@ -276,7 +329,7 @@ MMP_openning_banner <- function(){
         settings.box.width,
         box.margins)
 
-    cat(combined.boxes.text) 
+    cat(combined.boxes.text)
     ## for (i in 1:max(length(settings.box.text), length(main.box.text))) {
     ##     cat(paste0(
     ##         ifelse(i>length(settings.box.text),
@@ -288,116 +341,10 @@ MMP_openning_banner <- function(){
     ##         "\u2551",
     ##         "\n"))
     ## }
-
     
-    
-}
-
-mmp__outerBox.top <- function(outer.box.width, this.box.width) {
-    top <- paste0("\u2554",
-                  strrep("\u2550", this.box.width),
-                  "\u2564",
-                  strrep("\u2550", outer.box.width - this.box.width),
-                  "\u2557",
-                  "\n"
-                  )
-    top
-}
-
-mmp__outerBox.bottom <- function(outer.box.width, this.box.width) {
-    bottom <- paste0("\u255A",
-                     strrep("\u2550", this.box.width),
-                     '\u2567',
-                     strrep("\u2550", outer.box.width - this.box.width),
-                     "\u255D",
-                     "\n"
-                     )
-    bottom
-}
-
-
-mmp__settingsBox <- function(settings, box.width, box.nchar, box.margins, currentTime) {
-    box.text <- NULL
-    keys <- settings$names
-    values <- sapply(settings$items, function(x) eval(parse(text = x)))
-    status <- settings$status
-    for (i in 1:length(keys)) {
-        box.text <- c(box.text,
-                           paste0("\u2551",
-                                  strrep(" ", box.margins),
-                                  switch(status[i],
-                                         'pending' = crayon::white(cli::symbol$line),
-                                         'success' = crayon::green(cli::symbol$tick),
-                                         'failure' = crayon::red(cli::symbol$cross)
-                                         ),
-                                  " ", crayon::blue(keys[i]), ": ",
-                                  crayon::white(values[i]),
-                                  strrep(" ", box.width - (box.nchar[i])-box.margins*2 -1),
-                                  "\u2502",
-                                  strrep(" ", box.margins)
-                                  )
-                           )
-    }
-    box.text
-}
-
-mmp__mainBox <- function(settings.box.text, box.width, settings.box.width, box.margins) {
-    main.box.text <- c("MMP Water Quality Report Analysis", "")
-    ## format the title to be centered
-    for (i in 1:length(main.box.text))
-        main.box.text[i] <- cli::ansi_align(main.box.text[i],
-                                            width = box.width - settings.box.width - 1,
-                                            align = 'center')
-
-    ## add the stages as left justified 
-    for (j in 1:length(runStage)) {
-            main.box.text <- c(main.box.text,
-                               cli::ansi_align(STATUS[[paste0("STAGE",runStage[j])]]$title,
-                                               width = box.width - settings.box.width - 1,
-                                               align = 'left')
-                               )
-            for (i in 1:length(STATUS[[paste0("STAGE",runStage[j])]]$items)) {
-                if (j == CURRENT_STAGE | STATUS[[paste0("STAGE",runStage[j])]]$status[i] == 'failure') {
-                    main.box.text <- c(main.box.text,
-                                       cli::ansi_align(
-                                                paste0(strrep(" ", box.margins),      
-                                                       switch(STATUS[[paste0("STAGE",runStage[j])]]$status[i],
-                                                              'pending' = crayon::white(cli::symbol$line),
-                                                              'success' = crayon::green(cli::symbol$tick),
-                                                              'failure' = crayon::red(cli::symbol$cross)
-                                                              ),
-                                                       " ", crayon::blue(STATUS[[paste0("STAGE",runStage[j])]]$name[i])
-                                                       ),
-                                                width = box.width - settings.box.width - 1,
-                                                align = 'left'
-                                            )
-                                       )
-                }
-                
-        } 
-    }
-    main.box.nchar <- nchar(main.box.text)
-    main.box.text
-}
-
-mmp__combinedBoxes <- function(top,settings.box.text, main.box.text, bottom, box.width, settings.box.width, box.margins) {
-    combined.text <- NULL
-    for (i in 1:max(length(settings.box.text), length(main.box.text))) {
-        combined.text <- c(combined.text,
-                           paste0(
-                               ifelse(i>length(settings.box.text),
-                                      paste0("\u2551",
-                                             cli::ansi_align("", width = settings.box.width, align = 'center'),
-                                             "\u2502",
-                                             strrep(" ", box.margins)), 
-                                      settings.box.text[i]),
-                               ifelse(i>length(main.box.text),
-                                      cli::ansi_align("", width = box.width - settings.box.width - 1, align = 'center'),
-                                      main.box.text[i]),
-                               "\u2551",
-                               "\n"))
-        }
-    combined.text <- c(top,combined.text,bottom)
+    ## log box
+    log.box <- mmp__logBox(box.width, box.margins)
+    cat(log.box) 
 }
 
 mmp__add_status <- function(stage, item, name, status) {
@@ -421,3 +368,89 @@ MMP_test <- function() {
         if (i > 5) STATUS$SETTINGS$status[4] <<- 'failure'
         }
     }
+
+####################################################################################
+## The following function writes out log information to a file named by the       ##
+## LOG_FILE global variable.                                                      ##
+## Arguments:                                                                     ##
+## - log_status:     a string indicating either 'FAILURE',  'SUCCESS',            ##
+##              'WARNING' or 'INFO                                                ##
+## - logFile:    a character string representation of the log file name           ##
+##               (including path relative to the current working director)        ##
+## - Category:   a character string with a category to appear verbatim in the log ##
+## - success:    boolean or string. One of TRUE (for success), 'WARNING'          ##
+##               (for warnings) or anything else for a failure                    ##
+## - msg:        the message (as a string) to appear verbatim in the log          ##
+####################################################################################
+MMP_log <- function(status, logFile = LOG_FILE, Category, msg=NULL) {
+    d <- dirname(logFile)
+    files <- list.files(d)
+    ## print(files)
+    if(!any(grepl(paste0('^',logFile,'$'),files))) system(paste0('touch "',logFile,'"'))
+    now <- Sys.time()
+    options(digits.secs=2)              ## switch to subsecond display
+    msg = paste0(now, '|', status, ': ', Category, ' ', msg)
+    ## cat(paste0(msg,'\n'))
+    if (!is.null(msg)) {
+        write(msg,  file=paste0(logFile), append=TRUE)
+    }
+}
+
+
+##########################################################################                                               
+## The following function provides a more useful error handling         ##                                               
+## routine.                                                             ##                                               
+##    expr:      an R expression to be evaluated                        ##                                               
+##    logFile:   a character string represetnation of the log file name ##                                               
+##               (including path relative to the current working        ##                                               
+##               directory)                                             ##                                               
+##    Category:  a character string representation of error category    ##                                               
+##    msg:       a character string with a message to appear verbatim   ##                                               
+##               in the log                                             ##                                               
+##    return:    boolean, whether to return a TRUE or FALSE             ##                                               
+##########################################################################                                               
+MMP_tryCatch <- function(expr, logFile,Category, expectedClass=NULL, msg=NULL, return=NULL, showWarnings=FALSE) {
+    if (!exists('PROGRESS')) PROGRESS=NULL
+    max.warnings<-4
+    warnings<-0
+    W <- NULL
+    w.handler <- function(w){ # warning handler                                                                          
+        m<-w$message
+        if ((warnings < max.warnings) && (grepl ('MMP_WARNING', m)>0)) {
+            MMP_log('WARNING', logFile, Category, paste(warnings, msg, m))
+            warnings<<-warnings+1
+        }
+        invokeRestart("muffleWarning")
+    }
+    ## ret <- list(value = withCallingHandlers(tryCatch(expr,
+    ##                                                  error = function(e) e,
+    ##                                                  warning = function(w) w,
+    ##                                                  message = function(m) m),
+    ##                                         warning = w.handler),warning = W)
+    ret <- list(value = withCallingHandlers(tryCatch(expr, error = function(e) e),
+                                            warning = w.handler),warning = W)
+    ## if(!is.atomic(ret$value) && !is.null(ret$value$message)){
+    ## print(!is.atomic(ret$value))
+    ## print(any(class(ret$value) %in% c("simpleError", "error", "rlang_error")))
+    if(!is.atomic(ret$value) && any(class(ret$value) %in% c("simpleError", "error", "rlang_error"))){
+        ## An error occurred
+        PROGRESS <<- c(PROGRESS,'Fail')
+        class(ret) <- "try-error"
+        MMP_log('ERROR', logFile, Category, paste(msg, ret$value$message))
+        if(!is.null(return)) {
+            FALSE
+        }else {
+            if (DEBUG_MODE) {
+                "An error occured, please refer to the status line above..."
+            } else {
+                quit(status=-1,save="no")
+            }
+        }
+    } else {    #no error check for warning
+        PROGRESS <<- c(PROGRESS,'Pass')
+        MMP_log('SUCCESS', logFile, Category, msg)
+        if(!is.null(return)) {
+            TRUE
+        }
+    }
+}

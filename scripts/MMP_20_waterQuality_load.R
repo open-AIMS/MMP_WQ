@@ -6,10 +6,19 @@ if (MMP_isParent()) {
     MMP_startMatter()
 }
 
+assign("CURRENT_STAGE", 2, env = globalenv())
+
+## - AIMS niskin
+## - AIMS Cairns transect
+## - JCU niskin
+## - JCU CY niskin
+## - JCU Event niskin
+## - JCU CY Event niskin
+source("MMP_21_waterQuality_load_niskin.R")
+
 STATUS[["STAGE2"]][["status"]][1] <- "success"
 assign("STATUS", STATUS, env = globalenv())
 
-for (i in 1:100000000) {}
 
-assign("CURRENT_STAGE", 2, env = globalenv())
-MMP_openning_banner()
+
+

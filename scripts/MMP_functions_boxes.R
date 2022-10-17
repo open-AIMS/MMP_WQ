@@ -82,12 +82,13 @@ mmp__mainBox <- function(settings.box.text, box.width, settings.box.width, box.m
                                                align = 'left')
                                )
             for (i in 1:length(STATUS[[paste0("STAGE",runStage[j])]]$items)) {
-                if (j == CURRENT_STAGE | STATUS[[paste0("STAGE",runStage[j])]]$status[i] == 'failure') {
+                if (runStage[j] == CURRENT_STAGE | STATUS[[paste0("STAGE",runStage[j])]]$status[i] == 'failure') {
                     main.box.text <- c(main.box.text,
                                        cli::ansi_align(
                                                 paste0(strrep(" ", box.margins),      
                                                        switch(STATUS[[paste0("STAGE",runStage[j])]]$status[i],
                                                               'pending' = crayon::white(cli::symbol$line),
+                                                              'progress' = crayon::magenta("\u23F1"),
                                                               'success' = crayon::green(cli::symbol$tick),
                                                               'failure' = crayon::red(cli::symbol$cross)
                                                               ),

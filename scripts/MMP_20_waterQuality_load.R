@@ -16,9 +16,15 @@ assign("CURRENT_STAGE", 2, env = globalenv())
 ## - JCU CY Event niskin
 source("MMP_21_waterQuality_load_niskin.R")
 
-STATUS[["STAGE2"]][["status"]][1] <- "success"
-assign("STATUS", STATUS, env = globalenv())
+## - AIMS FLNTU logggers
+## - Water temperature loggers
+## - Salinity loggers
+## source("MMP_22_waterQuality_load_loggers.R")
 
+## - Degree heating weeks
+## - Disturbance table
+## - tides
+## - BOM weather
 
 
 

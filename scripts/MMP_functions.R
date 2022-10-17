@@ -23,7 +23,7 @@ MMP_startMatter <- function(args = commandArgs()) {
     MMP_loadPackages()         ## load required packages
     MMP_define_paths()         ## define the location of paths/files
     MMP_parseCLA(args)         ## parse command line arguments
-    if (1 %in% runStage) {
+    if (CURRENT_STAGE == 1) {
         ## clear data and outputs from previous runs
         MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH',
                                   'DOCS_PATH'
@@ -57,14 +57,14 @@ MMP_initialise_status <- function() {
                       status = c("pending", "pending", "pending")
                       ),
         STAGE2 = list(title = "Stage 2 - extract data from DBs",
-                      items = c("aimsNiskin","jcuNiskin","jcuCYNiskin",
+                      items = c("aimsNiskin","cairnsTransect","jcuNiskin","jcuCYNiskin",
                                 "jcuEventNiskin","jcuCYEventNiskin",
-                                "flntu", "cairnsTransect",
+                                "flntu", 
                                 "waterTemp","salinity","dhd","disturbances",
                                 "DataReport"),
-                      names = c("AIMS niskin data","JCU niskin data","JCY CY niskin data",
+                      names = c("AIMS niskin data","Cairns transect data","JCU niskin data","JCY CY niskin data",
                                 "JCU Event niskin data","JCU CY Event niskin data",
-                                "AIMS FLNTU loggers","Cairns transect data",
+                                "AIMS FLNTU loggers",
                                 "Water temperature loggers","Salinity loggers",
                                 "Degree heating weeks","Disturbance table",
                                 "Data report"),
@@ -92,7 +92,7 @@ MMP_parseCLA <- function(args) {
         MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
-        stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers>'),
+        stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers> --alwaysExtract=<TRUE>'),
              call. = FALSE)
     }
     ## args <- commandArgs()
@@ -121,6 +121,16 @@ MMP_parseCLA <- function(args) {
     assign("CURRENT_STAGE", runStage[1], env = globalenv())
     mmp__add_status(stage = "SETTINGS", item = "runStage", name = "Run stages", status = "success")
     mmp__add_status(stage = "SETTINGS", item = "CURRENT_STAGE", name = "Current stage", status = "success")
+
+    alwaysExtract <- grep('--alwaysExtract.*', args)
+    if (length(alwaysExtract) == 0) {
+        alwaysExtract <- TRUE
+    } else {
+        alwaysExtract <- args[alwaysExtract]
+        alwaysExtract <- eval(parse(text=gsub('--alwaysExtract=(.*)','\\1', alwaysExtract)))
+    }
+    assign("alwaysExtract", alwaysExtract, env = globalenv())
+    mmp__add_status(stage = "SETTINGS", item = "alwaysExtract", name = "Always extract", status = "success")
     
     mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "success")
     MMP_log(status = "SUCCESS", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
@@ -234,6 +244,8 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(DATA_PATH, '/primary'))
     if (!dir.exists(paste0(DATA_PATH, '/primary/niskin')))
         dir.create(paste0(DATA_PATH, '/primary/niskin'))
+    if (!dir.exists(paste0(DATA_PATH, '/primary/loggers')))
+        dir.create(paste0(DATA_PATH, '/primary/loggers'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
@@ -460,11 +472,13 @@ MMP_tryCatch <- function(expr, logFile,Category, expectedClass=NULL, msg=NULL, r
 MMP_tryCatch_db <- function(name = 'niskin',
                             stage = "STAGE2",
                             item = "aimsNiskin",
-                            label = "AIMS niskin") {
+                            label = "AIMS niskin",
+                            PATH = NISKIN_PATH,
+                            db_user = "wq_nut2") {
     MSG <- paste0("Extracting ", label, " data from the database")
     tryCatch({
         status <- system2("java",
-                          args = paste0("-jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"),
+                          args = paste0("-jar dbExport.jar ", PATH, name, ".sql ", PATH, name, ".csv ", db_user),
                           stdout = TRUE, stderr = TRUE)
         ## Catch the errors returned by the database
         ##print(status)
@@ -503,4 +517,25 @@ MMP_tryCatch_db <- function(name = 'niskin',
         mmp__change_status(stage = stage, item = item, status = "failure")
     }
     )
+}
+
+MMP_checkData <- function(name = "niskin",
+                    stage = "STAGE2",
+                    item = "aimsNiskin",
+                    label = "AIMS niskin",
+                    PATH = NISKIN_PATH) {
+    if (file.exists(paste0(PATH, name, ".csv"))) {
+        MMP_log(status = "SUCCESS",
+                logFile = LOG_FILE,
+                Category = paste0(label, " data exists"),
+                msg=NULL) 
+        mmp__change_status(stage = stage, item = item, status = "success")
+    } else {
+        MMP_log(status = "FAILURE",
+                logFile = LOG_FILE,
+                Category = paste0(label, " data does not exist"),
+                msg=NULL) 
+        mmp__change_status(stage = stage, item = item, status = "failure")
+    }
+    
 }

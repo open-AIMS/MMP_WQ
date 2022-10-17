@@ -454,3 +454,53 @@ MMP_tryCatch <- function(expr, logFile,Category, expectedClass=NULL, msg=NULL, r
         }
     }
 }
+
+
+
+MMP_tryCatch_db <- function(name = 'niskin',
+                            stage = "STAGE2",
+                            item = "aimsNiskin",
+                            label = "AIMS niskin") {
+    MSG <- paste0("Extracting ", label, " data from the database")
+    tryCatch({
+        status <- system2("java",
+                          args = paste0("-jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"),
+                          stdout = TRUE, stderr = TRUE)
+        ## Catch the errors returned by the database
+        ##print(status)
+        if (stringr::str_detect(status[6], 'Error')) {
+            msg <- paste0(MSG, ": There is a problem with the SQL: ", stringr::str_replace(status[8], "java.sql.SQLSyntaxErrorException: (.*)", "\\1"))
+
+            MMP_log(status = "FAILURE",
+                    logFile = LOG_FILE,
+                    Category = msg,
+                    msg=NULL) 
+            mmp__change_status(stage = stage, item = item, status = "failure")
+            ## stop(msg, call. = FALSE)
+        } else {
+            MMP_log(status = "SUCCESS",
+                    logFile = LOG_FILE,
+                    Category = MSG,
+                    msg=NULL) 
+            mmp__change_status(stage = stage, item = item, status = "success")
+        }
+        
+        ## warning('Be')
+    },
+    error = function(e) {
+        MMP_log(status = "FAILURE",
+                logFile = LOG_FILE,
+                Category = paste0(MSG, ": ", e["message"]),
+                msg=NULL) 
+        mmp__change_status(stage = stage, item = item, status = "failure")
+    },
+    warning = function(w) {
+                                        # print(paste0(paste(w, collapse = ''), ' This is a warning warning'))
+        MMP_log(status = "FAILURE",
+                logFile = LOG_FILE,
+                Category = paste0(MSG, ": ", w["message"]),
+                msg=NULL) 
+        mmp__change_status(stage = stage, item = item, status = "failure")
+    }
+    )
+}

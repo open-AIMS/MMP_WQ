@@ -27,57 +27,11 @@ writeLines("select l.PROJECT, l.STATION_NAME, l.LOCATION_NAME,
  order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
  paste0(NISKIN_PATH, "niskin.sql"))
 
-## ## MMP_tryCatch({
-##     try({status<-system(paste0("java -jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"), intern=TRUE)})
+MMP_tryCatch_db(name = 'niskin',
+                stage = "STAGE2",
+                item = "aimsNiskin",
+                label = "AIMS niskin")
 
-##     ## handle errors
-##     ## err <- switch(status,
-##     ##               grepl('^Error running query',status)
-## print(status) 
-## ##     stop('Something is missing')
-## ## }, logFile=LOG_FILE, Category='Extracting AIMS nisking data', msg=paste0(''), return=NULL)
-
-
-## error <- 'no'
-## tryCatch({
-##     status<-system(paste0("java -jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"), intern=TRUE);
-##     print(status)
-## },
-## error = function(e) {'error'},
-## warning = function(x) {'warning'}
-## )
-
-writeLines("select PROJECTA from STATION_DETAILS where rownum < 10",
- paste0(NISKIN_PATH, "niskin.sql"))
-error <- 'no'
-tryCatch({
-                                        #status<-
-                                        #    system(paste0("java -jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"), intern=TRUE);
-    status <- system2("java",
-                      args = paste0("-jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"),
-                      stdout = TRUE, stderr = TRUE)
-    #print(status)
-    if (stringr::str_detect(status[6], 'Error')) {
-        msg <- stringr::str_replace(status[8], "java.sql.SQLSyntaxErrorException: (.*)", "\\1") 
-        stop(msg, call. = FALSE)
-        }
-                      
-                      ## warning('Be')
-},
-error = function(e) {print(paste0(e))},
-warning = function(w) {print(paste0(paste(w, collapse = ''), ' This is a warning warning'))}
-)
-## print(error)
-## error <- 'no'
-## withCallingHandlers({
-##     status<-system(paste0("java -jar dbExport.jar ", NISKIN_PATH, "niskin.sql ", NISKIN_PATH, "niskin.csv reef wq_nut2"), intern=TRUE);
-##     print(status)
-## },
-## error = function(e) {'error'},
-## warning = function(x) {'warning'}
-## )
-
-mmp__change_status(stage = "STAGE2", item = "aimsNiskin", status = "success")
-## MMP_openning_banner()
+MMP_openning_banner()
 ## ----end
 

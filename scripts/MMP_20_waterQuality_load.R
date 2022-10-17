@@ -19,12 +19,13 @@ source("MMP_21_waterQuality_load_niskin.R")
 ## - AIMS FLNTU logggers
 ## - Water temperature loggers
 ## - Salinity loggers
-## source("MMP_22_waterQuality_load_loggers.R")
+source("MMP_22_waterQuality_load_loggers.R")
 
 ## - Degree heating weeks
 ## - Disturbance table
 ## - tides
 ## - BOM weather
+source("MMP_23_waterQuality_load_other.R")
 
 
 

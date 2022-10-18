@@ -25,7 +25,7 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance", ".csv"))) {
                     PATH = OTHER_PATH,
                     db_user = "reef reefmon")
 } else {
-    MMP_checkData(name = "disturbance",
+    MMP_checkData(name = "disturbance.csv",
                   stage = "STAGE2",
                   item = "disturbances",
                   label = "AIMS Disturbance table",
@@ -166,10 +166,47 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
                     PATH = OTHER_PATH,
                     db_user = "reef rwqpp_user")
 } else {
-    MMP_checkData(name = "bom",
+    MMP_checkData(name = "bom.csv",
                   stage = "STAGE2",
                   item = "BOM",
                   label = "BOM weather",
+                  PATH = OTHER_PATH)
+}
+
+MMP_openning_banner()
+## ----end
+
+## ---- Discharge data 
+mmp__change_status(stage = "STAGE2", item = "discharge", status = "progress")
+MMP_openning_banner()
+
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "discharge", ".csv"))) {
+    writeLines("SELECT sample_time, param_name,param_value, station_id, station_name, river_name, QUAL_CODE
+from nrm_flow.dnrm_data_record r, nrm_flow.dnrm_station s 
+where r.dnrm_station_id = s.id
+ and s.station_id in ('102102A','104001A','105107A','107003A',
+        '108002A','109001A','110001D',
+        '111007A','111101D','112004A','112101B',
+        '113006A','114001A','116001F','116001E',
+        '117002A','119003A','120006B','121003A',
+        '122004A','124001B','125007A','126001A','126003A',
+        '129001A','130005A')
+  and QUAL_CODE < 151
+  and PARAM_NAME = 'Discharge (ML/day)'
+  and PARAM_AG = 'Mean (Daily)'",
+paste0(OTHER_PATH, "discharge.sql"))
+
+    MMP_tryCatch_db(name = 'discharge',
+                    stage = "STAGE2",
+                    item = "discharge",
+                    label = "River discharge",
+                    PATH = OTHER_PATH,
+                    db_user = "reef rwqpp_user")
+} else {
+    MMP_checkData(name = "discharge.csv",
+                  stage = "STAGE2",
+                  item = "discharge",
+                  label = "River discharge",
                   PATH = OTHER_PATH)
 }
 

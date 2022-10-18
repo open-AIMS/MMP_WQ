@@ -25,7 +25,7 @@ if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "flntu", ".csv"))) {
                     PATH = LOGGER_PATH,
                     db_user = "reef rwqpp_user")
 } else {
-    MMP_checkData(name = "flntu",
+    MMP_checkData(name = "flntu.csv",
                   stage = "STAGE2",
                   item = "flntu",
                   label = "AIMS FLNTU loggers",
@@ -53,7 +53,7 @@ if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "waterTempW", ".csv"))) {
                     PATH = LOGGER_PATH,
                     db_user = "rtds rtdsread")
 } else {
-    MMP_checkData(name = "waterTempW",
+    MMP_checkData(name = "waterTempW.csv",
                   stage = "STAGE2",
                   item = "waterTemp",
                   label = "Water temperature loggers",
@@ -79,7 +79,7 @@ if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "waterSalinity", ".csv"))) 
                     PATH = LOGGER_PATH,
                     db_user = "reef wq_nut2")
 } else {
-    MMP_checkData(name = "waterSalinity",
+    MMP_checkData(name = "waterSalinity.csv",
                   stage = "STAGE2",
                   item = "salinity",
                   label = "Salinity loggers",

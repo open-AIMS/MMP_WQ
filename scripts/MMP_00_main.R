@@ -10,4 +10,7 @@ if (2 %in% runStage) {
     source("MMP_20_waterQuality_load.R")
 }
 
+if (3 %in% runStage) {
+    source("MMP_30_waterQuality_process.R")
+}
 ## MMP_test()

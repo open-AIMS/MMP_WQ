@@ -1,0 +1,746 @@
+GBRMPA_group;SHORT_NAME;GBRMPA_water_area;Measure;GL.Season;Location;GL;DirectionOfFailure
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;NOx.wm;Wet;Median;1.5;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;NOx.wm;Annual;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PN.wm;Annual;Mean;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PO4.wm;Wet;Median;3.0;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PO4.wm;Annual;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;PP.wm;Annual;Mean;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.7;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;NTU;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;NTU;Wet;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;NTU;Annual;Median;10;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;3.0;L
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;;L
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;4.0;H
+30;ER01,AR01,PRN01,PRS01;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Median;;H
+;SR01,SR02;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;NOx.wm;Wet;Median;1.5;H
+;SR01,SR02;Enclosed Coastal waters;NOx.wm;Annual;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PN.wm;Annual;Mean;;H
+;SR01,SR02;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PO4.wm;Wet;Median;2.0;H
+;SR01,SR02;Enclosed Coastal waters;PO4.wm;Annual;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+;SR01,SR02;Enclosed Coastal waters;PP.wm;Annual;Mean;;H
+;SR01,SR02;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.4;H
+;SR01,SR02;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;;H
+;SR01,SR02;Enclosed Coastal waters;NTU;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;NTU;Wet;Median;;H
+;SR01,SR02;Enclosed Coastal waters;NTU;Annual;Median;10;H
+;SR01,SR02;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+;SR01,SR02;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;3.1;L
+;ER01,AR01,SR01,SR02;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;;L
+;SR01,SR02;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+;SR01,SR02;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;5.0;H
+;SR01,SR02;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Mean;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;NOx.wm;Wet;Median;1.0;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;NOx.wm;Annual;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PN.wm;Annual;Mean;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PO4.wm;Wet;Median;2.0;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PO4.wm;Annual;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;PP.wm;Annual;Mean;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.7;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;NTU;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;NTU;Wet;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;NTU;Annual;Median;11;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;1.5;L
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;;L
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;6.0;H
+40;KR01,KR02,BR01,NR01,NR02;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Mean;;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;NOx.wm;Dry;Median;0.32;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;NOx.wm;Wet;Median;0.45;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;NOx.wm;Annual;Median;0.35;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PN.wm;Dry;Mean;16;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PN.wm;Wet;Median;20;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PN.wm;Annual;Median;18;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PO4.wm;Dry;Median;1.86;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PO4.wm;Wet;Median;0.93;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PO4.wm;Annual;Median;1.40;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PP.wm;Dry;Mean;2.3;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PP.wm;Wet;Median;3;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;PP.wm;Annual;Median;2.6;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.25;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.46;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.36;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;NTU;Dry;Median;0.9;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;NTU;Wet;Median;0.8;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;NTU;Annual;Median;;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;TSS_MGPERL.wm;Dry;Mean;1.6;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;1.7;H
+50;ER02b,ER03,AR02b,AR03b,CI01,NR03,NR04,SR03,SR04,PRN02,PRN03,PRS02,PRS03,PRS2.5;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.9;H
+
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;NOx.wm;Dry;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;NOx.wm;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;NOx.wm;Annual;Median;0.35;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PN.wm;Dry;Mean;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PN.wm;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PN.wm;Annual;Median;18;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PO4.wm;Dry;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PO4.wm;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PO4.wm;Annual;Median;0.62;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PP.wm;Dry;Mean;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PP.wm;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;PP.wm;Annual;Median;2;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.27;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;NTU;Dry;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;NTU;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;NTU;Annual;Median;0.5;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;SECCHI_DEPTH.wm;Dry;Median;;L
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;SECCHI_DEPTH.wm;Wet;Median;;L
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;TSS_MGPERL.wm;Dry;Mean;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;TSS_MGPERL.wm;Wet;Median;;H
+60;AE04,ER05,NR05,SR05,SR06,PRN04,PRN05,PRN06,PRBB,PRS05;Midshelf waters;TSS_MGPERL.wm;Annual;Median;1.5;H
+70;NR06,ER06;Offshore waters;NOx.wm;Dry;Median;;H
+70;NR06,ER06;Offshore waters;NOx.wm;Wet;Median;;H
+70;NR06,ER06;Offshore waters;NOx.wm;Annual;Median;0.42;H
+70;NR06,ER06;Offshore waters;PN.wm;Dry;Median;;H
+70;NR06,ER06;Offshore waters;PN.wm;Wet;Median;;H
+70;NR06,ER06;Offshore waters;PN.wm;Annual;Median;16;H
+70;NR06,ER06;Offshore waters;PO4.wm;Dry;Median;;H
+70;NR06,ER06;Offshore waters;PO4.wm;Wet;Median;;H
+70;NR06,ER06;Offshore waters;PO4.wm;Annual;Median;0.39;H
+70;NR06,ER06;Offshore waters;PP.wm;Dry;Mean;;H
+70;NR06,ER06;Offshore waters;PP.wm;Wet;Median;;H
+70;NR06,ER06;Offshore waters;PP.wm;Annual;Median;1.9;H
+70;NR06,ER06;Offshore waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+70;NR06,ER06;Offshore waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+70;NR06,ER06;Offshore waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.26;H
+70;NR06,ER06;Offshore waters;NTU;Dry;Median;;H
+70;NR06,ER06;Offshore waters;NTU;Wet;Median;;H
+70;NR06,ER06;Offshore waters;NTU;Annual;Median;0.5;H
+70;NR06,ER06;Offshore waters;SECCHI_DEPTH.wm;Dry;Median;;L
+70;NR06,ER06;Offshore waters;SECCHI_DEPTH.wm;Wet;Median;;L
+70;NR06,ER06;Offshore waters;SECCHI_DEPTH.wm;Annual;Mean;17;L
+70;NR06,ER06;Offshore waters;TSS_MGPERL.wm;Dry;Mean;;H
+70;NR06,ER06;Offshore waters;TSS_MGPERL.wm;Wet;Median;;H
+70;NR06,ER06;Offshore waters;TSS_MGPERL.wm;Annual;Median;0.5;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;NOx.wm;Dry;Median;;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;NOx.wm;Wet;Median;;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;NOx.wm;Annual;Median;0.35;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PN.wm;Dry;Median;16;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PN.wm;Wet;Median;25;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PN.wm;Annual;Mean;20;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PO4.wm;Dry;Median;;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PO4.wm;Wet;Median;;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PO4.wm;Annual;Median;2;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;NTU;Dry;Median;;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;NTU;Wet;Median;;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;NTU;Annual;Median;1;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+1;C1,C6,C8,RM1,RM4,RM8,TUL1;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;NOx.wm;Dry;Median;;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;NOx.wm;Wet;Median;;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;NOx.wm;Annual;Median;0.35;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PN.wm;Dry;Median;16;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PN.wm;Wet;Median;25;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PN.wm;Annual;Mean;20;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PO4.wm;Dry;Median;;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PO4.wm;Wet;Median;;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PO4.wm;Annual;Median;2;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;NTU;Dry;Median;;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;NTU;Wet;Median;;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;NTU;Annual;Median;1;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+2;RM9,RM10,TUL3,TUL4,TUL5,TUL6,TUL8,TUL9;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;NOx.wm;Dry;Median;;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;NOx.wm;Wet;Median;;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;NOx.wm;Annual;Median;0.31;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PN.wm;Dry;Median;16;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PN.wm;Wet;Median;25;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PN.wm;Annual;Median;14;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PO4.wm;Dry;Median;;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PO4.wm;Wet;Median;;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PO4.wm;Annual;Median;2;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PP.wm;Dry;Median;2.3;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PP.wm;Wet;Median;3.3;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;PP.wm;Annual;Median;2;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.3;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;NTU;Dry;Median;;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;NTU;Wet;Median;;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;NTU;Annual;Median;0.6;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;SECCHI_DEPTH.wm;Dry;Median;;L
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;SECCHI_DEPTH.wm;Wet;Median;;L
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;SECCHI_DEPTH.wm;Annual;Median;13;L
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+3;C4,C5,C11,RM2,RM3,RM5,RM6,RM7,TUL2;Midshelf waters;TSS_MGPERL.wm;Annual;Median;1.2;H
+4;RM12,TUL11;Midestuarine waters;NOx.wm;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;NOx.wm;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;NOx.wm;Annual;Median;15;H
+4;RM12,TUL11;Midestuarine waters;PN.wm;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;PN.wm;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;PN.wm;Annual;Median;;H
+4;RM12,TUL11;Midestuarine waters;PO4.wm;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;PO4.wm;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;PO4.wm;Annual;Median;3;H
+4;RM12,TUL11;Midestuarine waters;PP.wm;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;PP.wm;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;PP.wm;Annual;Median;;H
+4;RM12,TUL11;Midestuarine waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;DRIFTCHL_UGPERL.wm;Annual;Median;2;H
+4;RM12,TUL11;Midestuarine waters;NTU;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;NTU;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;NTU;Annual;Median;5;H
+4;RM12,TUL11;Midestuarine waters;SECCHI_DEPTH.wm;Dry;Median;;L
+4;RM12,TUL11;Midestuarine waters;SECCHI_DEPTH.wm;Wet;Median;;L
+4;RM12,TUL11;Midestuarine waters;SECCHI_DEPTH.wm;Annual;Median;1.5;L
+4;RM12,TUL11;Midestuarine waters;TSS_MGPERL.wm;Dry;Median;;H
+4;RM12,TUL11;Midestuarine waters;TSS_MGPERL.wm;Wet;Median;;H
+4;RM12,TUL11;Midestuarine waters;TSS_MGPERL.wm;Annual;Median;7;H
+5;TUL7,TUL10;Lower estuarine waters;NOx.wm;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;NOx.wm;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;NOx.wm;Annual;Median;3;H
+5;TUL7,TUL10;Lower estuarine waters;PN.wm;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PN.wm;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PN.wm;Annual;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PO4.wm;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PO4.wm;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PO4.wm;Annual;Median;3;H
+5;TUL7,TUL10;Lower estuarine waters;PP.wm;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PP.wm;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;PP.wm;Annual;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;DRIFTCHL_UGPERL.wm;Annual;Median;1.1;H
+5;TUL7,TUL10;Lower estuarine waters;NTU;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;NTU;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;NTU;Annual;Median;4;H
+5;TUL7,TUL10;Lower estuarine waters;SECCHI_DEPTH.wm;Dry;Median;;L
+5;TUL7,TUL10;Lower estuarine waters;SECCHI_DEPTH.wm;Wet;Median;;L
+5;TUL7,TUL10;Lower estuarine waters;SECCHI_DEPTH.wm;Annual;Median;1.6;L
+5;TUL7,TUL10;Lower estuarine waters;TSS_MGPERL.wm;Dry;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;TSS_MGPERL.wm;Wet;Median;;H
+5;TUL7,TUL10;Lower estuarine waters;TSS_MGPERL.wm;Annual;Median;5;H
+6;BUR1,BUR2;Open Coastal waters;NOx.wm;Dry;Median;;H
+6;BUR1,BUR2;Open Coastal waters;NOx.wm;Wet;Median;;H
+6;BUR1,BUR2;Open Coastal waters;NOx.wm;Annual;Median;0.28;H
+6;BUR1,BUR2;Open Coastal waters;PN.wm;Dry;Median;16;H
+6;BUR1,BUR2;Open Coastal waters;PN.wm;Wet;Median;25;H
+6;BUR1,BUR2;Open Coastal waters;PN.wm;Annual;Median;12;H
+6;BUR1,BUR2;Open Coastal waters;PO4.wm;Dry;Median;;H
+6;BUR1,BUR2;Open Coastal waters;PO4.wm;Wet;Median;;H
+6;BUR1,BUR2;Open Coastal waters;PO4.wm;Annual;Median;1;H
+6;BUR1,BUR2;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+6;BUR1,BUR2;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+6;BUR1,BUR2;Open Coastal waters;PP.wm;Annual;Median;2.2;H
+6;BUR1,BUR2;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+6;BUR1,BUR2;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+6;BUR1,BUR2;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.35;H
+6;BUR1,BUR2;Open Coastal waters;NTU;Dry;Median;;H
+6;BUR1,BUR2;Open Coastal waters;NTU;Wet;Median;;H
+6;BUR1,BUR2;Open Coastal waters;NTU;Annual;Median;0.8;H
+6;BUR1,BUR2;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+6;BUR1,BUR2;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+6;BUR1,BUR2;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+6;BUR1,BUR2;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+6;BUR1,BUR2;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+6;BUR1,BUR2;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.2;H
+7;BUR3;Open Coastal waters;NOx.wm;Dry;Median;;H
+7;BUR3;Open Coastal waters;NOx.wm;Wet;Median;;H
+7;BUR3;Open Coastal waters;NOx.wm;Annual;Median;0.28;H
+7;BUR3;Open Coastal waters;PN.wm;Dry;Median;16;H
+7;BUR3;Open Coastal waters;PN.wm;Wet;Median;25;H
+7;BUR3;Open Coastal waters;PN.wm;Annual;Mean;20;H
+7;BUR3;Open Coastal waters;PO4.wm;Dry;Median;;H
+7;BUR3;Open Coastal waters;PO4.wm;Wet;Median;;H
+7;BUR3;Open Coastal waters;PO4.wm;Annual;Median;1;H
+7;BUR3;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+7;BUR3;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+7;BUR3;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+7;BUR3;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+7;BUR3;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+7;BUR3;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+7;BUR3;Open Coastal waters;NTU;Dry;Median;;H
+7;BUR3;Open Coastal waters;NTU;Wet;Median;;H
+7;BUR3;Open Coastal waters;NTU;Annual;Median;0.8;H
+7;BUR3;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+7;BUR3;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+7;BUR3;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+7;BUR3;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+7;BUR3;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+7;BUR3;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+8;BUR4;Open Coastal waters;NOx.wm;Dry;Median;;H
+8;BUR4;Open Coastal waters;NOx.wm;Wet;Median;;H
+8;BUR4;Open Coastal waters;NOx.wm;Annual;Median;0.28;H
+8;BUR4;Open Coastal waters;PN.wm;Dry;Median;16;H
+8;BUR4;Open Coastal waters;PN.wm;Wet;Median;25;H
+8;BUR4;Open Coastal waters;PN.wm;Annual;Median;17;H
+8;BUR4;Open Coastal waters;PO4.wm;Dry;Median;;H
+8;BUR4;Open Coastal waters;PO4.wm;Wet;Median;;H
+8;BUR4;Open Coastal waters;PO4.wm;Annual;Median;1;H
+8;BUR4;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+8;BUR4;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+8;BUR4;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+8;BUR4;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+8;BUR4;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+8;BUR4;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.59;H
+8;BUR4;Open Coastal waters;NTU;Dry;Median;;H
+8;BUR4;Open Coastal waters;NTU;Wet;Median;;H
+8;BUR4;Open Coastal waters;NTU;Annual;Median;1.3;H
+8;BUR4;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+8;BUR4;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+8;BUR4;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Median;4;L
+8;BUR4;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+8;BUR4;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+8;BUR4;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.9;H
+9;BUR5;Open Coastal waters;NOx.wm;Dry;Median;;H
+9;BUR5;Open Coastal waters;NOx.wm;Wet;Median;;H
+9;BUR5;Open Coastal waters;NOx.wm;Annual;Median;0.5;H
+9;BUR5;Open Coastal waters;PN.wm;Dry;Median;16;H
+9;BUR5;Open Coastal waters;PN.wm;Wet;Median;25;H
+9;BUR5;Open Coastal waters;PN.wm;Annual;Mean;20;H
+9;BUR5;Open Coastal waters;PO4.wm;Dry;Median;;H
+9;BUR5;Open Coastal waters;PO4.wm;Wet;Median;;H
+9;BUR5;Open Coastal waters;PO4.wm;Annual;Median;2;H
+9;BUR5;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+9;BUR5;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+9;BUR5;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+9;BUR5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+9;BUR5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+9;BUR5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.6;H
+9;BUR5;Open Coastal waters;NTU;Dry;Median;;H
+9;BUR5;Open Coastal waters;NTU;Wet;Median;;H
+9;BUR5;Open Coastal waters;NTU;Annual;Median;3;H
+9;BUR5;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+9;BUR5;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+9;BUR5;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Median;3;L
+9;BUR5;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+9;BUR5;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+9;BUR5;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;5;H
+10;BUR6,BUR7;Open Coastal waters;NOx.wm;Dry;Median;;H
+10;BUR6,BUR7;Open Coastal waters;NOx.wm;Wet;Median;;H
+10;BUR6,BUR7;Open Coastal waters;NOx.wm;Annual;Median;1;H
+10;BUR6,BUR7;Open Coastal waters;PN.wm;Dry;Median;16;H
+10;BUR6,BUR7;Open Coastal waters;PN.wm;Wet;Median;25;H
+10;BUR6,BUR7;Open Coastal waters;PN.wm;Annual;Median;13;H
+10;BUR6,BUR7;Open Coastal waters;PO4.wm;Dry;Median;;H
+10;BUR6,BUR7;Open Coastal waters;PO4.wm;Wet;Median;;H
+10;BUR6,BUR7;Open Coastal waters;PO4.wm;Annual;Median;2;H
+10;BUR6,BUR7;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+10;BUR6,BUR7;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+10;BUR6,BUR7;Open Coastal waters;PP.wm;Annual;Median;2.1;H
+10;BUR6,BUR7;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+10;BUR6,BUR7;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+10;BUR6,BUR7;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+10;BUR6,BUR7;Open Coastal waters;NTU;Dry;Median;;H
+10;BUR6,BUR7;Open Coastal waters;NTU;Wet;Median;;H
+10;BUR6,BUR7;Open Coastal waters;NTU;Annual;Mean;2;H
+10;BUR6,BUR7;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+10;BUR6,BUR7;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+10;BUR6,BUR7;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+10;BUR6,BUR7;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+10;BUR6,BUR7;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+10;BUR6,BUR7;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.2;H
+11;BUR8,BUR9;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;NOx.wm;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;NOx.wm;Annual;Median;4;H
+11;BUR8,BUR9;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PN.wm;Annual;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PO4.wm;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PO4.wm;Annual;Median;1;H
+11;BUR8,BUR9;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;PP.wm;Annual;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;1;H
+11;BUR8,BUR9;Enclosed Coastal waters;NTU;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;NTU;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;NTU;Annual;Median;4;H
+11;BUR8,BUR9;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+11;BUR8,BUR9;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+11;BUR8,BUR9;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Median;1.5;L
+11;BUR8,BUR9;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;;H
+11;BUR8,BUR9;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Median;2;H
+12;BUR10;Midshelf waters;NOx.wm;Dry;Median;;H
+12;BUR10;Midshelf waters;NOx.wm;Wet;Median;;H
+12;BUR10;Midshelf waters;NOx.wm;Annual;Median;0.28;H
+12;BUR10;Midshelf waters;PN.wm;Dry;Median;16;H
+12;BUR10;Midshelf waters;PN.wm;Wet;Median;25;H
+12;BUR10;Midshelf waters;PN.wm;Annual;Median;14;H
+12;BUR10;Midshelf waters;PO4.wm;Dry;Median;;H
+12;BUR10;Midshelf waters;PO4.wm;Wet;Median;;H
+12;BUR10;Midshelf waters;PO4.wm;Annual;Median;1;H
+12;BUR10;Midshelf waters;PP.wm;Dry;Median;2.3;H
+12;BUR10;Midshelf waters;PP.wm;Wet;Median;3.3;H
+12;BUR10;Midshelf waters;PP.wm;Annual;Median;2;H
+12;BUR10;Midshelf waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+12;BUR10;Midshelf waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+12;BUR10;Midshelf waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.33;H
+12;BUR10;Midshelf waters;NTU;Dry;Median;;H
+12;BUR10;Midshelf waters;NTU;Wet;Median;;H
+12;BUR10;Midshelf waters;NTU;Annual;Median;0.5;H
+12;BUR10;Midshelf waters;SECCHI_DEPTH.wm;Dry;Median;;L
+12;BUR10;Midshelf waters;SECCHI_DEPTH.wm;Wet;Median;;L
+12;BUR10;Midshelf waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+12;BUR10;Midshelf waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+12;BUR10;Midshelf waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+12;BUR10;Midshelf waters;TSS_MGPERL.wm;Annual;Median;0.8;H
+13;BUR11,BUR12;Open Coastal waters;NOx.wm;Dry;Median;;H
+13;BUR11,BUR12;Open Coastal waters;NOx.wm;Wet;Median;;H
+13;BUR11,BUR12;Open Coastal waters;NOx.wm;Annual;Median;1;H
+13;BUR11,BUR12;Open Coastal waters;PN.wm;Dry;Median;16;H
+13;BUR11,BUR12;Open Coastal waters;PN.wm;Wet;Median;25;H
+13;BUR11,BUR12;Open Coastal waters;PN.wm;Annual;Mean;20;H
+13;BUR11,BUR12;Open Coastal waters;PO4.wm;Dry;Median;;H
+13;BUR11,BUR12;Open Coastal waters;PO4.wm;Wet;Median;;H
+13;BUR11,BUR12;Open Coastal waters;PO4.wm;Annual;Median;2;H
+13;BUR11,BUR12;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+13;BUR11,BUR12;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+13;BUR11,BUR12;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+13;BUR11,BUR12;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+13;BUR11,BUR12;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+13;BUR11,BUR12;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+13;BUR11,BUR12;Open Coastal waters;NTU;Dry;Median;;H
+13;BUR11,BUR12;Open Coastal waters;NTU;Wet;Median;;H
+13;BUR11,BUR12;Open Coastal waters;NTU;Annual;Median;2;H
+13;BUR11,BUR12;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+13;BUR11,BUR12;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+13;BUR11,BUR12;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+13;BUR11,BUR12;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+13;BUR11,BUR12;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+13;BUR11,BUR12;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;NOx.wm;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;NOx.wm;Annual;Median;4;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PN.wm;Annual;Mean;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PO4.wm;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PO4.wm;Annual;Median;1;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;PP.wm;Annual;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;1;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;NTU;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;NTU;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;NTU;Annual;Median;4;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Median;1.5;L
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;;H
+14;BUR13,BUR14,BUR15;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Median;2;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;NOx.wm;Dry;Median;;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;NOx.wm;Wet;Median;;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;NOx.wm;Annual;Median;1;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PN.wm;Dry;Median;16;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PN.wm;Wet;Median;25;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PN.wm;Annual;Mean;14;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PO4.wm;Dry;Median;;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PO4.wm;Wet;Median;;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PO4.wm;Annual;Median;1;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;PP.wm;Annual;Median;2.3;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.36;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;NTU;Dry;Median;;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;NTU;Wet;Median;;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;NTU;Annual;Median;1.1;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+15;WHI1,WHI2,WHI3,WHI4,WHI5;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.4;H
+16;WHI6;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;NOx.wm;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;NOx.wm;Annual;Median;4;H
+16;WHI6;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;PN.wm;Annual;Mean;;H
+16;WHI6;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;PO4.wm;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;PO4.wm;Annual;Median;3;H
+16;WHI6;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;PP.wm;Annual;Median;;H
+16;WHI6;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;1.3;H
+16;WHI6;Enclosed Coastal waters;NTU;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;NTU;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;NTU;Annual;Median;4;H
+16;WHI6;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+16;WHI6;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+16;WHI6;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Median;1.6;L
+16;WHI6;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+16;WHI6;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;;H
+16;WHI6;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Median;5;H
+17;WHI7,WHI10;Open Coastal waters;NOx.wm;Dry;Median;;H
+17;WHI7,WHI10;Open Coastal waters;NOx.wm;Wet;Median;;H
+17;WHI7,WHI10;Open Coastal waters;NOx.wm;Annual;Median;0.25;H
+17;WHI7,WHI10;Open Coastal waters;PN.wm;Dry;Median;16;H
+17;WHI7,WHI10;Open Coastal waters;PN.wm;Wet;Median;25;H
+17;WHI7,WHI10;Open Coastal waters;PN.wm;Annual;Median;18;H
+17;WHI7,WHI10;Open Coastal waters;PO4.wm;Dry;Median;;H
+17;WHI7,WHI10;Open Coastal waters;PO4.wm;Wet;Median;;H
+17;WHI7,WHI10;Open Coastal waters;PO4.wm;Annual;Median;2;H
+17;WHI7,WHI10;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+17;WHI7,WHI10;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+17;WHI7,WHI10;Open Coastal waters;PP.wm;Annual;Median;2.1;H
+17;WHI7,WHI10;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+17;WHI7,WHI10;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+17;WHI7,WHI10;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+17;WHI7,WHI10;Open Coastal waters;NTU;Dry;Median;;H
+17;WHI7,WHI10;Open Coastal waters;NTU;Wet;Median;;H
+17;WHI7,WHI10;Open Coastal waters;NTU;Annual;Mean;2;H
+17;WHI7,WHI10;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+17;WHI7,WHI10;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+17;WHI7,WHI10;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+17;WHI7,WHI10;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+17;WHI7,WHI10;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+17;WHI7,WHI10;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.6;H
+18;WHI8,WHI11;Open Coastal waters;NOx.wm;Dry;Median;;H
+18;WHI8,WHI11;Open Coastal waters;NOx.wm;Wet;Median;;H
+18;WHI8,WHI11;Open Coastal waters;NOx.wm;Annual;Median;1;H
+18;WHI8,WHI11;Open Coastal waters;PN.wm;Dry;Median;16;H
+18;WHI8,WHI11;Open Coastal waters;PN.wm;Wet;Median;25;H
+18;WHI8,WHI11;Open Coastal waters;PN.wm;Annual;Mean;20;H
+18;WHI8,WHI11;Open Coastal waters;PO4.wm;Dry;Median;;H
+18;WHI8,WHI11;Open Coastal waters;PO4.wm;Wet;Median;;H
+18;WHI8,WHI11;Open Coastal waters;PO4.wm;Annual;Median;2;H
+18;WHI8,WHI11;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+18;WHI8,WHI11;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+18;WHI8,WHI11;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+18;WHI8,WHI11;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+18;WHI8,WHI11;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+18;WHI8,WHI11;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+18;WHI8,WHI11;Open Coastal waters;NTU;Dry;Median;;H
+18;WHI8,WHI11;Open Coastal waters;NTU;Wet;Median;;H
+18;WHI8,WHI11;Open Coastal waters;NTU;Annual;Mean;2;H
+18;WHI8,WHI11;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+18;WHI8,WHI11;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+18;WHI8,WHI11;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+18;WHI8,WHI11;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+18;WHI8,WHI11;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+18;WHI8,WHI11;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+19;WHI9;Open Coastal waters;NOx.wm;Dry;Median;;H
+19;WHI9;Open Coastal waters;NOx.wm;Wet;Median;;H
+19;WHI9;Open Coastal waters;NOx.wm;Annual;Median;0.25;H
+19;WHI9;Open Coastal waters;PN.wm;Dry;Median;16;H
+19;WHI9;Open Coastal waters;PN.wm;Wet;Median;25;H
+19;WHI9;Open Coastal waters;PN.wm;Annual;Median;18;H
+19;WHI9;Open Coastal waters;PO4.wm;Dry;Median;;H
+19;WHI9;Open Coastal waters;PO4.wm;Wet;Median;;H
+19;WHI9;Open Coastal waters;PO4.wm;Annual;Median;2;H
+19;WHI9;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+19;WHI9;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+19;WHI9;Open Coastal waters;PP.wm;Annual;Median;2.1;H
+19;WHI9;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+19;WHI9;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+19;WHI9;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+19;WHI9;Open Coastal waters;NTU;Dry;Median;;H
+19;WHI9;Open Coastal waters;NTU;Wet;Median;;H
+19;WHI9;Open Coastal waters;NTU;Annual;Mean;1;H
+19;WHI9;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+19;WHI9;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+19;WHI9;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+19;WHI9;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+19;WHI9;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+19;WHI9;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1.6;H
+20;WHI10.1,WHI10.2;Open Coastal waters;NOx.wm;Dry;Median;;H
+20;WHI10.1,WHI10.2;Open Coastal waters;NOx.wm;Wet;Median;;H
+20;WHI10.1,WHI10.2;Open Coastal waters;NOx.wm;Annual;Median;1;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PN.wm;Dry;Median;16;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PN.wm;Wet;Median;25;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PN.wm;Annual;Mean;20;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PO4.wm;Dry;Median;;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PO4.wm;Wet;Median;;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PO4.wm;Annual;Median;2;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+20;WHI10.1,WHI10.2;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+20;WHI10.1,WHI10.2;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+20;WHI10.1,WHI10.2;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+20;WHI10.1,WHI10.2;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+20;WHI10.1,WHI10.2;Open Coastal waters;NTU;Dry;Median;2;H
+20;WHI10.1,WHI10.2;Open Coastal waters;NTU;Wet;Median;12;H
+20;WHI10.1,WHI10.2;Open Coastal waters;NTU;Annual;Mean;;H
+20;WHI10.1,WHI10.2;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+20;WHI10.1,WHI10.2;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+20;WHI10.1,WHI10.2;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+20;WHI10.1,WHI10.2;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+20;WHI10.1,WHI10.2;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+20;WHI10.1,WHI10.2;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+;FTZ1;Midshelf waters;NOx.wm;Dry;Median;;H
+;FTZ1;Midshelf waters;NOx.wm;Wet;Median;;H
+;FTZ1;Midshelf waters;NOx.wm;Annual;Median;0.5;H
+;FTZ1;Midshelf waters;PN.wm;Dry;Median;16;H
+;FTZ1;Midshelf waters;PN.wm;Wet;Median;25;H
+;FTZ1;Midshelf waters;PN.wm;Annual;Median;12;H
+;FTZ1;Midshelf waters;PO4.wm;Dry;Median;;H
+;FTZ1;Midshelf waters;PO4.wm;Wet;Median;;H
+;FTZ1;Midshelf waters;PO4.wm;Annual;Median;2;H
+;FTZ1;Midshelf waters;PP.wm;Dry;Median;2.4;H
+;FTZ1;Midshelf waters;PP.wm;Wet;Median;3.4;H
+;FTZ1;Midshelf waters;PP.wm;Annual;Median;1.9;H
+;FTZ1;Midshelf waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+;FTZ1;Midshelf waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+;FTZ1;Midshelf waters;DRIFTCHL_UGPERL.wm;Annual;Median;0.27;H
+;FTZ1;Midshelf waters;NTU;Dry;Median;;H
+;FTZ1;Midshelf waters;NTU;Wet;Median;;H
+;FTZ1;Midshelf waters;NTU;Annual;Median;0.3;H
+;FTZ1;Midshelf waters;SECCHI_DEPTH.wm;Dry;Median;;L
+;FTZ1;Midshelf waters;SECCHI_DEPTH.wm;Wet;Median;;L
+;FTZ1;Midshelf waters;SECCHI_DEPTH.wm;Annual;Median;12;L
+;FTZ1;Midshelf waters;TSS_MGPERL.wm;Dry;Median;1.7;H
+;FTZ1;Midshelf waters;TSS_MGPERL.wm;Wet;Median;2.5;H
+;FTZ1;Midshelf waters;TSS_MGPERL.wm;Annual;Median;0.4;H
+;FTZ2,FTZ3;Open Coastal waters;NOx.wm;Dry;Median;;H
+;FTZ2,FTZ3;Open Coastal waters;NOx.wm;Wet;Median;;H
+;FTZ2,FTZ3;Open Coastal waters;NOx.wm;Annual;Median;0.5;H
+;FTZ2,FTZ3;Open Coastal waters;PN.wm;Dry;Median;16;H
+;FTZ2,FTZ3;Open Coastal waters;PN.wm;Wet;Median;25;H
+;FTZ2,FTZ3;Open Coastal waters;PN.wm;Annual;Mean;20;H
+;FTZ2,FTZ3;Open Coastal waters;PO4.wm;Dry;Median;;H
+;FTZ2,FTZ3;Open Coastal waters;PO4.wm;Wet;Median;;H
+;FTZ2,FTZ3;Open Coastal waters;PO4.wm;Annual;Mean;2;H
+;FTZ2,FTZ3;Open Coastal waters;PP.wm;Dry;Median;2.4;H
+;FTZ2,FTZ3;Open Coastal waters;PP.wm;Wet;Median;3.4;H
+;FTZ2,FTZ3;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+;FTZ2,FTZ3;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+;FTZ2,FTZ3;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+;FTZ2,FTZ3;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+;FTZ2,FTZ3;Open Coastal waters;NTU;Dry;Median;;H
+;FTZ2,FTZ3;Open Coastal waters;NTU;Wet;Median;;H
+;FTZ2,FTZ3;Open Coastal waters;NTU;Annual;Mean;1.5;H
+;FTZ2,FTZ3;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+;FTZ2,FTZ3;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+;FTZ2,FTZ3;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+;FTZ2,FTZ3;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.7;H
+;FTZ2,FTZ3;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.5;H
+;FTZ2,FTZ3;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+;FTZ4;Open Coastal waters;NOx.wm;Dry;Median;;H
+;FTZ4;Open Coastal waters;NOx.wm;Wet;Median;;H
+;FTZ4;Open Coastal waters;NOx.wm;Annual;Median;0.5;H
+;FTZ4;Open Coastal waters;PN.wm;Dry;Median;16;H
+;FTZ4;Open Coastal waters;PN.wm;Wet;Median;25;H
+;FTZ4;Open Coastal waters;PN.wm;Annual;Median;15;H
+;FTZ4;Open Coastal waters;PO4.wm;Dry;Median;;H
+;FTZ4;Open Coastal waters;PO4.wm;Wet;Median;;H
+;FTZ4;Open Coastal waters;PO4.wm;Annual;Median;2;H
+;FTZ4;Open Coastal waters;PP.wm;Dry;Median;2.3;H
+;FTZ4;Open Coastal waters;PP.wm;Wet;Median;3.3;H
+;FTZ4;Open Coastal waters;PP.wm;Annual;Median;2.5;H
+;FTZ4;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+;FTZ4;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+;FTZ4;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+;FTZ4;Open Coastal waters;NTU;Dry;Median;;H
+;FTZ4;Open Coastal waters;NTU;Wet;Median;;H
+;FTZ4;Open Coastal waters;NTU;Annual;Median;0.5;H
+;FTZ4;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+;FTZ4;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+;FTZ4;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Median;10;L
+;FTZ4;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.6;H
+;FTZ4;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.4;H
+;FTZ4;Open Coastal waters;TSS_MGPERL.wm;Annual;Median;1;H
+;FTZ5;Open Coastal waters;NOx.wm;Dry;Median;;H
+;FTZ5;Open Coastal waters;NOx.wm;Wet;Median;;H
+;FTZ5;Open Coastal waters;NOx.wm;Annual;Median;0.5;H
+;FTZ5;Open Coastal waters;PN.wm;Dry;Median;16;H
+;FTZ5;Open Coastal waters;PN.wm;Wet;Median;25;H
+;FTZ5;Open Coastal waters;PN.wm;Annual;Mean;20;H
+;FTZ5;Open Coastal waters;PO4.wm;Dry;Median;;H
+;FTZ5;Open Coastal waters;PO4.wm;Wet;Median;;H
+;FTZ5;Open Coastal waters;PO4.wm;Annual;Median;2;H
+;FTZ5;Open Coastal waters;PP.wm;Dry;Median;2.4;H
+;FTZ5;Open Coastal waters;PP.wm;Wet;Median;3.4;H
+;FTZ5;Open Coastal waters;PP.wm;Annual;Mean;2.8;H
+;FTZ5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;0.32;H
+;FTZ5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;0.63;H
+;FTZ5;Open Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Mean;0.45;H
+;FTZ5;Open Coastal waters;NTU;Dry;Median;;H
+;FTZ5;Open Coastal waters;NTU;Wet;Median;;H
+;FTZ5;Open Coastal waters;NTU;Annual;Mean;1.5;H
+;FTZ5;Open Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+;FTZ5;Open Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+;FTZ5;Open Coastal waters;SECCHI_DEPTH.wm;Annual;Mean;10;L
+;FTZ5;Open Coastal waters;TSS_MGPERL.wm;Dry;Median;1.7;H
+;FTZ5;Open Coastal waters;TSS_MGPERL.wm;Wet;Median;2.5;H
+;FTZ5;Open Coastal waters;TSS_MGPERL.wm;Annual;Mean;2;H
+;FTZ6;Enclosed Coastal waters;NOx.wm;Dry;Median;;H
+;FTZ6;Enclosed Coastal waters;NOx.wm;Wet;Median;;H
+;FTZ6;Enclosed Coastal waters;NOx.wm;Annual;Median;3;H
+;FTZ6;Enclosed Coastal waters;PN.wm;Dry;Median;;H
+;FTZ6;Enclosed Coastal waters;PN.wm;Wet;Median;;H
+;FTZ6;Enclosed Coastal waters;PN.wm;Annual;Median;;H
+;FTZ6;Enclosed Coastal waters;PO4.wm;Dry;Median;;H
+;FTZ6;Enclosed Coastal waters;PO4.wm;Wet;Median;;H
+;FTZ6;Enclosed Coastal waters;PO4.wm;Annual;Median;3;H
+;FTZ6;Enclosed Coastal waters;PP.wm;Dry;Median;;H
+;FTZ6;Enclosed Coastal waters;PP.wm;Wet;Median;;H
+;FTZ6;Enclosed Coastal waters;PP.wm;Annual;Median;;H
+;FTZ6;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Dry;Median;;H
+;FTZ6;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Wet;Median;;H
+;FTZ6;Enclosed Coastal waters;DRIFTCHL_UGPERL.wm;Annual;Median;1;H
+;FTZ6;Enclosed Coastal waters;NTU;Dry;Median;7;H
+;FTZ6;Enclosed Coastal waters;NTU;Wet;Median;15;H
+;FTZ6;Enclosed Coastal waters;NTU;Annual;Median;;H
+;FTZ6;Enclosed Coastal waters;SECCHI_DEPTH.wm;Dry;Median;;L
+;FTZ6;Enclosed Coastal waters;SECCHI_DEPTH.wm;Wet;Median;;L
+;FTZ6;Enclosed Coastal waters;SECCHI_DEPTH.wm;Annual;Median;;L
+;FTZ6;Enclosed Coastal waters;TSS_MGPERL.wm;Dry;Median;;H
+;FTZ6;Enclosed Coastal waters;TSS_MGPERL.wm;Wet;Median;;H
+;FTZ6;Enclosed Coastal waters;TSS_MGPERL.wm;Annual;Median;;H

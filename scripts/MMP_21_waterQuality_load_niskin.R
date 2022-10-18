@@ -9,7 +9,8 @@ if (MMP_isParent()) {
 NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/")
 
 ## ---- AIMS niskin
-mmp__change_status(stage = "STAGE2", item = "aimsNiskin", status = "progress")
+CURRENT_ITEM <- "aimsNiskin"
+mmp__change_status(stage = CURRENT_STAGE, item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "niskin", ".csv"))) {
@@ -32,15 +33,15 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "niskin", ".csv"))) {
  paste0(NISKIN_PATH, "niskin.sql"))
 
     MMP_tryCatch_db(name = 'niskin',
-                    stage = "STAGE2",
-                    item = "aimsNiskin",
+                    stage = CURRENT_STAGE,
+                    item = CURRENT_ITEM,
                     label = "AIMS niskin",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
-    MMP_checkData(name = "niskin",
-                  stage = "STAGE2",
-                  item = "aimsNiskin",
+    MMP_checkData(name = "niskin.csv",
+                  stage = CURRENT_STAGE,
+                  item = CURRENT_ITEM,
                   label = "AIMS niskin",
                   PATH = NISKIN_PATH)
 }
@@ -76,7 +77,7 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cairns", ".csv"))) {
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
-    MMP_checkData(name = "cairns",
+    MMP_checkData(name = "cairns.csv",
                   stage = "STAGE2",
                   item = "cairnsTransect",
                   label = "Cairns transect",
@@ -115,7 +116,7 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcu", ".csv"))) {
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2" )
 } else {
-    MMP_checkData(name = "jcu",
+    MMP_checkData(name = "jcu.csv",
                   stage = "STAGE2",
                   item = "jcuNiskin",
                   label = "JCU niskin",
@@ -154,7 +155,7 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cy", ".csv"))) {
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
-    MMP_checkData(name = "cy",
+    MMP_checkData(name = "cy.csv",
                   stage = "STAGE2",
                   item = "jcuCYNiskin",
                   label = "JCU CY niskin",
@@ -189,7 +190,7 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcuEvent", ".csv"))) {
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
-    MMP_checkData(name = "jcuEvent",
+    MMP_checkData(name = "jcuEvent.csv",
                   stage = "STAGE2",
                   item = "jcuEventNiskin",
                   label = "JCU Event niskin",
@@ -225,7 +226,7 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cyEvent", ".csv"))) {
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
-    MMP_checkData(name = "cyEvent",
+    MMP_checkData(name = "cyEvent.csv",
                   stage = "STAGE2",
                   item = "jcuCYEventNiskin",
                   label = "JCU CY Event niskin",

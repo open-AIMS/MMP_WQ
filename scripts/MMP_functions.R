@@ -1,4 +1,5 @@
 source("MMP_functions_boxes.R")
+source("MMP_functions_processing.R")
 
 #########################################################################
 ## The following function determines whether the current script is the ##
@@ -60,16 +61,21 @@ MMP_initialise_status <- function() {
                       items = c("aimsNiskin","cairnsTransect","jcuNiskin","jcuCYNiskin",
                                 "jcuEventNiskin","jcuCYEventNiskin",
                                 "flntu", 
-                                "waterTemp","salinity","dhd","disturbances", "tides","BOM",
+                                "waterTemp","salinity","dhd","disturbances", "tides","BOM","discharge",
                                 "DataReport"),
                       names = c("AIMS niskin data","Cairns transect data","JCU niskin data","JCY CY niskin data",
                                 "JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers",
                                 "Water temperature loggers","Salinity loggers",
-                                "Degree heating weeks","Disturbance table", "Harmonic tides","BOM weather",
+                                "Degree heating weeks","Disturbance table", "Harmonic tides","BOM weather", "River discharge",
                                 "Data report"),
                       status = c("pending","pending","pending","pending","pending",
-                                 "pending","pending","pending","pending","pending","pending","pending","pending","pending")
+                                 "pending","pending","pending","pending","pending","pending","pending","pending","pending","pending")
+                      ),
+        STAGE3 = list(title = "Stage 3 - process data",
+                      items = c("aimsNiskin"),
+                      names = c("AIMS niskin data"),
+                      status = c("pending")
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -152,7 +158,7 @@ MMP_parseCLA <- function(args) {
 MMP_loadPackages <- function(log = TRUE) {           
     missing <- ''
     options(tidyverse.quiet = TRUE)
-    pkgs <- c('tidyverse','testthat','cli','rlang','crayon', 'assertthat'
+    pkgs <- c('tidyverse','testthat','cli','rlang','crayon', 'assertthat', 'lubridate'
               )
 
     for (p in pkgs) {
@@ -248,6 +254,15 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(DATA_PATH, '/primary/loggers'))
     if (!dir.exists(paste0(DATA_PATH, '/primary/other')))
         dir.create(paste0(DATA_PATH, '/primary/other'))
+
+    if (!dir.exists(paste0(DATA_PATH, '/processed')))
+        dir.create(paste0(DATA_PATH, '/processed'))
+    if (!dir.exists(paste0(DATA_PATH, '/processed/niskin')))
+        dir.create(paste0(DATA_PATH, '/processed/niskin'))
+    if (!dir.exists(paste0(DATA_PATH, '/processed/loggers')))
+        dir.create(paste0(DATA_PATH, '/processed/loggers'))
+    if (!dir.exists(paste0(DATA_PATH, '/processed/other')))
+        dir.create(paste0(DATA_PATH, '/processed/other'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
@@ -428,7 +443,7 @@ MMP_log <- function(status, logFile = LOG_FILE, Category, msg=NULL) {
 ##               in the log                                             ##                                               
 ##    return:    boolean, whether to return a TRUE or FALSE             ##                                               
 ##########################################################################                                               
-MMP_tryCatch <- function(expr, logFile,Category, expectedClass=NULL, msg=NULL, return=NULL, showWarnings=FALSE) {
+MMP_tryCatch <- function(expr, logFile, item, Category, expectedClass=NULL, msg=NULL, return=NULL, showWarnings=FALSE) {
     if (!exists('PROGRESS')) PROGRESS=NULL
     max.warnings<-4
     warnings<-0
@@ -456,6 +471,7 @@ MMP_tryCatch <- function(expr, logFile,Category, expectedClass=NULL, msg=NULL, r
         PROGRESS <<- c(PROGRESS,'Fail')
         class(ret) <- "try-error"
         MMP_log('ERROR', logFile, Category, paste(msg, ret$value$message))
+        ## mmp__change_status(stage = CURRENT_STAGE, item = item, status = "failure")
         if(!is.null(return)) {
             FALSE
         }else {
@@ -472,6 +488,7 @@ MMP_tryCatch <- function(expr, logFile,Category, expectedClass=NULL, msg=NULL, r
             TRUE
         }
     }
+    MMP_openning_banner()
 }
 
 
@@ -526,19 +543,27 @@ MMP_tryCatch_db <- function(name = 'niskin',
     )
 }
 
-MMP_checkData <- function(name = "niskin",
+## Progressive = TRUE indicates that the status should only change if there is a failure.
+## Essentially, this allows a fail flag to be raised midway through a sequence of steps.
+## If a step fails, then the whole sequence is a failure.  However, if a step does not
+## fail, the sequence is still in progress
+MMP_checkData <- function(name = "niskin.csv",
                     stage = "STAGE2",
                     item = "aimsNiskin",
                     label = "AIMS niskin",
-                    PATH = NISKIN_PATH) {
-    if (file.exists(paste0(PATH, name, ".csv"))) {
-        MMP_log(status = "SUCCESS",
-                logFile = LOG_FILE,
-                Category = paste0(label, " data exists"),
-                msg=NULL) 
-        mmp__change_status(stage = stage, item = item, status = "success")
-        filesize <- R.utils::hsize(file.size(paste0(PATH, name, ".csv")))
-        mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+                    PATH = NISKIN_PATH,
+                    progressive = FALSE)
+{
+    if (file.exists(paste0(PATH, name))) {
+        if (!progressive) {
+            MMP_log(status = "SUCCESS",
+                    logFile = LOG_FILE,
+                    Category = paste0(label, " data exists"),
+                    msg=NULL) 
+            mmp__change_status(stage = stage, item = item, status = "success")
+            filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
+            mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+        }
     } else {
         MMP_log(status = "FAILURE",
                 logFile = LOG_FILE,

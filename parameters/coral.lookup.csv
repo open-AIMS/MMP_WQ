@@ -1,0 +1,54 @@
+MMP_SITE_NAME,Region,Reg,Subregion,Subreg,Latitude,Longitude,pos,xadj,yadj,point.xadj,point.yadj,gLabel.xadj,gLabel.yadj
+Snapper North,Wet Tropics,wt,Barron Daintree,bd,-16.2812,145.504,0,0.02,0.04,0,0.01,0.2,0.02
+Snapper South,Wet Tropics,wt,Barron Daintree,bd,-16.3100,145.485,0,0.02,-0.02,0,0,0.2,-0.02
+Low Isles,Wet Tropics,wt,Barron Daintree,bd,-16.414,145.569,0,0.03,0,0,0,0.2,0
+Green,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,16.77293,145.9551,0,0.03,0,0,0,0.2,0
+Fitzroy West,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-16.9101,145.990,0.5,0,0.03,0,0,0.2,0.03
+Fitzroy West LTMP,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-16.9101,145.990,0,,,0,0,,
+Fitzroy East,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-16.9367,146.018,0.5,0,-0.03,0,0,0.2,-0.03
+High West,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-17.1715,145.996,0.5,0,0.03,0,0,0.2,0.03
+High East,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-17.1589,146.031,0.5,0,-0.03,0,0,0.2,-0.01
+Franklands East,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-17.2014,146.098,0,0.02,0.02,0,0,0.2,0
+Franklands West,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,-17.2266,146.179,0,0,-0.02,-0.01,-0.00,0.2,-0.03
+Barnards,Wet Tropics,wt,Tully Herbert,th,-17.6571,146.179,0,0.02,0,0,0,0.2,0
+King,Wet Tropics,wt,Tully Herbert,th,-17.7914,146.159,0,0.02,0,0,0,0.2,0
+Dunk North,Wet Tropics,wt,Tully Herbert,th,-17.9262833333,146.1371333333,0,0.02,0,0,0,0.2,0.02
+Dunk South,Wet Tropics,wt,Tully Herbert,th,-17.9752,146.155,0,0.02,0,0,0,0.2,-0
+Bedarra Island,Wet Tropics,wt,Tully Herbert,th,-17.9100,146.142,0,0.02,0,0,0,0.2,0
+Bedarra,Wet Tropics,wt,Tully Herbert,th,-18.00102,146.1411,0,0.02,0,0,0,0.2,0
+Palms West,Burdekin,bd,Burdekin,bd,-18.54496,146.4871,0.5,0,0.06,0,0,0.4,0.04
+Palms East,Burdekin,bd,Burdekin,bd,-18.5750,146.573,0,0.05,0,0,0,0.4,-0.02
+Lady Elliot,Burdekin,bd,Burdekin,bd,-18.7006,146.335,0,0.05,0,0,0,0.5,0.0
+Pandora North,Burdekin,bd,Burdekin,bd,-18.8293,146.441,0.5,0,0.06,0,0.02,0.5,0.06
+Pandora,Burdekin,bd,Burdekin,bd,-18.835,146.432,1,-0.05,0,0,0,0.5,-0.03
+Havannah North,Burdekin,bd,Burdekin,bd,-18.814,146.545,0,0.05,0.04,0,0.03,0.7,0.03
+Havannah,Burdekin,bd,Burdekin,bd,-18.868,146.544,0,0.05,-0.01,0,0,0.4,-0.07
+Magnetic,Burdekin,bd,Burdekin,bd,-19.173,146.891,0,0.05,0.02,0,0,0.5,0.05
+Middle Rf,Burdekin,bd,Burdekin,bd,-19.217,146.838,0,0.05,-0.02,0,0.02,0.5,0
+Middle Rf LTMP,Burdekin,bd,Burdekin,bd,-19.217,146.838,0,,,0,0,0.5,0
+
+Double Cone,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.131,148.738,1,-0.03,0,0,0,0,0.2
+Hayman,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.043,148.919,0,0.03,0.02,0,0,0.4,0.08
+Langford,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.079,148.851,0,0.03,-0.02,0,0,0.4,0.01
+Border,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.202,149.028,0,0.03,0,0,0,0.4,-0.03
+Hook,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.188,148.888,1,-0.03,0,0,0,0.4,0.02
+Daydream,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.234,148.796,0,0.03,0,0,0,0.4,0.01
+Shute Harbour,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.304,148.830,0,0.03,0,0,0,0.4,-0.01
+Dent,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.397,148.941,0,0.03,0,0,0,0.5,-0.01
+Pine,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.404,148.885,0.5,0,-0.04,0,0,0.4,-0.03
+Seaforth,Mackay Whitsunday,mw,Mackay Whitsunday,mw,-20.493,149.013,0,0.03,0,0,0,0.4,0
+
+North Keppel,Fitzroy,f,Fitzroy,f,-23.120,150.900,0,0.03,0,0,0,0.2,0.04
+Barren,Fitzroy,f,Fitzroy,f,-23.158,151.056,0,0.03,0,0,0,0.09,0.0
+Middle,Fitzroy,f,Fitzroy,f,-23.145,150.940,1,-0.03,0,0,0,0.2,0.05
+Keppels South,Fitzroy,f,Fitzroy,f,-23.21671,150.9620,0,0.03,0,0,0,0.15,0
+Pelican,Fitzroy,f,Fitzroy,f,-23.23681,150.8740,1,-0.03,0,0,0,0.3,-0.02
+Peak,Fitzroy,f,Fitzroy,f,-23.3257,150.943,0,0.03,0,0,0,0.2,0
+
+
+Camp East,Burdekin,bd,Burdekin,bd,,,0,0.02,0,0,0
+Camp West,Burdekin,bd,Burdekin,bd,,,0,0.02,0,0,0
+Holbourne East,Burdekin,bd,Burdekin,bd,,,0,0.02,0,0,0
+Holbourne West,Burdekin,bd,Burdekin,bd,,,0,0.02,0,0,0
+Seal Rocks North,Fitzroy,f,Fitzroy,f,,,0,0.02,0,0,0
+Seal Rocks South,Fitzroy,f,Fitzroy,f,,,0,0.02,0,0,0

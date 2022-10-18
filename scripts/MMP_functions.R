@@ -83,18 +83,23 @@ MMP_initialise_status <- function() {
 
 #########################################################################
 ## The following function parses the command line arguments            ##
-## --finalYear                                                         ##
+## --finalYear            [a four digit number]                        ##
 ##    : the maximum reneeYear (beginning 1st September each year).     ##
 ##      This essentially defines the upper limit of data used in the   ##
 ##      analyses.                                                      ##
-## --runStage                                                          ##
+## --runStage             [an integer or vector of integers]           ##
 ##    : which stage is the analysis intending to run.                  ##
 ##      1. preparation stage, also performs a complete clearout        ##
+## --alwaysExtract=TRUE   [boolean]                                    ##
+##    : TRUE (default) - extracts all data from database and           ##
+##                       overwrite any data existing in \data folder   ##
+##      FALSE - extracts only data which is missing                    ##
 #########################################################################
 MMP_parseCLA <- function(args) {
     runStage <<- 1   ## this is a temp incase it is not specified on the command line - it is required for the openning banner
     CURRENT_STAGE <<- 1
-    if(length(args)<7) {
+    # Check all neccessary CLAs are present and no extra CLAs entered
+    if(length(args) < 7 | length(args) > 8) {
         MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
@@ -102,47 +107,80 @@ MMP_parseCLA <- function(args) {
              call. = FALSE)
     }
     ## args <- commandArgs()
-    report_year <- grep('--reportYear=.*', args)
-    if(length(report_year) == 0) {
+    # Check report year is present, is numeric integer, has exactly four digits, ?<= current year + 1?
+    report_year <- grep('--reportYear=.*', args) # index of reportYear in args
+    if(length(report_year) == 0) {  # if index wasn't returned, reportYear is missing
         MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
         stop('A final report year must be supplied as a command line argument, such as: Rscript <script.R> --reportYear=2022', call. = FALSE)
     }
-    reportYear <- args[report_year]
-    reportYear <- gsub('--reportYear=(.*)','\\1', reportYear)
-    assign("reportYear", reportYear, env = globalenv())
-    mmp__add_status(stage = "SETTINGS", item = "reportYear", name = "Report year", status = "success")
-    
-    runStage <- grep('--runStage=.*', args)
-    if(length(runStage) == 0) {
+    reportYear <- args[report_year]  # get reportYear arg
+    reportYear <- gsub('--reportYear=(.*)','\\1', reportYear) # subtract '--reportYear='
+    if(!grepl("^\\d{4}$", reportYear)) {   # check if report year is exactly 4 digits'
+        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+        MMP_openning_banner()
+        stop('A final report year must be a number with 4 digits, such as: Rscript <script.R> --reportYear=2022', call. = FALSE)
+    }
+    assign("reportYear", reportYear, env = globalenv()) # assign to global variable
+    mmp__add_status(stage = "SETTINGS", item = "reportYear", name = "Report year", status = "success") # update status
+
+    # Check if run stage is present, is numeric vector, ?all elements unique and in [1, maxStage]?
+    runStage <- grep('--runStage=.*', args)   # return index of runStage in args
+    if(length(runStage) == 0) { # if index wasn't returned, runStage is missing
         MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
         stop('A run stage must be supplied as a command line argument, such as: Rscript <script.R> --runStage=1', call. = FALSE)
     }
-    runStage <- args[runStage]
-    runStage <- eval(parse(text=gsub('--runStage=(.*)','\\1', runStage)))
-    assign("runStage", runStage, env = globalenv())
-    assign("CURRENT_STAGE", runStage[1], env = globalenv())
-    mmp__add_status(stage = "SETTINGS", item = "runStage", name = "Run stages", status = "success")
+    # POSSIBLE ADDITION: change d to [1, max run stage], add '...must be an integer or vector of integers between 1 - max run stage
+    runStage <- args[runStage] # get index of run stage from args
+    runStage <- tryCatch( # parse and evaluate run stage to R code e.g. "1:2" --> c(1, 2)
+        eval(parse(text = gsub('--runStage=(.*)','\\1', runStage))), 
+        error = function(e) { # catch non-numeric run stages e.g. "A" --> Error: object A doesnt exist
+            MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+            mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+            MMP_openning_banner()
+            stop('Run stage must be an integer or vector of integers, such as: Rscript <script.R> --runStage=1:2', call. = FALSE)
+        }
+    )
+    if(!all(grepl("^\\d{1}$", runStage))) { # check if all run stage vector entries are digits 
+        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+        MMP_openning_banner()
+        stop('Run stage must be an integer or a vector of integers, such as: Rscript <script.R> --runStage=2:4', call. = FALSE)
+    }
+    assign("runStage", runStage, env = globalenv()) # create global variable for run stage
+    assign("CURRENT_STAGE", runStage[1], env = globalenv()) # ... and current stage
+    mmp__add_status(stage = "SETTINGS", item = "runStage", name = "Run stages", status = "success") # update status
     mmp__add_status(stage = "SETTINGS", item = "CURRENT_STAGE", name = "Current stage", status = "success")
 
-    alwaysExtract <- grep('--alwaysExtract.*', args)
-    if (length(alwaysExtract) == 0) {
+    alwaysExtract <- grep('--alwaysExtract.*', args) # see if always extract was specified
+    if (length(alwaysExtract) == 0) {# ... if not, default to TRUE
         alwaysExtract <- TRUE
-    } else {
+    } else { # if so, set to TRUE or FALSE as appropriate, otherwise error
         alwaysExtract <- args[alwaysExtract]
-        alwaysExtract <- eval(parse(text=gsub('--alwaysExtract=(.*)','\\1', alwaysExtract)))
+        alwaysExtract <- gsub('--alwaysExtract=(.*)','\\1', alwaysExtract)
+        if(alwaysExtract %in% c("FALSE", "false", "F", "f")) {
+            alwaysExtract <- FALSE
+        } 
+        else if(alwaysExtract %in% c("TRUE", "true", "T", "t")) {
+            alwaysExtract <- TRUE
+        }
+        else {
+            MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+            mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+            MMP_openning_banner()
+            stop('Always extract must be either TRUE or FALSE (default = TRUE), such as: Rscript <script.R> --alwaysExtract=FALSE', call. = FALSE)
+        }
     }
-    assign("alwaysExtract", alwaysExtract, env = globalenv())
-    mmp__add_status(stage = "SETTINGS", item = "alwaysExtract", name = "Always extract", status = "success")
+    assign("alwaysExtract", alwaysExtract, env = globalenv()) # create global always extract variable
+    mmp__add_status(stage = "SETTINGS", item = "alwaysExtract", name = "Always extract", status = "success") # update status
     
     mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "success")
     MMP_log(status = "SUCCESS", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
 
-
-    
 }
 
 ####################################################################

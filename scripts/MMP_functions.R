@@ -60,16 +60,16 @@ MMP_initialise_status <- function() {
                       items = c("aimsNiskin","cairnsTransect","jcuNiskin","jcuCYNiskin",
                                 "jcuEventNiskin","jcuCYEventNiskin",
                                 "flntu", 
-                                "waterTemp","salinity","dhd","disturbances",
+                                "waterTemp","salinity","dhd","disturbances", "tides","BOM",
                                 "DataReport"),
                       names = c("AIMS niskin data","Cairns transect data","JCU niskin data","JCY CY niskin data",
                                 "JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers",
                                 "Water temperature loggers","Salinity loggers",
-                                "Degree heating weeks","Disturbance table",
+                                "Degree heating weeks","Disturbance table", "Harmonic tides","BOM weather",
                                 "Data report"),
                       status = c("pending","pending","pending","pending","pending",
-                                 "pending","pending","pending","pending","pending","pending","pending")
+                                 "pending","pending","pending","pending","pending","pending","pending","pending","pending")
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -284,6 +284,8 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(DATA_PATH, '/primary/niskin'))
     if (!dir.exists(paste0(DATA_PATH, '/primary/loggers')))
         dir.create(paste0(DATA_PATH, '/primary/loggers'))
+    if (!dir.exists(paste0(DATA_PATH, '/primary/other')))
+        dir.create(paste0(DATA_PATH, '/primary/other'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
@@ -406,6 +408,11 @@ mmp__add_status <- function(stage, item, name, status) {
 
 mmp__change_status <- function(stage, item, status) {
     STATUS[[stage]]$status[which(STATUS[[stage]]$item == item)] <- status
+    assign("STATUS", STATUS, env = globalenv())
+}
+
+mmp__change_name <- function(stage, item, name) {
+    STATUS[[stage]]$name[which(STATUS[[stage]]$item == item)] <- name
     assign("STATUS", STATUS, env = globalenv())
 }
 
@@ -568,6 +575,8 @@ MMP_checkData <- function(name = "niskin",
                 Category = paste0(label, " data exists"),
                 msg=NULL) 
         mmp__change_status(stage = stage, item = item, status = "success")
+        filesize <- R.utils::hsize(file.size(paste0(PATH, name, ".csv")))
+        mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
     } else {
         MMP_log(status = "FAILURE",
                 logFile = LOG_FILE,
@@ -576,4 +585,14 @@ MMP_checkData <- function(name = "niskin",
         mmp__change_status(stage = stage, item = item, status = "failure")
     }
     
+}
+
+MMP_getTides <- function(ref, loc,path,file, t.start, t.end) {
+    if(any(grepl(file,list.files(path)))) system(paste0("rm ",path,file))
+    system(paste("export HFILE_PATH=../parameters/harmonics-2004-06-14.tcd; tide -l '",ref,"' -b '",t.start,"' -e '",t.end,"' -m m -f c -em smSMp -s '00:10' -z y -u m -o ",path,file, sep=""), intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE)
+    tmp <-read.csv(paste0(path,file), header=F)
+    colnames(tmp)<- c('TidesLocation','Date','Time','Height')
+    tmp$DateTime <- as.POSIXct(paste(tmp$Date, tmp$Time), format='%Y-%m-%d %I:%M %p UTC')
+    tmp<- data.frame(tmp,reef.alias=loc)
+    tmp
 }

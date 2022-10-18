@@ -13,7 +13,6 @@ mmp__change_status(stage = "STAGE2", item = "aimsNiskin", status = "progress")
 MMP_openning_banner()
 
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "niskin", ".csv"))) {
-    print('here')
     writeLines("select l.PROJECT, l.STATION_NAME, l.LOCATION_NAME,
  l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
  l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH, 
@@ -52,7 +51,7 @@ MMP_openning_banner()
 ## ---- AIMS Cairns Transect
 mmp__change_status(stage = "STAGE2", item = "cairnsTransect", status = "progress")
 MMP_openning_banner()
-if (alwaysExtract) {
+if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cairns", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
  l.COLLECTION_START_DATE, l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH,
  l.ACOUSTIC_DEPTH, 
@@ -90,7 +89,7 @@ MMP_openning_banner()
 ## ---- JCU niskin
 mmp__change_status(stage = "STAGE2", item = "jcuNiskin", status = "progress")
 MMP_openning_banner()
-if (alwaysExtract) {
+if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcu", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
  l.COLLECTION_START_DATE,
  l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
@@ -129,7 +128,7 @@ MMP_openning_banner()
 ## ---- JCU CY niskin
 mmp__change_status(stage = "STAGE2", item = "jcuCYNiskin", status = "progress")
 MMP_openning_banner()
-if (alwaysExtract) {
+if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cy", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
  l.COLLECTION_START_DATE,
  l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH, 
@@ -168,7 +167,7 @@ MMP_openning_banner()
 ## ---- JCU Event niskin
 mmp__change_status(stage = "STAGE2", item = "jcuEventNiskin", status = "progress")
 MMP_openning_banner()
-if (alwaysExtract) {
+if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcuEvent", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
        l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
        r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM, r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
@@ -204,7 +203,7 @@ MMP_openning_banner()
 ## ---- JCU CY Event niskin
 mmp__change_status(stage = "STAGE2", item = "jcuCYEventNiskin", status = "progress")
 MMP_openning_banner()
-if (alwaysExtract) {
+if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cyEvent", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
        l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
        r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM, r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
@@ -235,4 +234,4 @@ if (alwaysExtract) {
 
 MMP_openning_banner()
 ## ----end
-}
+

@@ -1,0 +1,116 @@
+SHORT_NAME,reef.alias,WATERBODY,Abrev,BOM,Tides,Region,Reg,Subregion,Subreg,Niskin,CairnsNiskin,FLNTU,Coral,WaterTemp,JCU
+PRN01,Pascoe River mouth north,Enclosed coastal waters,PRN01,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRN02,PRN02,Open coastal waters,PRN02,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRN03,PRN03,Open coastal waters,PRN03,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRN04,PRN04,Midshelf waters,PRN04,Lockhart River Airport,Piper Island,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRN05,Eel Reef,Midshelf waters,PRN05,Lockhart River Airport,Piper Island,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRN06,Eel Reef North,Midshelf waters,PRN06,Lockhart River Airport,Piper Island,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRS01,Pascoe River mouth south,Enclosed coastal waters,PRS01,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRS02,PRS02,Open coastal waters,PRS02,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRS03,PRS03,Open coastal waters,PRS03,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRS05,PRS05,Midshelf waters,PRS05,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRBB,Middle Reef,Midshelf waters,PRBB,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+PRS2.5,PRS2.5,Open coastal waters,PRS2.5,Lockhart River Airport,Portland Roads,Cape York,cy,Pascoe,p,T,F,F,F,F,T
+,,,,,,,,,,,,,,,
+SR00,Stewart River mouth,Enclosed coastal waters,SR01,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+SR01,SR01,Enclosed coastal waters,SR01,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+SR02,SR02,Enclosed coastal waters,SR02,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+SR03,SR03,Open coastal waters,SR03,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+SR04,Burkitt Island,Midshelf waters,SR04,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+SR05,Hannah Island,Midshelf waters,SR05,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+SR06,Magpie Reef,Midshelf waters,SR05,Lockhart River Airport,Pelican Island (East Coast),Cape York,cy,Stewart,s,T,F,F,F,F,T
+,,,,,,,,,,,,,,,
+CI01,Cliff Isles,Open coastal waters,CI01,Lockhart River Airport,Flinders Island,Cape York,cy,Normanby,n,T,F,F,F,F,T
+KR01,Kennedy River mouth,Enclosed coastal waters,KR01,Lockhart River Airport,Normanby River,Cape York,cy,Normanby,n,T,F,F,F,F,T
+KR02,Kennedy inshore,Enclosed coastal waters,KR02,Lockhart River Airport,Normanby River,Cape York,cy,Normanby,n,T,F,F,F,F,T
+BR01,Bizant River mouth,Enclosed coastal waters,BR01,Lockhart River Airport,Normanby River,Cape York,cy,Normanby,n,T,F,F,F,F,T
+NR01,Normanby River mouth,Enclosed coastal waters,NR01,Lockhart River Airport,Normanby River,Cape York,cy,Normanby,n,T,F,F,F,F,T
+NR02,Normanby inshore,Enclosed coastal waters,NR02,Lockhart River Airport,Normanby River,Cape York,cy,Normanby,n,T,F,F,F,F,T
+NR03,NR03,Open coastal waters,NR03,Lockhart River Airport,Normanby River,Cape York,cy,Normanby,n,T,F,F,F,F,T
+NR04,NR04,Open coastal waters,NR04,Lockhart River Airport,Flinders Island,Cape York,cy,Normanby,n,T,F,F,F,F,T
+NR05,NR05,Midshelf waters,NR05,Lockhart River Airport,Flinders Island,Cape York,cy,Normanby,n,T,F,F,F,F,T
+NR06,Corbett Reef,Offshore waters,NR06,Lockhart River Airport,Flinders Island,Cape York,cy,Normanby,n,T,F,F,F,F,T
+,,,,,,,,,,,,,,,
+ER01,Endeavour mouth,Enclosed coastal waters,ER01,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+ER02b,Endeavour north shore,Open coastal waters,ER02b,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+ER03,Endeavour offshore,Open coastal waters,ER03,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+ER05,ER05,Midshelf waters,ER05,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+ER06,Forrester FLNTU,Offshore waters,ER06,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,T,F,F,T
+AR01,Annan mouth,Enclosed coastal waters,AR01,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+AR02b,Walker Bay,Open coastal waters,AR02b,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+AR03b,Dawson Reef,Open coastal waters,AR03b,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,T,F,F,T
+AE04,Egret and Boulder Reef,Midshelf waters,AE04,Cooktown Airport,Cooktown,Cape York,cy,Endeavour,e,T,F,F,F,F,T
+,,,,,,,,,,,,,,,
+C1,Cape Tribulation,Open coastal waters,CpTr,Low Isles Lighthouse,Low Islets,Wet Tropics,wt,Barron Daintree,bd,T,T,F,F,F,F
+C2,Snapper North,Open coastal waters,SnpN,Low Isles Lighthouse,Bailay Creek,Wet Tropics,wt,Barron Daintree,bd,F,T,F,T,T,F
+C4,Port Douglas,Midshelf waters,PrtD,Low Isles Lighthouse,Low Islets,Wet Tropics,wt,Barron Daintree,bd,T,T,F,F,F,F
+C5,Double Island,Midshelf waters,Dobl,Cairns Aero,Low Islets,Wet Tropics,wt,Barron Daintree,bd,T,T,F,F,F,F
+C6,Yorkey's Knob,Open coastal waters,Yr'K,Cairns Aero,Green Island,Wet Tropics,wt,Barron Daintree,bd,T,T,F,F,F,F
+C8,Fairlead Buoy,Open coastal waters,FrlB,Cairns Aero,Cairns,Wet Tropics,wt,Barron Daintree,bd,T,T,F,F,F,F
+C11,Green Island,Midshelf waters,Gren,Cairns Aero,Green Island,Wet Tropics,wt,Barron Daintree,bd,T,T,F,F,F,F
+,,,,,,,,,,,,,,,
+RM1,Fitzroy West,Open coastal waters,FtzW,Low Isles Lighthouse,Fitzroy Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,T,F,T,T,T,F
+RM2,RM2,Midshelf waters,RM2,Low Isles Lighthouse,High Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+RM3,RM3,Midshelf waters,RM3,Low Isles Lighthouse,High Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,T,F,F,F,F,T
+RM4,RM4,Open coastal waters,RM4,Low Isles Lighthouse,High Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+RM5,High East,Midshelf waters,HghE,Low Isles Lighthouse,High Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+RM6,Normanby Island,Midshelf waters,Nrmn,Low Isles Lighthouse,Russell Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+RM7,Franklands West,Midshelf waters,FrnW,Low Isles Lighthouse,Russell Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,T,F,T,T,T,T
+RM8,High West,Open coastal waters,HghW,Low Isles Lighthouse,High Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,T,F,T,T,T,T
+RM9,Palmer Point,Open coastal waters,RM9,Low Isles Lighthouse,High Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+RM10,Russell Mulgrave Mouth Mooring,Open coastal waters,RMMM,Low Isles Lighthouse,Russell Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,T,F,T,F,F,T
+RM11,Russell-Mulgrave River mouth,Enclosed coastal waters,RsMM,Low Isles Lighthouse,Russell Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+RM12,Russell-Mulgrave junction,Mid estuarine waters,RsMJ,Low Isles Lighthouse,Russell Island,Wet Tropics,wt,Johnstone Russell Mulgrave,jrm,F,F,F,F,F,T
+,,,,,,,,,,,,,,,
+TUL1,King,Open coastal waters,Kng,Lucinda Point,Mourilyan Harbour,Wet Tropics,wt,Tully Herbert,th,F,F,F,F,T,T
+TUL2,Clump Point East,Midshelf waters,ClPE,Lucinda Point,Mourilyan Harbour,Wet Tropics,wt,Tully Herbert,th,T,F,F,F,F,T
+TUL3,Dunk North,Open coastal waters,DnkN,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,T,T,T,T,T,T
+TUL4,South Mission Beach,Open coastal waters,MsBS,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,F,F,F,F,F,T
+TUL5,Dunk Island South East,Open coastal waters,DnkS,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,T,F,F,F,F,T
+TUL6,Between Tam O'Shanter and Timana,Open coastal waters,BTOaT,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,T,F,F,F,F,T
+TUL7,Hull River mouth,Lower estuarine/enclosed waters,HllM,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,F,F,F,F,F,T
+TUL8,Bedarra,Open coastal waters,Bdrr,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,T,F,F,F,F,T
+TUL9,Triplets,Open coastal waters,Trpl,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,F,F,F,F,F,T
+TUL10,Tully River mouth mooring,Enclosed coastal waters,TLMM,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,T,F,T,F,F,T
+TUL11,Tully River,Mid estuarine waters,Tlly,Lucinda Point,Dunk Island,Wet Tropics,wt,Tully Herbert,th,F,F,F,F,F,T
+,Barnards,Open coastal waters,Brnr,Lucinda Point,Mourilyan Harbour,Wet Tropics,wt,Tully Herbert,th,F,F,F,F,T,F
+,,,,,,,,,,,,,,,
+BUR1,Palms West,Midshelf waters,PlmW,Lucinda Point,Lucinda,Burdekin,bk,Burdekin,bk,T,F,T,T,T,T
+BUR2,Pandora,Open coastal waters,Pndr,Lucinda Point,Lucinda,Burdekin,bk,Burdekin,bk,T,F,T,T,T,T
+BUR3,Cordelia Rocks,Open coastal waters,Crdl,Townsville Aero,Lucinda,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR4,Magnetic,Open coastal waters,Mgnt,Townsville Aero,Townsville,Burdekin,bk,Burdekin,bk,T,F,T,T,T,T
+BUR5,Inner Cleveland Bay,Open coastal waters,ClvB,Townsville Aero,Townsville,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR6,Cape Cleveland,Open coastal waters,CpCl,Townsville Aero,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR7,Haughton 2,Open coastal waters,Hght,Townsville Aero,Cape Bowling Green,Burdekin,bk,Burdekin,bk,T,F,F,F,F,T
+BUR8,Haughton River mouth,Enclosed coastal waters,HghM,Townsville Aero,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR9,Barratta Creek,Enclosed coastal waters,BrrC,Townsville Aero,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR10,Yongala,Midshelf waters,Yngl,Alva Beach,Cape Bowling Green,Burdekin,bk,Burdekin,bk,T,F,T,F,T,F
+BUR11,Cape Bowling Green,Open coastal waters,CpBG,Alva Beach,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR12,Plantation Creek,Open coastal waters,PlnC,Alva Beach,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR13,Burdekin River mouth mooring,Enclosed coastal waters,BrdM,Alva Beach,Cape Bowling Green,Burdekin,bk,Burdekin,bk,T,F,T,F,T,T
+BUR14,Burdekin Mouth 2,Enclosed coastal waters,BrM2,Alva Beach,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+BUR15,Burdekin Mouth 3,Enclosed coastal waters,BrM3,Alva Beach,Cape Bowling Green,Burdekin,bk,Burdekin,bk,F,F,F,F,F,T
+,Havannah,Open coastal waters,Hvnn,Townsville Aero,Lucinda,Burdekin,bk,Burdekin,bk,F,F,F,F,T,F
+,,,,,,,,,,,,,,,
+WHI1,Double Cone,Open coastal waters,DblC,Hamilton Island Airport,Double Bay,Mackay Whitsunday,mw,Mackay Whitsunday,mw,T,F,T,T,T,T
+WHI2,Hook,Open coastal waters,HkWs,Hamilton Island Airport,Shute Harbour,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,T,T
+WHI3,Molle North,Open coastal waters,MllN,Hamilton Island Airport,Shute Harbour,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+WHI0,Daydream,Open coastal waters,Dydr,Hamilton Island Airport,Shute Harbour,Mackay Whitsunday,mw,Mackay Whitsunday,mw,T,F,T,F,F,F
+WHI4,Pine,Open coastal waters,Pine,Hamilton Island Airport,Shaw Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,T,F,T,T,T,T
+WHI5,Seaforth,Open coastal waters,Sfrt,Hamilton Island Airport,Shaw Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,T,F,T,T,T,T
+WHI6,OConnell River mouth,Enclosed coastal waters,OcnM,Hamilton Island Airport,East Repulse Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,T,F,T,F,F,T
+WHI7,Repulse Islands dive mooring,Open coastal waters,Rpls,Hamilton Island Airport,East Repulse Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,T,F,T,F,T,T
+WHI8,Rabbit,Open coastal waters,Rbbt,Hamilton Island Airport,Carlisle Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+WHI9,Brampton Island,Open coastal waters,Brmp,Mackay M.O,Carlisle Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+WHI10.1,Sand Bay 1,Open coastal Port subzone,SnB1,Mackay M.O,Carlisle Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+WHI10.2,Sand Bay 2,Open coastal Port subzone,SnB2,Mackay M.O,Carlisle Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+WHI10,Sand Bay,Open coastal Port subzone,SnB2,Mackay M.O,Carlisle Island,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+WHI11,Pioneer River mouth,Open coastal waters,PnrM,Mackay M.O,Mackay Outer Harbour,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,F,T
+,Shute Harbour,,ShtH,,Shute Harbour,Mackay Whitsunday,mw,Mackay Whitsunday,mw,F,F,F,F,T,F
+,,,,,,,,,,,,,,,
+FTZ1,Barren,Midshelf Central Coast,Brrn,Yeppoon The Esplanade,Rosslyn Bay,Fitzroy,f,Fitzroy,f,T,F,T,F,T,F
+FTZ2,Keppels South,Open coastal Central Coast,KppS,Yeppoon The Esplanade,Rosslyn Bay,Fitzroy,f,Fitzroy,f,T,F,T,F,T,F
+FTZ3,Pelican,Open coastal Central Coast,Plcn,Yeppoon The Esplanade,Rosslyn Bay,Fitzroy,f,Fitzroy,f,T,F,T,F,T,F
+FTZ4,North Keppel Island,Open coastal Central Coast,NrtK,Yeppoon The Esplanade,Rosslyn Bay,Fitzroy,f,Fitzroy,f,T,F,F,T,T,F
+FTZ5,Peak West,Open coastal Central Coast,Peak,Yeppoon The Esplanade,Rosslyn Bay,Fitzroy,f,Fitzroy,f,T,F,F,F,F,F
+FTZ6,Fitzroy River Mouth,Enclosed coastal waters Central Coast,FTZ6,Yeppoon The Esplanade,Rosslyn Bay,Fitzroy,f,Fitzroy,f,T,F,T,F,F,F

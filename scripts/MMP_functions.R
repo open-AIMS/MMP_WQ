@@ -73,9 +73,10 @@ MMP_initialise_status <- function() {
                                  "pending","pending","pending","pending","pending","pending","pending","pending","pending","pending")
                       ),
         STAGE3 = list(title = "Stage 3 - process data",
-                      items = c("aimsNiskin", "cairnsTransect"),
-                      names = c("AIMS niskin data", "Cairns transect data"),
-                      status = c("pending","pending")
+                      items = c("aimsNiskin", "cairnsTransect", "jcuNiskin","jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin"),
+                      names = c("AIMS niskin data", "Cairns transect data","JCU niskin data","JCY CY niskin data",
+                                "JCU Event niskin data","JCU CY Event niskin data"),
+                      status = c("pending","pending","pending","pending","pending","pending")
                       )
     )
     assign("STATUS", STATUS, env = globalenv())

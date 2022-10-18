@@ -121,17 +121,17 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
     ## ----end
 
 } else {
-    MMP_checkData(name = "niskin.aims.reef.av.RData",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "Processed AIMS niskin",
-                  PATH = NISKIN_OUTPUT_PATH)
 }
 
+MMP_checkData(name = "niskin.aims.reef.av.RData",
+              stage = paste0("STAGE", CURRENT_STAGE),
+              item = CURRENT_ITEM,
+              label = "Processed AIMS niskin",
+              PATH = NISKIN_OUTPUT_PATH)
 MMP_openning_banner()
 ## ----end
 
-## ---- AIMS Cairns Transect
+## ---- AIMS Cairns Transect process
 CURRENT_ITEM <- "cairnsTransect"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
@@ -240,13 +240,421 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RDa
     ## ----end
 
 } else {
-    MMP_checkData(name = "cairns.reef.av.RData",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "Processed Cairns transect",
-                  PATH = NISKIN_OUTPUT_PATH)
 }
 
+MMP_checkData(name = "cairns.reef.av.RData",
+              stage = paste0("STAGE", CURRENT_STAGE),
+              item = CURRENT_ITEM,
+              label = "Processed Cairns transect",
+              PATH = NISKIN_OUTPUT_PATH)
+MMP_openning_banner()
+
+## ----end
+
+## ---- JCU niskin process
+CURRENT_ITEM <- "jcuNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+MMP_openning_banner()
+if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av1.RData"))) &
+    file.exists(paste0(NISKIN_INPUT_PATH, 'jcu.csv'))) {
+    MMP_tryCatch({
+        jcu.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'jcu.csv')) %>%
+                     suppressMessages()
+        jcu_lookup = read_csv(paste0(PARAMS_PATH, '/jcu_location_lookup.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        },
+        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing', msg='Reading in Water Quality (JCU) data', return=TRUE)
+
+    ## 1. First level of data processing
+    ## ---- JCU niskin process level 1
+    MMP_tryCatch(
+    {
+        MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
+        MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
+        niskin.jcu.reef1 = jcu.reef %>%
+            mutate(
+                COLLECTION_START_DATE = gsub('Sept','Sep', COLLECTION_START_DATE),
+                Date = as.Date(COLLECTION_START_DATE, format='%d-%b-%Y'),           # convert to date
+                oldSamplingYear=MMP_oldSamplingYear(Date),
+                waterYear = MMP_waterYear(Date),
+                reneeYear = MMP_reneeYear(Date),
+                cwaterYear = MMP_categoricalWaterYear(Date),
+                financialYear = MMP_financialYear(Date),                                    # add water year
+                cfinancialYear = MMP_categoricalFinancialYear(Date),                        # categorical year
+                Dt.num = MMP_decimalDate(Date)                                      # decimal year
+            ) %>%
+            mutate(SHORT_NAME=as.character(SHORT_NAME)) %>%
+            left_join(jcu_lookup %>%
+                      dplyr:::select(SHORT_NAME) %>%
+                      mutate(SHORT_NAME=as.character(SHORT_NAME)) %>%
+                      distinct) %>%
+            ##In order to relate water quality measures to environmental covariates (particularly tidal flow)
+            ## it is necessary that the time of sample collection be
+            ## preserved in addition to the date.
+            mutate(Time=as.POSIXct(COLLECTION_START_DATE, format='%d-%b-%Y %H:%M:%S')) %>%
+            mutate(
+                Collection=interaction(MMP_SITE_NAME, Date)) %>%
+            filter(Date<MAXDATE) %>%
+            MMP_reorderReefs() %>%
+            MMP_selectReefs(source='JCU') 
+        save(niskin.jcu.reef1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef1.RData'))
+    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of Water Quality (Niskin) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.jcu.reef1.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "AIMS niskin",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+    ## 3. Further processing
+    ## ---- JCU niskin process level 3
+    MMP_tryCatch(
+    {
+        load(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef1.RData'))
+        niskin.jcu.reef1 <- niskin.jcu.reef1 %>%
+            mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
+            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+            MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
+             MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
+        niskin.jcu.reef.av1 <-
+            niskin.jcu.reef1 %>%
+            MMP_aggregateWQDuplicates() %>%                   #aggregate the duplicates
+            MMP_depthWeightedAverages() %>%                                                #generate a few different depth weighted averages
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='JCU') %>%
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>% droplevels() %>%
+             mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
+             mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME))
+        save(niskin.jcu.reef.av1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData'))
+    }, LOG_FILE, Category = "Data processing", msg='Process Water Quality (JCU) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.jcu.reef.av1.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "AIMS niskin processed averages",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+
+    ## ----end
+} else {
+}
+
+MMP_checkData(name = "niskin.jcu.reef.av1.RData",
+              stage = paste0("STAGE", CURRENT_STAGE),
+              item = CURRENT_ITEM,
+              label = "Processed JCU niskin",
+              PATH = NISKIN_OUTPUT_PATH)
+MMP_openning_banner()
+
+## ----end
+
+## ---- JCU CY niskin process
+CURRENT_ITEM <- "jcuCYNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+MMP_openning_banner()
+if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.RData"))) &
+    file.exists(paste0(NISKIN_INPUT_PATH, 'cy.csv'))) {
+    MMP_tryCatch({
+        cy.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cy.csv')) %>%
+                     suppressMessages()
+        lookup = read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        wq.sites = read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        },
+        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing', msg='Reading in Water Quality (CY) data', return=TRUE)
+
+    ## 1. First level of data processing
+    ## ---- CY niskin process level 1
+    MMP_tryCatch(
+    {
+        ## Check for missing samples
+        cy.reef %>% dplyr::select(LOCATION_NAME, MMP_SITE_NAME,SHORT_NAME) %>% distinct %>%
+            anti_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
+            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct)
+        MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
+        MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
+        niskin.cy.reef = cy.reef %>%
+            filter(MMP_SITE_NAME!='') %>%  #2021 - exclude any records that do not have a MMP_SITE_NAME - these are identified in the anti_join above 
+            mutate(
+                COLLECTION_START_DATE = gsub('Sept','Sep', COLLECTION_START_DATE),
+                Date = as.Date(COLLECTION_START_DATE, format='%d-%b-%Y'),           # convert to date
+                oldSamplingYear=MMP_oldSamplingYear(Date),
+                waterYear = MMP_waterYear(Date),
+                reneeYear = MMP_reneeYear(Date),
+                cwaterYear = MMP_categoricalWaterYear(Date),
+                financialYear = MMP_financialYear(Date),                                    # add water year
+                cfinancialYear = MMP_categoricalFinancialYear(Date),                        # categorical year
+                Dt.num = MMP_decimalDate(Date)                                      # decimal year
+            ) %>%
+            mutate(Time=as.POSIXct(COLLECTION_START_DATE, format='%d-%b-%Y %H:%M:%S')) %>%
+            mutate(SHORT_NAME=as.character(SHORT_NAME)) %>%
+            mutate(
+                Collection=interaction(MMP_SITE_NAME, Date)) %>%
+            filter(Date<MAXDATE) %>%
+            MMP_reorderReefs() %>%
+            MMP_selectReefs(source='CY') 
+        save(niskin.cy.reef, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.RData'))
+    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of Water Quality (Niskin) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.cy.reef.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "CY niskin",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+    ## 3. Further processing
+    ## ---- CY niskin process level 3
+    MMP_tryCatch(
+    {
+        load(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.RData'))
+        niskin.cy.reef <- niskin.cy.reef %>%
+            mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
+            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+            MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
+             MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
+        niskin.cy.reef.av <-
+            niskin.cy.reef %>%
+            MMP_aggregateWQDuplicates() %>%                   #aggregate the duplicates
+            MMP_depthWeightedAverages() %>%                                                #generate a few different depth weighted averages
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='JCU') %>%
+            filter(!is.na(Subregion)) %>% droplevels %>% 
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>% droplevels() %>%
+             mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels
+        save(niskin.cy.reef.av, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData'))
+    }, LOG_FILE, Category = "Data processing", msg='Process Water Quality (CY) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.cy.reef.av.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "CY niskin processed averages",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+
+    ## ----end
+} else {
+}
+
+MMP_checkData(name = "niskin.cy.reef.av.RData",
+              stage = paste0("STAGE", CURRENT_STAGE),
+              item = CURRENT_ITEM,
+              label = "Processed CY niskin",
+              PATH = NISKIN_OUTPUT_PATH)
+MMP_openning_banner()
+
+## ----end
+
+## ---- JCU Event niskin process
+CURRENT_ITEM <- "jcuEventNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+MMP_openning_banner()
+if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.reef.av1.RData"))) &
+    file.exists(paste0(NISKIN_INPUT_PATH, 'jcuEvent.csv'))) {
+    MMP_tryCatch({
+        jcu.event.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'jcuEvent.csv')) %>%
+                     suppressMessages()
+        jcu_lookup = read_csv(paste0(PARAMS_PATH, '/jcu_location_lookup.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        wq.sites = read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        },
+        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing', msg='Reading in Water Quality (JCU Event) data', return=TRUE)
+    ## 1. First level of data processing
+    ## ---- JCU Event niskin process level 1
+    MMP_tryCatch(
+    {
+        ## Check for missing reefs etc
+        jcu.event.reef %>% dplyr::select(LOCATION_NAME, MMP_SITE_NAME,SHORT_NAME) %>% distinct %>%
+            anti_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
+            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct)
+        MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
+        MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
+        niskin.jcu.event.reef1 = jcu.event.reef %>%
+            mutate(
+                COLLECTION_START_DATE = gsub('Sept','Sep', COLLECTION_START_DATE),
+                Date = as.Date(COLLECTION_START_DATE, format='%d-%b-%Y'),           # convert to date
+                oldSamplingYear=MMP_oldSamplingYear(Date),
+                waterYear = MMP_waterYear(Date),
+                reneeYear = MMP_reneeYear(Date),
+                cwaterYear = MMP_categoricalWaterYear(Date),
+                financialYear = MMP_financialYear(Date),                                    # add water year
+                cfinancialYear = MMP_categoricalFinancialYear(Date),                        # categorical year
+                Dt.num = MMP_decimalDate(Date)                                      # decimal year
+            ) %>%
+            mutate(SHORT_NAME=as.character(SHORT_NAME)) %>%
+            mutate(Time=as.POSIXct(COLLECTION_START_DATE, format='%d-%b-%Y %H:%M:%S')) %>%
+            mutate(
+                Collection=interaction(MMP_SITE_NAME, Date)) %>%
+            filter(Date<MAXDATE) %>%
+            MMP_reorderReefs() 
+        save(niskin.jcu.event.reef1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.event.reef1.RData'))
+    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of Water Quality (JCU Event) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.jcu.event.reef1.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "JCU Event niskin",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+    ## 3. Further processing
+    ## ---- JCU Event niskin process level 3
+    MMP_tryCatch(
+    {
+        load(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.event.reef1.RData'))
+        niskin.jcu.event.reef1 <- niskin.jcu.event.reef1 %>%
+            mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
+            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+            MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
+             MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
+        niskin.jcu.event.reef.av1 <-
+            niskin.jcu.event.reef1 %>%
+            MMP_aggregateWQDuplicates() %>%                   #aggregate the duplicates
+            MMP_depthWeightedAverages() %>%                                                #generate a few different depth weighted averages
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='JCU') %>%
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>% droplevels() %>%
+             mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels
+        save(niskin.jcu.event.reef.av1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.event.reef.av1.RData'))
+    }, LOG_FILE, Category = "Data processing", msg='Process Water Quality (JCU Event) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.jcu.event.reef.av1.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "JCU Event niskin processed averages",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+
+    ## ----end
+} else {
+}
+
+MMP_checkData(name = "niskin.jcu.event.reef.av1.RData",
+              stage = paste0("STAGE", CURRENT_STAGE),
+              item = CURRENT_ITEM,
+              label = "Processed JCU Event niskin",
+              PATH = NISKIN_OUTPUT_PATH)
+MMP_openning_banner()
+
+## ----end
+
+## ---- JCU Event CY Event niskin
+CURRENT_ITEM <- "jcuCYEventNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+MMP_openning_banner()
+if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.reef.av1.RData"))) &
+    file.exists(paste0(NISKIN_INPUT_PATH, 'cyEvent.csv'))) {
+    MMP_tryCatch({
+        cy.event.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cyEvent.csv')) %>%
+                     suppressMessages()
+        jcu_lookup = read_csv(paste0(PARAMS_PATH, '/jcu_location_lookup.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        wq.sites = read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>%
+            suppressMessages()
+        },
+        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing', msg='Reading in Water Quality (CY) data', return=TRUE)
+    ## 1. First level of data processing
+    ## ---- CY Event niskin process level 1
+    MMP_tryCatch(
+    {
+        ## Check for missing samples
+        cy.event.reef %>% dplyr::select(LOCATION_NAME, MMP_SITE_NAME,SHORT_NAME) %>% distinct %>%
+            anti_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
+            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct)
+        MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
+        MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
+        niskin.cy.event.reef1 = cy.event.reef %>%
+            mutate(
+                COLLECTION_START_DATE = gsub('Sept','Sep', COLLECTION_START_DATE),
+                Date = as.Date(COLLECTION_START_DATE, format='%d-%b-%Y'),           # convert to date
+                oldSamplingYear=MMP_oldSamplingYear(Date),
+                waterYear = MMP_waterYear(Date),
+                reneeYear = MMP_reneeYear(Date),
+                cwaterYear = MMP_categoricalWaterYear(Date),
+                financialYear = MMP_financialYear(Date),                                    # add water year
+                cfinancialYear = MMP_categoricalFinancialYear(Date),                        # categorical year
+                Dt.num = MMP_decimalDate(Date)                                      # decimal year
+            ) %>%
+            mutate(Time=as.POSIXct(COLLECTION_START_DATE, format='%d-%b-%Y %H:%M:%S')) %>%
+            mutate(SHORT_NAME=as.character(SHORT_NAME)) %>%
+            mutate(
+                Collection=interaction(MMP_SITE_NAME, Date)) %>%
+            filter(Date<MAXDATE) %>%
+            MMP_reorderReefs() 
+        save(niskin.cy.event.reef1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.event.reef1.RData'))
+    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of Water Quality (CY Event) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.cy.event.reef1.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "CY Event niskin",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+    ## 3. Further processing
+    ## ---- CY Event niskin process level 3
+    MMP_tryCatch(
+    {
+        load(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.event.reef1.RData'))
+        niskin.cy.event.reef1 <- niskin.cy.event.reef1 %>%
+            mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
+            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+            MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
+             MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
+        niskin.cy.event.reef.av1 <-
+            niskin.cy.event.reef1 %>%
+            MMP_aggregateWQDuplicates() %>%                   #aggregate the duplicates
+            MMP_depthWeightedAverages() %>%                                                #generate a few different depth weighted averages
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='JCU') %>%
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>% droplevels() %>%
+             mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels
+        save(niskin.cy.event.reef.av1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.event.reef.av1.RData'))
+    }, LOG_FILE, Category = "Data processing", msg='Process Water Quality (CY Event) data', return=TRUE)
+
+    MMP_checkData(name = "niskin.cy.event.reef.av1.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "CY Event niskin processed averages",
+                  PATH = NISKIN_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+
+    ## ----end
+} else {
+}
+
+MMP_checkData(name = "niskin.cy.event.reef.av1.RData",
+              stage = paste0("STAGE", CURRENT_STAGE),
+              item = CURRENT_ITEM,
+              label = "Processed CY Event niskin",
+              PATH = NISKIN_OUTPUT_PATH)
 MMP_openning_banner()
 
 ## ----end

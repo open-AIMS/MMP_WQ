@@ -525,11 +525,75 @@ MMP_designLatest <- function(data, WQ=TRUE) {
     if (WQ==TRUE) {
         wq.sites <- read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>% suppressMessages()
         data %>%
-            left_join(wq.sites %>% mutate(AIMS=rowSums(.[,c(`Water (AIMS MMP)`, `Water (AIMS and JCU)`)],na.rm=TRUE),
-                                          JCU=rowSums(.[,c(`Water (JCU)`, `Water (AIMS and JCU)`)],na.rm=TRUE)) %>%
+            left_join(wq.sites %>% mutate(AIMS=rowSums(.[,c("Water (AIMS MMP)", "Water (AIMS and JCU)")],na.rm=TRUE),
+                                          JCU=rowSums(.[,c("Water (JCU)", "Water (AIMS and JCU)")],na.rm=TRUE)) %>%
                       dplyr:::select(GBRMPA_group, SHORT_NAME, Water_Samples, AIMS, JCU) %>%
                       distinct()
                       ) %>%
             droplevels()
     }
 }
+
+###############################################################################
+## The following function creates consistent reef names for the forams       ##
+## data.  If the forams are no longer required, then this can be depreciated ##
+##                                                                           ##
+## Parameters:                                                               ##
+##    loc:      character vector of foram index location names               ##
+## Return:                                                                   ##
+##    label:    character vector of reef alias names                         ##
+###############################################################################
+MMP_locationLabels <- function(loc) {
+    require('car')
+    Label<-car:::recode(loc,"'Snapper North'='Snapper Isl.';
+                       'Fitzroy West'='Fitzroy Isl.';
+                       'High West'='High Isl.';
+                       'Franklands West'='Russell Isl.';
+                       'Dunk North'='Dunk Isl.';
+                       'Palms West'='Pelorus/Orpheous Isl.';
+                       'Pandora'='Pandora Reef';
+                       'Magnetic'='Geoffrey Bay';
+                       'Haughton'='Haughton River';
+                       'Burdekin Mouth'='Burdekin Mouth';
+                       'Double Cone'='Double Cone Isl.';
+                       'Daydream'='Daydream Isl.';
+                       'Pine'='Pine Isl.';
+                       'Barren'='Barren Isl.';
+                       'Keppels South'='Humpy Isl.';
+                       'Pelican'='Pelican Isl.';
+                       'Seaforth'='Seaforth Isl.';
+                       'Repulse'='Repulse Mooring'
+      ")
+    Label
+}
+
+###################################################################
+## The following function adds a vector of booleans to indicate  ##
+## whether the reef is a historic reef (TRUE) for the purpose of ##
+## backwards compatibility.                                      ##
+###################################################################
+MMP_HistoricReef <- function(reef) {
+    ifelse(reef %in% c('Cape Tribulation',
+                       'Port Douglas',
+                       'Double Island',
+                       'Green Island',
+                       "Yorkey's Knob",
+                       'Fairlead Buoy',
+                       'Fitzroy West',
+                       'High West',
+                       'Franklands West',
+                       'Dunk North',
+                       'Palms West',
+                       'Pandora',
+                       'Magnetic',
+                       'Haughton 2',
+                       'Double Cone',
+                       'Pine',
+                       'Seaforth',
+                       'Repulse Islands dive mooring',
+                       'Barren',
+                       'Keppels South',
+                       'Pelican'),
+           TRUE,FALSE)
+}
+

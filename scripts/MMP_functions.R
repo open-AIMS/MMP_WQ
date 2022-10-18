@@ -73,9 +73,9 @@ MMP_initialise_status <- function() {
                                  "pending","pending","pending","pending","pending","pending","pending","pending","pending","pending")
                       ),
         STAGE3 = list(title = "Stage 3 - process data",
-                      items = c("aimsNiskin"),
-                      names = c("AIMS niskin data"),
-                      status = c("pending")
+                      items = c("aimsNiskin", "cairnsTransect"),
+                      names = c("AIMS niskin data", "Cairns transect data"),
+                      status = c("pending","pending")
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -427,7 +427,7 @@ mmp__change_status <- function(stage, item, status) {
 }
 
 mmp__change_name <- function(stage, item, name) {
-    STATUS[[stage]]$name[which(STATUS[[stage]]$item == item)] <- name
+    STATUS[[stage]]$names[which(STATUS[[stage]]$item == item)] <- name
     assign("STATUS", STATUS, env = globalenv())
 }
 
@@ -597,7 +597,7 @@ MMP_checkData <- function(name = "niskin.csv",
             MMP_log(status = "SUCCESS",
                     logFile = LOG_FILE,
                     Category = paste0(label, " data exists"),
-                    msg=NULL) 
+                    msg=NULL)
             mmp__change_status(stage = stage, item = item, status = "success")
             filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
             mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))

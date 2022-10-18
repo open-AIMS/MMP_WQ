@@ -9,7 +9,8 @@ if (MMP_isParent()) {
 OTHER_PATH <- paste0(DATA_PATH, "/primary/other/")
 
 ## ---- AIMS Disturbance table 
-mmp__change_status(stage = "STAGE2", item = "disturbances", status = "progress")
+CURRENT_ITEM <- "disturbances"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
 if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance", ".csv"))) {
@@ -19,15 +20,15 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance", ".csv"))) {
                paste0(OTHER_PATH, "disturbance.sql"))
 
     MMP_tryCatch_db(name = 'disturbance',
-                    stage = "STAGE2",
-                    item = "disturbances",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "AIMS Disturbance table",
                     PATH = OTHER_PATH,
                     db_user = "reef reefmon")
 } else {
     MMP_checkData(name = "disturbance.csv",
-                  stage = "STAGE2",
-                  item = "disturbances",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "AIMS Disturbance table",
                   PATH = OTHER_PATH)
 }
@@ -36,7 +37,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- tides 
-mmp__change_status(stage = "STAGE2", item = "tides", status = "progress")
+CURRENT_ITEM <- "tides"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
     ## ---- tides - generate tide locations
@@ -56,7 +58,7 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
         }
 
         ## MMP_checkData(name = "tidelocations",
-        ##               stage = "STAGE2",
+        ##               stage = CURRENT_STAGE,
         ##               item = "tides",
         ##               label = "Harmonic tides",
         ##               PATH = OTHER_PATH)
@@ -67,10 +69,10 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
                 logFile = LOG_FILE,
                 Category = paste0("Harmonic tides locations", " data does not exist"),
                 msg=NULL) 
-        mmp__change_status(stage = STAGE2, item = "tides", status = "failure")
+        mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "failure")
     }
 
-## ----end
+    ## ----end
 
     ## ---- tides - select tide locations
     MMP_tryCatch(
@@ -87,7 +89,7 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
     }, LOG_FILE, Category = "Harmonic tides", msg=' - tide locations selected', return=TRUE)
 
     if(!exists("tideLookup")) {
-        mmp__change_status(stage = STAGE2, item = "tides", status = "failure")
+        mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "failure")
     }
     ## ----end
 
@@ -100,7 +102,7 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
         t.start <- format(as.POSIXct(minDate)-(10*60*60), '%Y-%m-%d %H:%M') #'2002-01-01 00:00'       
         t.end <- format(as.POSIXct(maxDate)+(2*60*60), '%Y-%m-%d %H:%M')
         tides=list()
-        mmp__change_name("STAGE2", "tides", paste0("Harmonic tides [", 0, "/ ", length(tideLookup[,'Location']), "]"))
+        mmp__change_name(CURRENT_STAGE, "tides", paste0("Harmonic tides [", 0, "/ ", length(tideLookup[,'Location']), "]"))
         MMP_openning_banner()
         for (i in 1:length(tideLookup[,'Location'])) { #1:length(tideLookup[,'Location'])) {
             l=gsub(" |\'|\\(|\\)|\\/","_",tideLookup[i,'Location'])
@@ -110,10 +112,10 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
                                                                  t.start=t.start,
                                                                  t.end=t.end)
 
-            mmp__change_name("STAGE2", "tides", paste0("Harmonic tides [", i, "/ ", length(tideLookup[,'Location']), "]"))
+            mmp__change_name(paste0("STAGE", CURRENT_STAGE), CURRENT_ITEM, paste0("Harmonic tides [", i, "/ ", length(tideLookup[,'Location']), "]"))
             MMP_openning_banner()
         } 
-        mmp__change_name("STAGE2", "tides", paste0("Harmonic tides [saving compliation]"))
+        mmp__change_name(paste0("STAGE", CURRENT_STAGE), "tides", paste0("Harmonic tides [saving compliation]"))
         save(tides,file=paste0(OTHER_PATH, "tides.RData")) 
         ##load(file=paste0(OTHER_PATH, "tides.RData")) 
         rm(tides)
@@ -121,9 +123,9 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
     }, LOG_FILE, Category = "Harmonic tides", msg=' - generate harmonic tides', return=TRUE)
 
     if(!file.exists(paste0(OTHER_PATH, "tides.RData"))) {
-        mmp__change_status(stage = "STAGE2", item = "tides", status = "failure")
+        mmp__change_status(stage = CURRENT_STAGE, item = "tides", status = "failure")
     } else {
-        mmp__change_status(stage = "STAGE2", item = "tides", status = "success")
+        mmp__change_status(stage = CURRENT_STAGE, item = "tides", status = "success")
     }
     ## ----end
     ## ---- tides - delete temporary files
@@ -133,11 +135,11 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "tides", ".RData"))) {
 
 } else {
     if(!file.exists(paste0(OTHER_PATH, "tides.RData"))) {
-        mmp__change_status(stage = "STAGE2", item = "tides", status = "failure")
+        mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "failure")
     } else {
         filesize <- R.utils::hsize(file.size(paste0(OTHER_PATH, "tides.RData")))
-        mmp__change_name(stage = "STAGE2", item = "tides", name = paste0("Harmonic tides", "  [",filesize, "]"))
-        mmp__change_status(stage = "STAGE2", item = "tides", status = "success")
+        mmp__change_name(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, name = paste0("Harmonic tides", "  [",filesize, "]"))
+        mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
     }
 }
 
@@ -145,7 +147,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- BOM weather data 
-mmp__change_status(stage = "STAGE2", item = "BOM", status = "progress")
+CURRENT_ITEM <- "BOM"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
 if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
@@ -160,15 +163,15 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
 , paste0(OTHER_PATH, "bom.sql"))
 
     MMP_tryCatch_db(name = 'bom',
-                    stage = "STAGE2",
-                    item = "BOM",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "BOM weather",
                     PATH = OTHER_PATH,
                     db_user = "reef rwqpp_user")
 } else {
     MMP_checkData(name = "bom.csv",
-                  stage = "STAGE2",
-                  item = "BOM",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "BOM weather",
                   PATH = OTHER_PATH)
 }
@@ -177,7 +180,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- Discharge data 
-mmp__change_status(stage = "STAGE2", item = "discharge", status = "progress")
+CURRENT_ITEM <- "discharge"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
 if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "discharge", ".csv"))) {
@@ -197,15 +201,15 @@ where r.dnrm_station_id = s.id
 paste0(OTHER_PATH, "discharge.sql"))
 
     MMP_tryCatch_db(name = 'discharge',
-                    stage = "STAGE2",
-                    item = "discharge",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "River discharge",
                     PATH = OTHER_PATH,
                     db_user = "reef rwqpp_user")
 } else {
     MMP_checkData(name = "discharge.csv",
-                  stage = "STAGE2",
-                  item = "discharge",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "River discharge",
                   PATH = OTHER_PATH)
 }

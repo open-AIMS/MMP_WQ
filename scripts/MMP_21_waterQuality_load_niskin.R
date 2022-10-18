@@ -10,9 +10,8 @@ NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/")
 
 ## ---- AIMS niskin
 CURRENT_ITEM <- "aimsNiskin"
-mmp__change_status(stage = CURRENT_STAGE, item = CURRENT_ITEM, status = "progress")
+mmp__change_status(stage = paste0("STAGE",CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
-
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "niskin", ".csv"))) {
     writeLines("select l.PROJECT, l.STATION_NAME, l.LOCATION_NAME,
  l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
@@ -33,24 +32,26 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "niskin", ".csv"))) {
  paste0(NISKIN_PATH, "niskin.sql"))
 
     MMP_tryCatch_db(name = 'niskin',
-                    stage = CURRENT_STAGE,
+                    stage = paste0("STAGE",CURRENT_STAGE),
                     item = CURRENT_ITEM,
                     label = "AIMS niskin",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
     MMP_checkData(name = "niskin.csv",
-                  stage = CURRENT_STAGE,
+                  stage = paste0("STAGE",CURRENT_STAGE),
                   item = CURRENT_ITEM,
                   label = "AIMS niskin",
-                  PATH = NISKIN_PATH)
+                  PATH = NISKIN_PATH,
+                  progressive = FALSE)
 }
 
 MMP_openning_banner()
 ## ----end
     
 ## ---- AIMS Cairns Transect
-mmp__change_status(stage = "STAGE2", item = "cairnsTransect", status = "progress")
+CURRENT_ITEM <- 'cairnsTransect'
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cairns", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
@@ -71,15 +72,15 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cairns", ".csv"))) {
  paste0(NISKIN_PATH, "cairns.sql"))
 
     MMP_tryCatch_db(name = 'cairns',
-                    stage = "STAGE2",
-                    item = "cairnsTransect",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "Cairns transect",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
     MMP_checkData(name = "cairns.csv",
-                  stage = "STAGE2",
-                  item = "cairnsTransect",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "Cairns transect",
                   PATH = NISKIN_PATH)
 }
@@ -88,7 +89,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- JCU niskin
-mmp__change_status(stage = "STAGE2", item = "jcuNiskin", status = "progress")
+CURRENT_ITEM <- "jcuNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcu", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
@@ -110,15 +112,16 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcu", ".csv"))) {
  paste0(NISKIN_PATH, "jcu.sql"))
 
     MMP_tryCatch_db(name = 'jcu',
-                    stage = "STAGE2",
-                    item = "jcuNiskin",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    stage = CURRENT_STAGE,
+                    item = CURRENT_ITEM,
                     label = "JCU niskin",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2" )
 } else {
     MMP_checkData(name = "jcu.csv",
-                  stage = "STAGE2",
-                  item = "jcuNiskin",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "JCU niskin",
                   PATH = NISKIN_PATH)
 }
@@ -127,7 +130,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- JCU CY niskin
-mmp__change_status(stage = "STAGE2", item = "jcuCYNiskin", status = "progress")
+CURRENT_ITEM <- "jcuCYNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cy", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
@@ -149,15 +153,15 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cy", ".csv"))) {
  paste0(NISKIN_PATH, "cy.sql"))
 
     MMP_tryCatch_db(name = 'cy',
-                    stage = "STAGE2",
-                    item = "jcuCYNiskin",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "JCU CY niskin",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
     MMP_checkData(name = "cy.csv",
-                  stage = "STAGE2",
-                  item = "jcuCYNiskin",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "JCU CY niskin",
                   PATH = NISKIN_PATH)
 }
@@ -166,7 +170,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- JCU Event niskin
-mmp__change_status(stage = "STAGE2", item = "jcuEventNiskin", status = "progress")
+CURRENT_ITEM <- "jcuEventNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcuEvent", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
@@ -184,15 +189,15 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcuEvent", ".csv"))) {
     paste0(NISKIN_PATH, "jcuEvent.sql"))
 
     MMP_tryCatch_db(name = 'jcuEvent',
-                    stage = "STAGE2",
-                    item = "jcuEventNiskin",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "JCU Event niskin",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
     MMP_checkData(name = "jcuEvent.csv",
-                  stage = "STAGE2",
-                  item = "jcuEventNiskin",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "JCU Event niskin",
                   PATH = NISKIN_PATH)
 }
@@ -202,7 +207,8 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- JCU CY Event niskin
-mmp__change_status(stage = "STAGE2", item = "jcuCYEventNiskin", status = "progress")
+CURRENT_ITEM <- "jcuCYEventNiskin"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cyEvent", ".csv"))) {
     writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
@@ -220,19 +226,17 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cyEvent", ".csv"))) {
     paste0(NISKIN_PATH, "cyEvent.sql"))
 
     MMP_tryCatch_db(name = 'cyEvent',
-                    stage = "STAGE2",
-                    item = "jcuCYEventNiskin",
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
                     label = "JCU CY Event niskin",
                     PATH = NISKIN_PATH,
                     db_user = "reef wq_nut2")
 } else {
     MMP_checkData(name = "cyEvent.csv",
-                  stage = "STAGE2",
-                  item = "jcuCYEventNiskin",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
                   label = "JCU CY Event niskin",
                   PATH = NISKIN_PATH)
 }
-
 MMP_openning_banner()
 ## ----end
-

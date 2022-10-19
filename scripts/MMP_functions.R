@@ -100,7 +100,7 @@ MMP_parseCLA <- function(args) {
     runStage <<- 1   ## this is a temp incase it is not specified on the command line - it is required for the openning banner
     CURRENT_STAGE <<- 1
     # Check all neccessary CLAs are present and no extra CLAs entered
-    if(length(args) < 7 | length(args) > 8) {
+    if(length(args) < 7) {
         MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()

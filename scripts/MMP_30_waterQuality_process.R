@@ -15,3 +15,8 @@ assign("CURRENT_STAGE", 3, env = globalenv())
 ## - JCU Event niskin
 ## - JCU CY Event niskin
 source("MMP_31_waterQuality_process_niskin.R")
+
+## - AIMS FLNTU logggers
+## - Water temperature loggers
+## - Salinity loggers
+source("MMP_32_waterQuality_process_loggers.R")

@@ -480,14 +480,17 @@ MMP_log <- function(status, logFile = LOG_FILE, Category, msg=NULL) {
 ##    Category:  a character string representation of error category    ##                                               
 ##    msg:       a character string with a message to appear verbatim   ##                                               
 ##               in the log                                             ##                                               
-##    return:    boolean, whether to return a TRUE or FALSE             ##                                               
-##########################################################################                                               
+##    return:    boolean, whether to return a TRUE or FALSE             ##
+##    progressive: denotes whether we have a finished extracting a      ## 
+##               dataset (FALSE) or further steps remain (TRUE) -       ##
+##               if FALSE, appends filesize to console status           ##                                           
+##########################################################################  
 MMP_tryCatch <- function(expr, logFile, item, Category, expectedClass=NULL, msg=NULL, return=NULL, showWarnings=FALSE) {
     if (!exists('PROGRESS')) PROGRESS=NULL
     max.warnings<-4
     warnings<-0
     W <- NULL
-    w.handler <- function(w){ # warning handler                                                                          
+    w.handler <- function(w) { # warning handler                                                                          
         m<-w$message
         if ((warnings < max.warnings) && (grepl ('MMP_WARNING', m)>0)) {
             MMP_log('WARNING', logFile, Category, paste(warnings, msg, m))
@@ -610,7 +613,6 @@ MMP_checkData <- function(name = "niskin.csv",
                 msg=NULL) 
         mmp__change_status(stage = stage, item = item, status = "failure")
     }
-    
 }
 
 MMP_getTides <- function(ref, loc,path,file, t.start, t.end) {

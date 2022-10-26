@@ -25,6 +25,7 @@ RUN apt-get update \
     fonts-dejavu-extra \
     curl \
     tk \
+    xtide \
   && rm -rf /var/lib/apt/lists/*
 
 # NOTE: pandoc-citeproc no longer maintained - are packages above 'time-capsuled' in the same way as R and R packages below?

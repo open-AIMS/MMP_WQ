@@ -27,6 +27,10 @@ source("MMP_functions.R")
 # Equivalent to MMP_isParent() ***** NOT 100% CONFIDENT IN THIS *****
 if (sys.nframe() == 4) { 
     MMP_startMatter()
+} else {
+    print("WARNING: UNEXPECTED BHEAVIOUR > MMP_00_test.R > sys.nframe != 4. This value is set to ensure the script is being called directly from the console.")
+    print("To continue edit script at 'if(sys.nframe()==4){...}'")
+    stop()
 }
 
 if (2 %in% runStage) {

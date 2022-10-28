@@ -9,6 +9,7 @@ if (MMP_isParent()) {
 LOGGER_PATH <- paste0(DATA_PATH, "/primary/loggers/")
 ## ---- AIMS FLNTU loggers
 CURRENT_ITEM <- "flntu"
+current_label <- "AIMS FLNTU loggers"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "flntu", ".csv"))) {
@@ -20,21 +21,23 @@ if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "flntu", ".csv"))) {
     MMP_tryCatch_db(name = 'flntu',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
-                    label = "AIMS FLNTU loggers",
+                    label = current_label,
                     PATH = LOGGER_PATH,
-                    db_user = "reef rwqpp_user")
+                    db_user = "reef rwqpp_user", 
+                    progressive=FALSE)
 } else {
-    MMP_checkData(name = "flntu.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "AIMS FLNTU loggers",
-                  PATH = LOGGER_PATH)
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
 
 MMP_openning_banner()
 ## ----end
 ## ---- AIMS Water temperature loggers
 CURRENT_ITEM <- "waterTemp"
+current_label <- "Water temperature loggers"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "waterTempW", ".csv"))) {
@@ -48,15 +51,16 @@ if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "waterTempW", ".csv"))) {
     MMP_tryCatch_db(name = 'waterTempW',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
-                    label = "Water temperature loggers",
+                    label = current_label,
                     PATH = LOGGER_PATH,
-                    db_user = "rtds rtdsread")
+                    db_user = "rtds rtdsread", 
+                    progressive=FALSE)
 } else {
-    MMP_checkData(name = "waterTempW.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "Water temperature loggers",
-                  PATH = LOGGER_PATH)
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
 
 MMP_openning_banner()
@@ -76,13 +80,14 @@ if (alwaysExtract | !file.exists(paste0(LOGGER_PATH, "waterSalinity", ".csv"))) 
                     item = CURRENT_ITEM,
                     label = "Salinity loggers",
                     PATH = LOGGER_PATH,
-                    db_user = "reef wq_nut2")
+                    db_user = "reef wq_nut2", 
+                    progressive=FALSE)
 } else {
-    MMP_checkData(name = "waterSalinity.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "Salinity loggers",
-                  PATH = LOGGER_PATH)
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
 
 MMP_openning_banner()

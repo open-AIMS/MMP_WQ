@@ -10,6 +10,7 @@ OTHER_PATH <- paste0(DATA_PATH, "/primary/other/")
 
 ## ---- AIMS Disturbance table 
 CURRENT_ITEM <- "disturbances"
+current_label <- "AIMS Disturbance table"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -22,15 +23,16 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance", ".csv"))) {
     MMP_tryCatch_db(name = 'disturbance',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
-                    label = "AIMS Disturbance table",
+                    label = current_label,
                     PATH = OTHER_PATH,
-                    db_user = "reef reefmon")
+                    db_user = "reef reefmon", 
+                    progressive=FALSE)
 } else {
-    MMP_checkData(name = "disturbance.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "AIMS Disturbance table",
-                  PATH = OTHER_PATH)
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
 
 MMP_openning_banner()
@@ -148,6 +150,7 @@ MMP_openning_banner()
 
 ## ---- BOM weather data 
 CURRENT_ITEM <- "BOM"
+current_label <- "BOM weather"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -165,15 +168,16 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
     MMP_tryCatch_db(name = 'bom',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
-                    label = "BOM weather",
+                    label = current_label,
                     PATH = OTHER_PATH,
-                    db_user = "reef rwqpp_user")
+                    db_user = "reef rwqpp_user", 
+                    progressive=FALSE)
 } else {
-    MMP_checkData(name = "bom.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "BOM weather",
-                  PATH = OTHER_PATH)
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
 
 MMP_openning_banner()
@@ -181,6 +185,7 @@ MMP_openning_banner()
 
 ## ---- Discharge data 
 CURRENT_ITEM <- "discharge"
+current_label <- "River discharge"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -203,15 +208,16 @@ paste0(OTHER_PATH, "discharge.sql"))
     MMP_tryCatch_db(name = 'discharge',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
-                    label = "River discharge",
+                    label = current_label,
                     PATH = OTHER_PATH,
-                    db_user = "reef rwqpp_user")
+                    db_user = "reef rwqpp_user", 
+                    progressive=FALSE)
 } else {
-    MMP_checkData(name = "discharge.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "River discharge",
-                  PATH = OTHER_PATH)
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
 
 MMP_openning_banner()

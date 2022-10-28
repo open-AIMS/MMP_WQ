@@ -24,9 +24,11 @@ print(paste("testing_command> Rscript MMP_00_test.R", paste(test_CLAs, collapse 
 # Run normal operations with test parameters:
 source("MMP_functions.R")
 
-# if (MMP_isParent()) { 
+# Equivalent to MMP_isParent() ***** NOT 100% CONFIDENT IN THIS *****
+if (sys.nframe() == 4) { 
     MMP_startMatter()
-# }
+}
+
 if (2 %in% runStage) {
     source("MMP_20_waterQuality_load.R")
 }

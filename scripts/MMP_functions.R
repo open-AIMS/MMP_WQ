@@ -431,6 +431,10 @@ mmp__change_name <- function(stage, item, name) {
     STATUS[[stage]]$names[which(STATUS[[stage]]$item == item)] <- name
     assign("STATUS", STATUS, env = globalenv())
 }
+mmp__append_filesize <- function(stage, item, label, filepath) {
+    filesize <- R.utils::hsize(file.size(paste0(filepath)))
+    mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+}
 
 MMP_test <- function() {
     for (i in 1:10) {
@@ -535,53 +539,72 @@ MMP_tryCatch <- function(expr, logFile, item, Category, expectedClass=NULL, msg=
 
 
 
+
+############################################################################
+## MMP_tryCatch_db logic:                                                 ##
+##                                                                        ##
+##  If alwaysExtract OR file ! exist:                                     ##
+##      --> Get data                                                      ##
+##          --> Error: update log/status *END*                            ##
+##          --> Success: update log/status                                ##
+##              --> Check file exists:                                    ##
+##                  --> file ! exist: update log/status *END*             ##
+##                  --> file exists: update log/status                    ##
+##                      --> if ! progressive: append file size to console ##
+##      *END*                                                             ##
+##  Else !alwaysExtract AND file exists                                   ##
+############################################################################
 MMP_tryCatch_db <- function(name = 'niskin',
                             stage = "STAGE2",
                             item = "aimsNiskin",
                             label = "AIMS niskin",
                             PATH = NISKIN_PATH,
-                            db_user = "wq_nut2") {
-    MSG <- paste0("Extracting ", label, " data from the database")
-    tryCatch({
-        status <- system2("java",
-                          args = paste0("-jar dbExport.jar ", PATH, name, ".sql ", PATH, name, ".csv ", db_user),
-                          stdout = TRUE, stderr = TRUE)
-        ## Catch the errors returned by the database
-        ##print(status)
-        if (stringr::str_detect(status[6], 'Error')) {
-            msg <- paste0(MSG, ": There is a problem with the SQL: ", stringr::str_replace(status[8], "java.sql.SQLSyntaxErrorException: (.*)", "\\1"))
-
-            MMP_log(status = "FAILURE",
-                    logFile = LOG_FILE,
-                    Category = msg,
-                    msg=NULL) 
-            mmp__change_status(stage = stage, item = item, status = "failure")
-            ## stop(msg, call. = FALSE)
-        } else {
-            MMP_log(status = "SUCCESS",
-                    logFile = LOG_FILE,
-                    Category = MSG,
-                    msg=NULL) 
-            mmp__change_status(stage = stage, item = item, status = "success")
+                            db_user = "wq_nut2", 
+                            progressive=TRUE) {
+    extract_msg <- paste0("Extracting ", label, " data from database")
+    sql_file <- paste0(PATH, name, ".sql") # sql instructions stored here
+    data_file <- paste0(PATH, name, ".csv") # save data here
+    tryCatch(
+        {   ## Try extract data using sql instructions and  and save to data file
+            status <- system2(
+                "java", stdout = TRUE, stderr = TRUE,
+                args = paste("-jar dbExport.jar", sql_file, data_file, db_user) 
+            )
+            ## Check for errors returned by the database and update log & status accordingly
+            if (stringr::str_detect(status[6], 'Error')) {
+                extract_error_msg <- paste0(
+                    MSG, ": There is a problem with the SQL: ", 
+                    stringr::str_replace(status[8], "java.sql.SQLSyntaxErrorException: (.*)", "\\1")
+                )
+                MMP_log("FAILURE", LOG_FILE, Category = extract_error_msg, msg=NULL) 
+                mmp__change_status(stage, item, status = "failure")
+            } 
+            else {
+                MMP_log("SUCCESS", LOG_FILE, Category = extract_msg, msg=NULL) 
+                mmp__change_status(stage, item, status = "success")
+                
+                ## Check if data was successfully saved to file and update log/status accordingly
+                if (file.exists(data_file)) {
+                    MMP_log("SUCCESS", LOG_FILE, Category = paste0(label, " data saved in ", data_file), msg=NULL)
+                    mmp__change_status(stage, item, status = "success")
+                    ## If last step in data extraction stage, append filesize in console
+                    if (!progressive) mmp__append_filesize(stage, item, label, data_file)
+                }
+                else {
+                    save_error_msg <- paste(label, "data could not be saved to", data_file)
+                    MMP_log("FAILURE", LOG_FILE, Category = save_error_msg, msg=NULL) 
+                    mmp__change_status(stage = stage, item = item, status = "failure")
+                }
+            }
+        },
+        error = function(e) {
+            MMP_log("FAILURE", LOG_FILE, Category = paste0(extract_msg, ": ", e["message"]), msg=NULL) 
+            mmp__change_status(stage, item, status = "failure")
+        },
+        warning = function(w) {
+            MMP_log("FAILURE", LOG_FILE, Category = paste0(extract_msg, ": ", w["message"]), msg=NULL) 
+            mmp__change_status(stage, item, status = "failure")
         }
-        
-        ## warning('Be')
-    },
-    error = function(e) {
-        MMP_log(status = "FAILURE",
-                logFile = LOG_FILE,
-                Category = paste0(MSG, ": ", e["message"]),
-                msg=NULL) 
-        mmp__change_status(stage = stage, item = item, status = "failure")
-    },
-    warning = function(w) {
-                                        # print(paste0(paste(w, collapse = ''), ' This is a warning warning'))
-        MMP_log(status = "FAILURE",
-                logFile = LOG_FILE,
-                Category = paste0(MSG, ": ", w["message"]),
-                msg=NULL) 
-        mmp__change_status(stage = stage, item = item, status = "failure")
-    }
     )
 }
 

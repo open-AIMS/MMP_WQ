@@ -20,9 +20,18 @@ if (MMP_isParent()) { # if calling application has landed on this script first
 ## ----end
 
 ## ---- Setup data items
-load_stage <- paste0("STAGE", CURRENT_STAGE)
-NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/")
-niskin_items <- c("aimsNiskin", "cairnsTransect", "jcuNiskin", "jcuCYNiskin", "jcuEventNiskin", "jcuCYEventNiskin")
+load_stage <- paste0("STAGE", CURRENT_STAGE) # STATUS (list) item corresponding to CURRENT_STAGE (numeric)
+NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/") # where niskin data is to be saved
+
+# Niskin datasets
+niskin_items <- c(
+    "aimsNiskin", 
+    "cairnsTransect", 
+    "jcuNiskin", 
+    "jcuCYNiskin", 
+    "jcuEventNiskin", 
+    "jcuCYEventNiskin"
+)
 item_properties <- list(
     aimsNiskin = list(
         name = "niskin", # to name files
@@ -183,5 +192,3 @@ for (item in niskin_items) {
     MMP_openning_banner()
 }
 ## ----end
-
-stop()

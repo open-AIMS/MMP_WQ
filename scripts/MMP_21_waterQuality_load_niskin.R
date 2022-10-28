@@ -1,16 +1,8 @@
-#################################################
-## DATA EXTRACTION LOGIC:                      ##
-##                                             ##
-## update status and banner                    ##
-## if alwaysExtract or data file doesnt exist: ##
-##     --> extract data with MMP_tryCatch_db   ##
-##         (updates log and status, append     ##
-##          filesize)                          ##
-## else !alwaysExtract and data file exists:   ##
-##     --> update log and status               ##
-##     --> append filesize                     ##
-## update banner                               ##
-#################################################
+#####################################################################################
+## GET NISKIN DATA:                                                                ##
+##   - extract from database when alwaysExtract=TRUE or data files don't yet exist ##
+##   - otherwise extract from MMP_WQ/data/primary/niskin                           ##
+#####################################################################################
 
 ## ---- Start procedure
 source("MMP_functions.R")
@@ -19,7 +11,7 @@ if (MMP_isParent()) { # if calling application has landed on this script first
 }
 ## ----end
 
-## ---- Setup data items
+## ---- Setup niskin data items
 load_stage <- paste0("STAGE", CURRENT_STAGE) # STATUS (list) item corresponding to CURRENT_STAGE (numeric)
 NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/") # where niskin data is to be saved
 
@@ -179,12 +171,8 @@ for (item in niskin_items) {
         )
     } # Otherwise ! alwaysExtract AND data file exists --> update log & status, append file size to banner
     else {
-        MMP_log(
-            status = "SUCCESS",
-            logFile = LOG_FILE,
-            Category = paste("Using existing", item_label,"data in", item_data_file),
-            msg = NULL
-        )
+        existing_data_msg <- paste("Using existing", item_label, "data in", item_data_file)
+        MMP_log("SUCCESS", LOG_FILE, Category = existing_data_msg)
         mmp__change_status(load_stage, item, status = "success")
         mmp__append_filesize(load_stage, item, item_label, item_data_file)
     }

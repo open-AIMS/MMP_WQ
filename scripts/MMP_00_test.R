@@ -9,7 +9,7 @@
 test_CLAs <- c(
     "--reportYear=2022",
     "--runStage=1:2",
-    "--alwaysExtract=TRUE"
+    "--alwaysExtract=FALSE"
 )
 ########################################################
 
@@ -21,13 +21,17 @@ dummy_args <- c(
 commandArgs <- function() dummy_args
 print(paste("testing_command> Rscript MMP_00_test.R", paste(test_CLAs, collapse = " ")))
 
+#########################################################
+
 # Run normal operations with test parameters:
 source("MMP_functions.R")
 
-# Equivalent to MMP_isParent() ***** NOT 100% CONFIDENT IN THIS *****
-if (sys.nframe() == 4) { 
+# Replace MMP_isParent() ***** NOT 100% CONFIDENT THIS WILL ALWAYS WORK *****
+if (sys.nframe() == 4) { # added
+# if (MMP_isParent()) {  # removed
     MMP_startMatter()
-} else {
+# }
+} else { # added
     print("WARNING: UNEXPECTED BHEAVIOUR > MMP_00_test.R > sys.nframe != 4. This value is set to ensure the script is being called directly from the console.")
     print("To continue edit script at 'if(sys.nframe()==4){...}'")
     stop()

@@ -576,33 +576,33 @@ MMP_tryCatch_db <- function(name = 'niskin',
                     MSG, ": There is a problem with the SQL: ", 
                     stringr::str_replace(status[8], "java.sql.SQLSyntaxErrorException: (.*)", "\\1")
                 )
-                MMP_log("FAILURE", LOG_FILE, Category = extract_error_msg, msg=NULL) 
+                MMP_log("FAILURE", LOG_FILE, Category = extract_error_msg) 
                 mmp__change_status(stage, item, status = "failure")
             } 
             else {
-                MMP_log("SUCCESS", LOG_FILE, Category = extract_msg, msg=NULL) 
+                MMP_log("SUCCESS", LOG_FILE, Category = extract_msg) 
                 mmp__change_status(stage, item, status = "success")
                 
                 ## Check if data was successfully saved to file and update log/status accordingly
                 if (file.exists(data_file)) {
-                    MMP_log("SUCCESS", LOG_FILE, Category = paste0(label, " data saved in ", data_file), msg=NULL)
+                    MMP_log("SUCCESS", LOG_FILE, Category = paste0(label, " data saved in ", data_file))
                     mmp__change_status(stage, item, status = "success")
                     ## If last step in data extraction stage, append filesize in console
                     if (!progressive) mmp__append_filesize(stage, item, label, data_file)
                 }
                 else {
                     save_error_msg <- paste(label, "data could not be saved to", data_file)
-                    MMP_log("FAILURE", LOG_FILE, Category = save_error_msg, msg=NULL) 
+                    MMP_log("FAILURE", LOG_FILE, Category = save_error_msg) 
                     mmp__change_status(stage = stage, item = item, status = "failure")
                 }
             }
         },
         error = function(e) {
-            MMP_log("FAILURE", LOG_FILE, Category = paste0(extract_msg, ": ", e["message"]), msg=NULL) 
+            MMP_log("FAILURE", LOG_FILE, Category = paste0(extract_msg, ": ", e["message"])) 
             mmp__change_status(stage, item, status = "failure")
         },
         warning = function(w) {
-            MMP_log("FAILURE", LOG_FILE, Category = paste0(extract_msg, ": ", w["message"]), msg=NULL) 
+            MMP_log("FAILURE", LOG_FILE, Category = paste0(extract_msg, ": ", w["message"])) 
             mmp__change_status(stage, item, status = "failure")
         }
     )

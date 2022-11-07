@@ -25,6 +25,8 @@ RUN apt-get update \
     fonts-dejavu-extra \
     curl \
     tk \
+    xtide \
+    openjdk-11-jre \
   && rm -rf /var/lib/apt/lists/*
 
 # NOTE: pandoc-citeproc no longer maintained - are packages above 'time-capsuled' in the same way as R and R packages below?
@@ -57,6 +59,7 @@ RUN R -e "options(repos = \
   install.packages('geojsonR'); \
   install.packages('geojsonsf'); \
   install.packages('s2'); \
+  install.packages('R.utils'); \
 "
 #############################################################################
 ## NOTE: we could opt for installing specific versions of packages

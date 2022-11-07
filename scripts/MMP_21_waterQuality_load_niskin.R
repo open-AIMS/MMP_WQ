@@ -1,147 +1,104 @@
+#####################################################################################
+## GET NISKIN DATA:                                                                ##
+##   - extract from database when alwaysExtract=TRUE or data files don't yet exist ##
+##   - otherwise extract from MMP_WQ/data/primary/niskin                           ##
+#####################################################################################
+
+## ---- Start procedure
 source("MMP_functions.R")
-
-## if the calling application has landed on this script as the running
-## script, then start initialisations
-if (MMP_isParent()) {
-    MMP_startMatter()
+if (MMP_isParent()) { # if calling application has landed on this script first
+    MMP_startMatter() # start initialisations
 }
+## ----end
 
-NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/")
+## ---- Setup niskin data items
+load_stage <- paste0("STAGE", CURRENT_STAGE) # STATUS (list) item corresponding to CURRENT_STAGE (numeric)
+NISKIN_PATH <- paste0(DATA_PATH, "/primary/niskin/") # where niskin data is to be saved
 
-## ---- AIMS niskin
-CURRENT_ITEM <- "aimsNiskin"
-mmp__change_status(stage = paste0("STAGE",CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
-MMP_openning_banner()
-if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "niskin", ".csv"))) {
-    writeLines("select l.PROJECT, l.STATION_NAME, l.LOCATION_NAME,
+# Niskin datasets
+niskin_items <- c(
+    "aimsNiskin", 
+    "cairnsTransect", 
+    "jcuNiskin", 
+    "jcuCYNiskin", 
+    "jcuEventNiskin", 
+    "jcuCYEventNiskin"
+)
+item_properties <- list(
+    aimsNiskin = list(
+        name = "niskin", # to name files
+        label = "AIMS niskin", # for output to console
+        db_user = "reef wq_nut2",
+        sql = "select l.PROJECT, l.STATION_NAME, l.LOCATION_NAME,
  l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
- l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH, 
+ l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
  r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM,
- r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU_QAQC AS HAND_NH4_UM, 
+ r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU_QAQC AS HAND_NH4_UM,
  r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL,
- r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM, 
+ r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM,
  r.CHL_QAQC AS DRIFTCHL_UGPERL, r.PHAEO_QAQC AS DRIFTPHAE_UGPERL,
  r.PN_SHIM_QAQC AS PN_SHIM_UM, r.DIC_QAQC AS DIC_UMPERKG,
  l.SWELL_HEIGHT, l.WIND_SPEED, l.WIND_DIR, m.mmp_site_name, m.SHORT_NAME, nrm.NRM_REGION
- from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME 
+ from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME
  join MMP.MMP_SITES m on l.MMP_SITE_ID = m.MMP_SITE_ID
  left join MMP.NRM_REGIONS nrm on nrm.nrm_region_id = m.nrm_region_id
  where l.PROJECT like 'MMP-AIMS'
  AND m.SHORT_NAME is not NULL
- order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
- paste0(NISKIN_PATH, "niskin.sql"))
-
-    MMP_tryCatch_db(name = 'niskin',
-                    stage = paste0("STAGE",CURRENT_STAGE),
-                    item = CURRENT_ITEM,
-                    label = "AIMS niskin",
-                    PATH = NISKIN_PATH,
-                    db_user = "reef wq_nut2")
-} else {
-    MMP_checkData(name = "niskin.csv",
-                  stage = paste0("STAGE",CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "AIMS niskin",
-                  PATH = NISKIN_PATH,
-                  progressive = FALSE)
-}
-
-MMP_openning_banner()
-## ----end
-    
-## ---- AIMS Cairns Transect
-CURRENT_ITEM <- 'cairnsTransect'
-mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
-MMP_openning_banner()
-if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cairns", ".csv"))) {
-    writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
+ order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE"
+    ),
+    cairnsTransect = list(
+        name = "cairns",
+        label = "Cairns transect",
+        db_user = "reef wq_nut2",
+        sql = "select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
  l.COLLECTION_START_DATE, l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH,
- l.ACOUSTIC_DEPTH, 
+ l.ACOUSTIC_DEPTH,
  r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM,
  r.NO3_QAQC AS NO3_UM,
- r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
+ r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM,
  r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL,
  r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM, r.CHL_QAQC AS DRIFTCHL_UGPERL,
  r.PHAEO_QAQC AS DRIFTPHAE_UGPERL, r.PN_SHIM_QAQC AS PN_SHIM_UM, r.DIC_QAQC AS DIC_UMPERKG,
  l.SWELL_HEIGHT, l.WIND_SPEED, l.WIND_DIR, m.mmp_site_name, m.SHORT_NAME, nrm.NRM_REGION
- from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME 
+ from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME
  join MMP.MMP_SITES m on l.mmp_site_id = m.mmp_site_id
  left join mmp.nrm_regions nrm on m.nrm_region_id = nrm.nrm_region_id
  where l.STATION_CLASS in ('C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11')
- order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
- paste0(NISKIN_PATH, "cairns.sql"))
-
-    MMP_tryCatch_db(name = 'cairns',
-                    stage = paste0("STAGE", CURRENT_STAGE),
-                    item = CURRENT_ITEM,
-                    label = "Cairns transect",
-                    PATH = NISKIN_PATH,
-                    db_user = "reef wq_nut2")
-} else {
-    MMP_checkData(name = "cairns.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "Cairns transect",
-                  PATH = NISKIN_PATH)
-}
-
-MMP_openning_banner()
-## ----end
-
-## ---- JCU niskin
-CURRENT_ITEM <- "jcuNiskin"
-mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
-MMP_openning_banner()
-if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcu", ".csv"))) {
-    writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
+ order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE"
+    ),
+    jcuNiskin = list(
+        name = "jcu",
+        label = "JCU niskin",
+        db_user = "reef wq_nut2",
+        sql = "select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
  l.COLLECTION_START_DATE,
  l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
  r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM,
- r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
+ r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM,
  r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL,
  r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM,
  r.CHL_QAQC AS DRIFTCHL_UGPERL, r.PHAEO_QAQC AS DRIFTPHAE_UGPERL, r.PN_SHIM_QAQC AS PN_SHIM_UM,
  r.DIC_QAQC AS DIC_UMPERKG,
  l.SWELL_HEIGHT, l.WIND_SPEED, l.WIND_DIR, m.mmp_site_name, m.SHORT_NAME, nrm.NRM_REGION
- from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME 
+ from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME
  join MMP.MMP_SITES m on l.MMP_SITE_ID = m.MMP_SITE_ID
  left join MMP.NRM_REGIONS nrm on nrm.nrm_region_id = m.nrm_region_id
  where l.PROJECT in ('MMP-JCU')
-  and l.STATION_CLASS in ('JR') 
- order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
- paste0(NISKIN_PATH, "jcu.sql"))
-
-    MMP_tryCatch_db(name = 'jcu',
-                    stage = paste0("STAGE", CURRENT_STAGE),
-                    stage = CURRENT_STAGE,
-                    item = CURRENT_ITEM,
-                    label = "JCU niskin",
-                    PATH = NISKIN_PATH,
-                    db_user = "reef wq_nut2" )
-} else {
-    MMP_checkData(name = "jcu.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "JCU niskin",
-                  PATH = NISKIN_PATH)
-}
-
-MMP_openning_banner()
-## ----end
-
-## ---- JCU CY niskin
-CURRENT_ITEM <- "jcuCYNiskin"
-mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
-MMP_openning_banner()
-if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cy", ".csv"))) {
-    writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
+  and l.STATION_CLASS in ('JR')
+ order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE"
+    ),
+    jcuCYNiskin = list(
+        name = "cy",
+        label = "JCU CY niskin",
+        db_user = "reef wq_nut2",
+        sql = "select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE,
  l.COLLECTION_START_DATE,
- l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH, 
+ l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
  r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM,
- r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
+ r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM,
  r.PN_QAQC AS PN_UM, r.PN_SHIM_QAQC as PN_SHIM_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL,
  r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM,
- r.CHL_QAQC AS DRIFTCHL_UGPERL, r.PHAEO_QAQC AS DRIFTPHAE_UGPERL, 
+ r.CHL_QAQC AS DRIFTCHL_UGPERL, r.PHAEO_QAQC AS DRIFTPHAE_UGPERL,
  r.DIC_QAQC AS DIC_UMPERKG,
  l.SWELL_HEIGHT, l.WIND_SPEED, l.WIND_DIR, m.mmp_site_name, m.SHORT_NAME, nrm.NRM_REGION
  from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME
@@ -149,94 +106,77 @@ if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cy", ".csv"))) {
  left join MMP.NRM_REGIONS nrm on nrm.nrm_region_id = m.nrm_region_id
  where l.STATION_CLASS in ('JR')
  AND l.PROJECT in ('MMP-CY')
- order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
- paste0(NISKIN_PATH, "cy.sql"))
-
-    MMP_tryCatch_db(name = 'cy',
-                    stage = paste0("STAGE", CURRENT_STAGE),
-                    item = CURRENT_ITEM,
-                    label = "JCU CY niskin",
-                    PATH = NISKIN_PATH,
-                    db_user = "reef wq_nut2")
-} else {
-    MMP_checkData(name = "cy.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "JCU CY niskin",
-                  PATH = NISKIN_PATH)
-}
-
-MMP_openning_banner()
-## ----end
-
-## ---- JCU Event niskin
-CURRENT_ITEM <- "jcuEventNiskin"
-mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
-MMP_openning_banner()
-if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "jcuEvent", ".csv"))) {
-    writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
+ order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE"
+    ),
+    jcuEventNiskin = list(
+        name = "jcuEvent",
+        label = "JCU Event niskin",
+        db_user = "reef wq_nut2",
+        sql = "select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
        l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
-       r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM, r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
-       r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL, r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM, 
+       r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM, r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM,
+       r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL, r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM,
      r.CHL_QAQC AS DRIFTCHL_UGPERL, r.PHAEO_QAQC AS DRIFTPHAE_UGPERL, r.PN_SHIM_QAQC AS PN_SHIM_UM, r.DIC_QAQC AS DIC_UMPERKG,
               l.SWELL_HEIGHT, l.WIND_SPEED, l.WIND_DIR, m.mmp_site_name, m.SHORT_NAME, nrm.NRM_REGION
-    from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME 
+    from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME
         join MMP.MMP_SITES m on l.MMP_SITE_ID = m.MMP_SITE_ID
         left join MMP.NRM_REGIONS nrm on nrm.nrm_region_id = m.nrm_region_id
         where l.STATION_CLASS in ('JE')
         AND l.PROJECT in ('MMP-JCU')
-    order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
-    paste0(NISKIN_PATH, "jcuEvent.sql"))
-
-    MMP_tryCatch_db(name = 'jcuEvent',
-                    stage = paste0("STAGE", CURRENT_STAGE),
-                    item = CURRENT_ITEM,
-                    label = "JCU Event niskin",
-                    PATH = NISKIN_PATH,
-                    db_user = "reef wq_nut2")
-} else {
-    MMP_checkData(name = "jcuEvent.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "JCU Event niskin",
-                  PATH = NISKIN_PATH)
-}
-
-
-MMP_openning_banner()
-## ----end
-
-## ---- JCU CY Event niskin
-CURRENT_ITEM <- "jcuCYEventNiskin"
-mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
-MMP_openning_banner()
-if (alwaysExtract | !file.exists(paste0(NISKIN_PATH, "cyEvent", ".csv"))) {
-    writeLines("select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
+    order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE"
+    ),
+    jcuCYEventNiskin = list(
+        name = "cyEvent",
+        label = "JCU CY Event niskin",
+        db_user = "reef wq_nut2",
+        sql = "select l.STATION_NAME, l.LOCATION_NAME, l.STATION_CLASS, l.LATITUDE, l.LONGITUDE, l.COLLECTION_START_DATE,
        l.AREA_CODE, r.DEPTH_CODE, r.DUPLICATE, r.DEPTH, l.SECCHI_DEPTH, l.ACOUSTIC_DEPTH,
-       r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM, r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM, 
-       r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL, r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM, 
+       r.DIP_QAQC AS DIP_UM, r.SI_QAQC AS SI_UM, r.NH4_QAQC AS NH4_UM, r.NO2_QAQC AS NO2_UM, r.NO3_QAQC AS NO3_UM, r.DOC_QAQC AS DOC_UM, r.NH4_INSITU AS HAND_NH4_UM,
+       r.PN_QAQC AS PN_UM, r.PP_QAQC AS PP_UM, r.POC_QAQC AS POC_UM, r.SS_QAQC AS TSS_MGPERL, r.TDN_PER_QAQC AS TDN_UM, r.TDP_PER_QAQC AS TDP_UM,
      r.CHL_QAQC AS DRIFTCHL_UGPERL, r.PHAEO_QAQC AS DRIFTPHAE_UGPERL, r.PN_SHIM_QAQC AS PN_SHIM_UM, r.DIC_QAQC AS DIC_UMPERKG,
               l.SWELL_HEIGHT, l.WIND_SPEED, l.WIND_DIR, m.mmp_site_name, m.SHORT_NAME, nrm.NRM_REGION
-    from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME 
+    from MV_SAMPLE_REPLICATE_HORIZ r join STATION_DETAILS l on r.STATION_NAME = l.STATION_NAME
         join MMP.MMP_SITES m on l.MMP_SITE_ID = m.MMP_SITE_ID
         left join MMP.NRM_REGIONS nrm on nrm.nrm_region_id = m.nrm_region_id
         where l.STATION_CLASS in ('JE')
         AND l.PROJECT in ('MMP-CY')
-    order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE",
-    paste0(NISKIN_PATH, "cyEvent.sql"))
+    order by r.STATION_NAME, r.DEPTH_CODE, r.DUPLICATE"
+    )
+)
+## ----end
 
-    MMP_tryCatch_db(name = 'cyEvent',
-                    stage = paste0("STAGE", CURRENT_STAGE),
-                    item = CURRENT_ITEM,
-                    label = "JCU CY Event niskin",
-                    PATH = NISKIN_PATH,
-                    db_user = "reef wq_nut2")
-} else {
-    MMP_checkData(name = "cyEvent.csv",
-                  stage = paste0("STAGE", CURRENT_STAGE),
-                  item = CURRENT_ITEM,
-                  label = "JCU CY Event niskin",
-                  PATH = NISKIN_PATH)
+## ---- Get data
+for (item in niskin_items) {
+    # Update status and banner
+    mmp__change_status(load_stage, item, status = "progress")
+    MMP_openning_banner
+    # Get current item properties
+    item_name <- item_properties[[item]]$name
+    item_label <- item_properties[[item]]$label
+    item_db_user <- item_properties[[item]]$db_user
+    item_sql <- item_properties[[item]]$sql
+    item_sql_file <- paste0(NISKIN_PATH, item_name, ".sql")
+    item_data_file <- paste0(NISKIN_PATH, item_name, ".csv")
+    # If alwaysExtract or data file doesn't yet exist --> write sql to file and extract data
+    if (alwaysExtract | !file.exists(item_data_file)) {
+        writeLines(item_sql, item_sql_file)
+        MMP_tryCatch_db(
+            name = item_name,
+            stage = load_stage,
+            item = item,
+            label = item_label,
+            PATH = NISKIN_PATH,
+            db_user = item_db_user,
+            progressive = FALSE
+        )
+    } # Otherwise ! alwaysExtract AND data file exists --> update log & status, append file size to banner
+    else {
+        existing_data_msg <- paste("Using existing", item_label, "data in", item_data_file)
+        MMP_log("SUCCESS", LOG_FILE, Category = existing_data_msg)
+        mmp__change_status(load_stage, item, status = "success")
+        mmp__append_filesize(load_stage, item, item_label, item_data_file)
+    }
+    # Update banner
+    MMP_openning_banner()
 }
-MMP_openning_banner()
 ## ----end

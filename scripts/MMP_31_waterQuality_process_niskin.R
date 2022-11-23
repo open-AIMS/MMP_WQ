@@ -296,7 +296,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
                 Collection=interaction(MMP_SITE_NAME, Date)) %>%
             filter(Date<MAXDATE) %>%
             MMP_reorderReefs() %>%
-            MMP_selectReefs(source='JCU') 
+            MMP_selectReefs(source='JCU') %>%
+            suppressMessages() %>%
+            suppressWarnings()
         save(niskin.jcu.reef1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef1.RData'))
     }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of Water Quality (Niskin) data', return=TRUE)
 
@@ -378,7 +380,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
         ## Check for missing samples
         cy.reef %>% dplyr::select(LOCATION_NAME, MMP_SITE_NAME,SHORT_NAME) %>% distinct %>%
             anti_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
-            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct)
+            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
+            suppressWarnings() %>%
+            suppressMessages()
         MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
         MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
         niskin.cy.reef = cy.reef %>%
@@ -481,7 +485,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
         ## Check for missing reefs etc
         jcu.event.reef %>% dplyr::select(LOCATION_NAME, MMP_SITE_NAME,SHORT_NAME) %>% distinct %>%
             anti_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
-            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct)
+            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
         MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
         niskin.jcu.event.reef1 = jcu.event.reef %>%
@@ -581,7 +587,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.re
         ## Check for missing samples
         cy.event.reef %>% dplyr::select(LOCATION_NAME, MMP_SITE_NAME,SHORT_NAME) %>% distinct %>%
             anti_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
-            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct)
+            left_join(wq.sites %>% dplyr::select(SHORT_NAME) %>% distinct) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         MAXDATE=as.Date(paste0(reportYear,'-08-31'))  #this used to be -06-30
         MINDATE=MAXDATE - lubridate::years(1) + lubridate::days(1)
         niskin.cy.event.reef1 = cy.event.reef %>%

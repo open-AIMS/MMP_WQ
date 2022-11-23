@@ -73,10 +73,15 @@ MMP_initialise_status <- function() {
                                  "pending","pending","pending","pending","pending","pending","pending","pending","pending","pending")
                       ),
         STAGE3 = list(title = "Stage 3 - process data",
-                      items = c("aimsNiskin", "cairnsTransect", "jcuNiskin","jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin"),
-                      names = c("AIMS niskin data", "Cairns transect data","JCU niskin data","JCY CY niskin data",
-                                "JCU Event niskin data","JCU CY Event niskin data"),
-                      status = c("pending","pending","pending","pending","pending","pending")
+                      items = c("aimsNiskin", "cairnsTransect", "jcuNiskin",
+                                "jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin",
+                                "flntu", "waterTemp", "salinity"),
+                      names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
+                                "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
+                                "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers"),
+                      status = c("pending","pending","pending",
+                                 "pending","pending","pending",
+                                 "pending","pending","pending")
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -626,8 +631,9 @@ MMP_checkData <- function(name = "niskin.csv",
                     Category = paste0(label, " data exists"),
                     msg=NULL)
             mmp__change_status(stage = stage, item = item, status = "success")
-            filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
-            mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+            mmp__append_filesize(stage = stage, item, item, paste0(PATH, name))
+            ## filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
+            ## mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
         }
     } else {
         MMP_log(status = "FAILURE",

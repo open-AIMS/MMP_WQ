@@ -70,10 +70,50 @@ docker run --rm <image_name> Rscript MMP_00_main.R --reportYear=<YYYY> --runStag
 C:\Users\user\Documents\Projects\MMP_WQ> docker run --rm mmp Rscript MMP_00_main.R --reportYear=2022 --runStage=1:3 --alwaysExtract=TRUE
 ```
 
-**4. Clean up (remove all docker containers, images, and cache).**
+**4. Build a singularity image (if intending to run on HPC).**  This
+step essentially involves saving the docker image from its local
+repository and then using this archive to build a singularity
+(apptainer) image that can be run on the HPC.
+
+**4.1. Build the singularity image:**
+
+```console
+docker save mmp -o mmp.tar
+singularity build mmp.sif docker-archive://mmp.tar
+```
+
+**4.2. Clone the code base on to the HPC:** Ensure that you are logged
+onto the HPC and have navigated to the folder in which the code
+repository should be created.
+
+```console
+git clone git@github.com:open-AIMS/MMP_WQ.git
+```
+
+**4.3. Transfer this image over to the HPC:**
+Ensure you are in the root of the project.
+
+```console
+scp mmp.sif <user>@hpc-l001.aims.gov.au:~/<path to project>
+```
+```
+# Example
+scp mmp.sif mlogan@hpc-l001.aims.gov.au:~/Work/AIMS/MMP/WQ/2023
+```
+
+**4.4. Run the singularity image on the HPC:** Ensure that you are
+logged into the HPC and have navigated to the `scripts` folder of the
+project.
+
+```console
+module load singularity
+singularity exec - B .:/home/Project ../mmp.sif Rscript MMP_00_main.R 
+```
+
+**5. Clean up (remove all docker containers, images, and cache).**
 As we saw in Step 1, it can take quite a while to build the docker image. This is because the image is quite large (i.e. uses a lot of memory). Therefore, when we are completely finished with Docker, we should restore this memory. 
 
-**4.1. Check for any docker containers:**
+**5.1. Check for any docker containers:**
     
 ```console
 docker ps --all
@@ -85,7 +125,7 @@ C:\Users\user\Documents\Projects\MMP_WQ> docker ps --all
   dcf7f999a862  mmp   "R"     6 seconds ago Exited (0) 5 seconds ago     gracious_bhabha
 ```
 
-**4.2. Remove any docker containers:**
+**5.2. Remove any docker containers:**
   
 ```console
 docker rm <container_ID>  # Note: you don't have to type out the full ID, just the first few characters
@@ -96,7 +136,7 @@ C:\Users\user\Documents\Projects\MMP_WQ> docker rm dcf
   dcf
 ```
 
-**4.3. Check for any docker images:**
+**5.3. Check for any docker images:**
 
 ```console
 docker images --all
@@ -108,7 +148,7 @@ C:\Users\user\Documents\Projects\MMP_WQ> docker images --all
   mmp         latest bbef020a621a 40 minutes ago 2.79GB
 ```
 
-**4.4. Remove any docker images:**
+**5.4. Remove any docker images:**
 ```console
 docker rmi <image_name>
 ```
@@ -119,7 +159,7 @@ C:\Users\bford\Documents\Projects\MMP_WQ> docker rmi mmp
   Deleted: sha256:bbef020a621aca0601972f3a167facfd70a6fd3c0c20f2f4e8f332e7babe7111
 ```
 
-**4.5. Clear build cache:**
+**5.5. Clear build cache:**
 
 ```console
 docker builder prune

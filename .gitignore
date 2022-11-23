@@ -3,3 +3,5 @@ mmp.log
 data
 outputs
 docs
+*.sif
+*.tar

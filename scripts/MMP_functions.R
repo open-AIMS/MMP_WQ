@@ -13,6 +13,12 @@ MMP_isParent <- function() {
    ifelse(sys.nframe()==1, TRUE, FALSE) 
 }
 
+MMP_fakeArgs <- function() {
+    MMP_startMatter(args = c('','','','','',
+                             '--reportYear=2022',
+                             '--runStage=3',
+                             '--alwaysExtract=TRUE'))
+}
 
 #########################################################################
 ## The following function is a wrapper to a series of functions that:  ##
@@ -75,13 +81,20 @@ MMP_initialise_status <- function() {
         STAGE3 = list(title = "Stage 3 - process data",
                       items = c("aimsNiskin", "cairnsTransect", "jcuNiskin",
                                 "jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin",
-                                "flntu", "waterTemp", "salinity"),
+                                "flntu", "waterTemp", "salinity",
+                                "dhw","disturbances","tides",
+                                "BOM","discharge"),
                       names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
                                 "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
-                                "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers"),
+                                "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers",
+                                "Degree heating weeks","Disturbance table", "Harmonic tides",
+                                "BOM weather", "River discharge"),
                       status = c("pending","pending","pending",
                                  "pending","pending","pending",
-                                 "pending","pending","pending")
+                                 "pending","pending","pending",
+                                 "pending","pending","pending",
+                                 "pending","pending"
+                                 )
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -202,7 +215,8 @@ MMP_parseCLA <- function(args) {
 MMP_loadPackages <- function(log = TRUE) {           
     missing <- ''
     options(tidyverse.quiet = TRUE)
-    pkgs <- c('tidyverse','testthat','cli','rlang','crayon', 'assertthat', 'lubridate'
+    pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
+              'assertthat', 'lubridate', 'rmarkdown','bookdown'
               )
 
     for (p in pkgs) {
@@ -311,6 +325,10 @@ MMP_prepare_paths <- function() {
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
         dir.create(paste0(OUTPUT_PATH, '/tables'))
+    if (!dir.exists(paste0(OUTPUT_PATH, '/figures')))
+        dir.create(paste0(OUTPUT_PATH, '/figures'))
+    if (!dir.exists(paste0(OUTPUT_PATH, '/figures/processed')))
+        dir.create(paste0(OUTPUT_PATH, '/figures/processed'))
 
     if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
 
@@ -439,6 +457,10 @@ mmp__change_name <- function(stage, item, name) {
 mmp__append_filesize <- function(stage, item, label, filepath) {
     filesize <- R.utils::hsize(file.size(paste0(filepath)))
     mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+}
+
+mmp__get_name <- function(stage, item) {
+    STATUS[[stage]]$names[which(STATUS[[stage]]$item == item)]
 }
 
 MMP_test <- function() {
@@ -653,3 +675,39 @@ MMP_getTides <- function(ref, loc,path,file, t.start, t.end) {
     tmp<- data.frame(tmp,reef.alias=loc)
     tmp
 }
+
+
+MMP_add_to_report <- function(report_list, content) {
+    report_list <- report_list %>% append(content)
+    assign("DOC_REPORT_LIST", report_list, env = globalenv())
+}
+
+mmp__sql <- function(file) {
+    paste0("```{sql}\n",
+           "#| filename: ", file,"\n",
+           "#| eval: false\n",
+           "#| code-fold: false\n\n",
+           readr::read_file(file),
+           "```\n\n")
+}
+
+mmp__add_table <- function(tab) {
+    knitr::kable(tab)
+}
+
+mmp__glimpse_like <- function(tab) {
+    data.frame(Variable = names(tab),
+               Class = sapply(tab, typeof),
+               `First values` = sapply(tab, function(x) paste0(head(x, 5),  collapse = ", ")),
+               row.names = NULL)  
+}
+
+my_html_document <- function(template = "", ...) {
+  base_format <- rmarkdown::html_document(...)
+
+  template_arg <- which(base_format$pandoc$args == "--template") + 1L
+  base_format$pandoc$args[template_arg] <- template
+
+  base_format
+}
+

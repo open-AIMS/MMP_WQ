@@ -27,9 +27,15 @@ RUN apt-get update \
     tk \
     xtide \
     openjdk-11-jre \
+    gdebi-core \
   && rm -rf /var/lib/apt/lists/*
 
 # NOTE: pandoc-citeproc no longer maintained - are packages above 'time-capsuled' in the same way as R and R packages below?
+
+## Install quarto (version 1.2.269)
+ARG QUARTO_VERSION="1.2.269"
+RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
+RUN gdebi --non-interactive quarto-linux-amd64.deb
 
 ## Install R package versions from MRAN (based on a date - YYYY-MM-DD)
 RUN R -e "options(repos = \
@@ -60,6 +66,7 @@ RUN R -e "options(repos = \
   install.packages('geojsonsf'); \
   install.packages('s2'); \
   install.packages('R.utils'); \
+  install.packages('quarto'); \
 "
 #############################################################################
 ## NOTE: we could opt for installing specific versions of packages

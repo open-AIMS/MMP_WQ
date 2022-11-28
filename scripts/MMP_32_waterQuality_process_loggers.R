@@ -286,7 +286,7 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- AIMS waterSalinity process
-CURRENT_ITEM <- "waterSalinity"
+CURRENT_ITEM <- "salinity"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -402,5 +402,5 @@ MMP_checkData(name = "waterSalinityAll.RData",
               label = "Processed water salinity",
               PATH = LOGGER_OUTPUT_PATH)
 MMP_openning_banner()
-    
+  
 ## ----end

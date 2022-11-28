@@ -1,0 +1,54 @@
+STATION_ID,correction.factor,RIVER_NAME,River,subregion
+102102A,3,"Pascoe River","Pascoe River","Cape York"
+104001A,5.8,"Stewart River","Stewart River","Cape York"
+105107A,1.9,"Normanby River","Normanby River","Cape York"
+107001B,3.7,"Endeavour River","Annan-Endeavour River","Cape York"
+107003A,3.7,"Annan River","Annan-Endeavour River","Cape York"
+108002A,1.3,"Daintree River","Daintree River",Daintree
+108003A,1.3,"Bloomfield River","Daintree River",Daintree
+109001A,3.2,Mossman,"Mossman River",Daintree
+110001D,1.2,"Barron River","Barron River",Daintree
+111007A,1.4,"Mulgrave River","Mulgrave-Russell River",Johnstone
+111101D,1.4,"Russell River","Mulgrave-Russell River",Johnstone
+112004A,1.5,"North Johnstone River","Johnstone River",Johnstone
+112101B,1.5,"South Johnstone River","Johnstone River",Johnstone
+113006A,1.1,"Tully River","Tully River",Tully
+114001A,2.2,Murray,"Murray River",Tully
+116001F,1.1,"Herbert River","Herbert River",Tully
+117002A,2.2,Black,"Black River",Burdekin
+117003A,2.2,"Bluewater Creek","Black River",Burdekin
+119003A,1.2,Haughton,"Haughton River",Burdekin
+119101A,1.2,"Barratta Creek","Haughton River",Burdekin
+120006B,1.0,"Burdekin River","Burdekin River",Burdekin
+121003A,2.2,Don,"Don River",Burdekin
+121002A,2.2,"Elliot River","Don River",Burdekin
+121004A,2.2,"Euri Creek","Don River",Burdekin
+124001B,2.5,"OConnell River","Proserpine River",Proserpine
+124001B,1.7,"OConnell River","OConnell River",Proserpine
+124003A,1.7,"Andromache River","OConnell River",Proserpine
+124002A,1.7,"St Helens Creek","OConnell River",Proserpine
+125016A,1.1,"Pioneer River","Pioneer River",Proserpine
+126001A,1.8,"Sandy Creek","Plane Creek",Proserpine
+126003A,1.8,"Carmila Creek","Plane Creek",Proserpine
+129001A,2.4,"Waterpark Creek","Styx River",Fitzroy
+129001A,2.0,"Waterpark Creek","Shoalwater Creek",Fitzroy
+129001A,1.5,"Waterpark Creek","Water Park Creek",Fitzroy
+130005A,1.0,"Fitzroy River","Fitzroy River",Fitzroy
+132001A,1.7,"Calliope River","Calliope River",Fitzroy
+132001A,0.43,"Calliope River","Boyne River",Fitzroy
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+"Colour code:",,,,
+"Open station",,,,
+"Closed station with no substitute",,,,
+"Closed station added for long temporal series",,,,
+"Open station not in our data base",,,,

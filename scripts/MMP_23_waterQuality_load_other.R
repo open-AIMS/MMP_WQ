@@ -149,6 +149,7 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- BOM weather data 
+
 CURRENT_ITEM <- "BOM"
 current_label <- "BOM weather"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
@@ -171,7 +172,7 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
                     label = current_label,
                     PATH = OTHER_PATH,
                     db_user = "reef rwqpp_user", 
-                    progressive=FALSE)
+                    progressive=TRUE)
 } else {
     MMP_log(status = "SUCCESS",
             logFile = LOG_FILE,

@@ -60,6 +60,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
             suppressMessages()
         
         save(flntu.all, file=paste0(LOGGER_OUTPUT_PATH, 'flntu.all.RData'))
+        save(flntu, file=paste0(LOGGER_OUTPUT_PATH, 'flntu.RData'))
 
         ## print(ggplot(flntu.all %>% mutate(nms=paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'),
         ##                                   nms=forcats::fct_reorder(nms, LATITUDE)),
@@ -72,12 +73,12 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
         ##       )
         ## textplot(capture.output(head(flntu.all)))
         ## title("FLNTU data")
-    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of Water Quality (FLNTU) data', return=TRUE)
+    }, LOG_FILE, Category = 'Data processing:', msg='Initial parsing of Water Quality (FLNTU) data', return=TRUE)
 
     MMP_checkData(name = "flntu.all.RData",
                   stage = paste0("STAGE", CURRENT_STAGE),
                   item = CURRENT_ITEM,
-                  label = "AIMS flntu",
+                  label = "",
                   PATH = LOGGER_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
@@ -105,38 +106,6 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
                  ) %>%
           mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME))
       
-      ## print(ggplot(flntu.all.daily %>%
-      ##              dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion, LATITUDE) %>%
-      ##              distinct %>%
-      ##              mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
-      ##                     nms=paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'),
-      ##                     nms=forcats::fct_reorder(nms, LATITUDE)),
-      ##              aes(y=(nms), x=Date))+
-      ##       geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE, xmax=MAXDATE), fill='grey', color=NA) +
-      ##       geom_point()+ggtitle('Water quality FLNTU data')+
-      ##       scale_y_discrete('') +
-      ##       scale_x_date('')+
-      ##       facet_grid(Subregion~., scales='free') +
-      ##       theme_mmp + theme(strip.background=element_blank(), strip.text.x=element_blank(),panel.background=element_rect(color='black'))
-      ##       )
-      ## p=ggplot(flntu.all.daily %>%
-      ##          dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion,Season, LATITUDE) %>%
-      ##          distinct %>%
-      ##          mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
-      ##                 nms = paste(MMP_SITE_NAME, '(',SHORT_NAME, ')'),
-      ##                 nms = forcats::fct_reorder(nms, LATITUDE)),
-      ##          aes(y=(nms), x=Date))+
-      ##   geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
-      ##   geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
-      ##   ggtitle('Water quality FLNTU data')+
-      ##   scale_y_discrete('') +
-      ##   scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-      ##   scale_color_manual('',values=c('red','blue')) +
-      ##   facet_grid(Subregion~., scales='free') +
-      ##   ggplot2:::theme_grey() +
-      ##   theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-      ##         strip.text.x=element_blank(),
-      ##         panel.border=element_rect(fill=NA,color='black',size=0.5))
       
       ## pdf(file=paste0('../output/figures/waterQuality/flntu/flntu_all_daily.pdf'), width=12, height=10)
       ## print(p)
@@ -147,12 +116,12 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
       save(flntu.all.daily, file=paste0(LOGGER_OUTPUT_PATH, 'flntu.all.daily.RData'))
       rm(flntu.all, flntu.all.daily)
       gc()
-    }, LOG_FILE, Category = 'Data processing', msg='Process Water Quality (FLNTU) data', return=TRUE)
+    }, LOG_FILE, Category = 'Data processing:', msg='Process Water Quality (FLNTU) data', return=TRUE)
 
     MMP_checkData(name = "flntu.all.daily.RData",
                   stage = paste0("STAGE", CURRENT_STAGE),
                   item = CURRENT_ITEM,
-                  label = "AIMS flntu",
+                  label = "",
                   PATH = LOGGER_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
@@ -161,10 +130,64 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
 } else {
 }
 
+## ---- outputs
+MMP_tryCatch(
+{
+    load(file=paste0(LOGGER_OUTPUT_PATH, 'flntu.RData'))
+    load(file=paste0(LOGGER_OUTPUT_PATH, 'flntu.all.daily.RData'))
+    
+    p=ggplot(flntu.all.daily %>%
+             dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion,Season, LATITUDE) %>%
+             distinct %>%
+             mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
+                    nms = paste(MMP_SITE_NAME, '(',SHORT_NAME, ')'),
+                    nms = forcats::fct_reorder(nms, LATITUDE)),
+             aes(y=(nms), x=Date))+
+        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
+        geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
+        ggtitle('Water quality FLNTU data')+
+        scale_y_discrete('') +
+        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+        scale_color_manual('',values=c('red','blue')) +
+        facet_grid(Subregion~., scales='free') +
+        ggplot2:::theme_grey() +
+        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+              strip.text.x=element_blank(),
+              panel.border=element_rect(fill=NA,color='black',size=0.5))
+    
+    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/flntu.all.daily.png'),
+           p,
+           width=12, height=10, dpi = 100)
+
+    MMP_add_to_report(report_list = DOC_REPORT_LIST,
+                      content = list(
+                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                     item = CURRENT_ITEM),"\n\n"),
+                          paste0("::: panel-tabset \n\n"),
+                          paste0("## SQL syntax\n"),
+                          mmp__sql(paste0(LOGGER_INPUT_PATH, 'flntu.sql')),
+                          paste0("## Data glimpse\n"),
+                          mmp__add_table(mmp__glimpse_like(flntu)),
+                          paste0("\n:Extraction of the first five records in each field from the FLNTU data. {#tbl-sql-flntu}\n\n"),
+                          paste0("## Sampling design\n"),
+                          paste0("\n::: {#fig-sql-flntu}\n"),
+                          paste0("![](",OUTPUT_PATH,"/figures/processed/flntu.all.daily.png)\n"),
+                          paste0("\nTemporal distribution of AIMS FLNTU water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                          paste0("::: \n"),
+                          paste0("::: \n\n")
+                      )
+                      )
+    
+    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
+}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (FLNTU) data', return=TRUE)
+
+## ----end
+
 MMP_checkData(name = "flntu.all.daily.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
-              label = "Processed AIMS FLNTU",
+              label.prefix = "Processed",
+              label = "",
               PATH = LOGGER_OUTPUT_PATH)
 MMP_openning_banner()
 
@@ -179,7 +202,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
     file.exists(paste0(LOGGER_INPUT_PATH, 'waterTempW.csv'))) {
     MMP_tryCatch(waterTempW <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterTempW.csv')) %>%
                      suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in Water Temperature data', return=TRUE)
+                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing:', msg='Reading in Water Temperature data', return=TRUE)
 
     ## 1. First level of data processing
     ## ---- AIMS waterTemp process level 1
@@ -188,6 +211,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
         MAXDATE=as.Date(paste0(reportYear,'-09-30'))
         MINDATE=MAXDATE-years(1)+days(1)
         
+        save(waterTempW, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW_orig.RData'))
         waterTempW <- waterTempW %>%
             left_join(names_lookup %>% dplyr::select(SHORT_NAME, MMP_SITE_NAME) %>% distinct) %>% 
             mutate(Temp = as.numeric(as.character(LEVEL1_AVG)),
@@ -211,11 +235,11 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
         save(waterTempW, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW.RData'))
         ## textplot(capture.output(head(waterTempW)))
         ## title("Water temperature logger data (weekly averages)")
-    }, LOG_FILE, Category = 'Data processing', msg='Process Water Quality (weekly water temperature) data (stage 1)', return=TRUE)
+    }, LOG_FILE, Category = 'Data processing:', msg='Process Water Quality (weekly water temperature) data (stage 1)', return=TRUE)
     MMP_checkData(name = "waterTempW.RData",
                   stage = paste0("STAGE", CURRENT_STAGE),
                   item = CURRENT_ITEM,
-                  label = "AIMS water temperature",
+                  label = "",
                   PATH = LOGGER_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
@@ -234,17 +258,6 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
             left_join(wq.sites %>% dplyr:::select(SHORT_NAME, LATITUDE=Latitude)) %>%
             suppressMessages() %>%
             suppressWarnings()
-        ## p=ggplot(waterTempWAll %>% dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>% distinct %>% arrange(desc(LATITUDE)) %>% mutate(Subregion=factor(Subregion, levels=unique(Subregion)), MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))), aes(y=MMP_SITE_NAME, x=Date))+
-        ##     geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey') +
-        ##     geom_point(aes(color=Season),position=position_jitter(height=0.5),size=0.1,show.legend=FALSE)+ggtitle('Water temperature logger')+
-        ##     scale_y_discrete('',limits = rev(levels(waterTempW$MMP_SITE_NAME))) +
-        ##     scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        ##     scale_color_manual('',values=c('red','blue')) +
-        ##     facet_grid(Subregion~., scales='free',space='free') +
-        ##     theme_mmp + theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-        ##                       strip.text.x=element_blank(),
-        ##                       panel.border=element_rect(fill=NA,color='black',size=0.5))
-        
         ## pdf(file=paste0('../output/figures/waterQuality/waterTemperature/waterTempWAll.pdf'), width=10, height=10)
         ## print(p)
         ## dev.off()
@@ -262,12 +275,12 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
         save(waterTempWAll, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempWAll.RData'))      
         rm(waterTempW, waterTempWAll)
         gc()
-    }, LOG_FILE, Category = 'Data processing', msg='Process Water Quality (weekly water temperature) data (stage 2)', return=TRUE)
+    }, LOG_FILE, Category = 'Data processing:', msg='Process Water Quality (weekly water temperature) data (stage 2)', return=TRUE)
 
     MMP_checkData(name = "waterTempWAll.RData",
                   stage = paste0("STAGE", CURRENT_STAGE),
                   item = CURRENT_ITEM,
-                  label = "AIMS water temperature",
+                  label = "",
                   PATH = LOGGER_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
@@ -276,10 +289,75 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
 } else{
 }
 
+## ---- outputs
+MMP_tryCatch(
+{
+    load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW_orig.RData'))
+    load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempWAll.RData'))
+    
+    p=ggplot(waterTempWAll %>% dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>% distinct %>% arrange(desc(LATITUDE)) %>% mutate(Subregion=factor(Subregion, levels=unique(Subregion)), MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))), aes(y=MMP_SITE_NAME, x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey') +
+            geom_point(aes(color=Season),position=position_jitter(height=0.5),size=0.1,show.legend=FALSE)+ggtitle('Water temperature logger')+
+            scale_y_discrete('',limits = rev(levels(waterTempW$MMP_SITE_NAME))) +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free',space='free') +
+            theme_mmp + theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                              strip.text.x=element_blank(),
+                              panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+    ## p=ggplot(flntu.all.daily %>%
+    ##          dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion,Season, LATITUDE) %>%
+    ##          distinct %>%
+    ##          mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
+    ##                 nms = paste(MMP_SITE_NAME, '(',SHORT_NAME, ')'),
+    ##                 nms = forcats::fct_reorder(nms, LATITUDE)),
+    ##          aes(y=(nms), x=Date))+
+    ##     geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
+    ##     geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
+    ##     ggtitle('Water quality FLNTU data')+
+    ##     scale_y_discrete('') +
+    ##     scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+    ##     scale_color_manual('',values=c('red','blue')) +
+    ##     facet_grid(Subregion~., scales='free') +
+    ##     ggplot2:::theme_grey() +
+    ##     theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+    ##           strip.text.x=element_blank(),
+    ##           panel.border=element_rect(fill=NA,color='black',size=0.5))
+    
+    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterTempWAll.png'),
+           p,
+           width=12, height=10, dpi = 100)
+
+    MMP_add_to_report(report_list = DOC_REPORT_LIST,
+                      content = list(
+                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                     item = CURRENT_ITEM),"\n\n"),
+                          paste0("::: panel-tabset \n\n"),
+                          paste0("## SQL syntax\n"),
+                          mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterTemp.sql')),
+                          paste0("## Data glimpse\n"),
+                          mmp__add_table(mmp__glimpse_like(waterTempW_orig)),
+                          paste0("\n:Extraction of the first five records in each field from the Water Temperature data. {#tbl-sql-waterTemp}\n\n"),
+                          paste0("## Sampling design\n"),
+                          paste0("\n::: {#fig-sql-waterTemp}\n"),
+                          paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll.png)\n"),
+                          paste0("\nTemporal distribution of AIMS Water Temperature samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                          paste0("::: \n"),
+                          paste0("::: \n\n")
+                      )
+                      )
+    
+    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
+}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Water Temperature) data', return=TRUE)
+
+## ----end
+
 MMP_checkData(name = "waterTempWAll.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
-              label = "Processed water temperature",
+              label.prefix = "Processed",
+              label = "",
               PATH = LOGGER_OUTPUT_PATH)
 MMP_openning_banner()
     

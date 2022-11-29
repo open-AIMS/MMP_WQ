@@ -460,7 +460,9 @@ mmp__append_filesize <- function(stage, item, label, filepath) {
 }
 
 mmp__get_name <- function(stage, item) {
-    STATUS[[stage]]$names[which(STATUS[[stage]]$item == item)]
+    str_replace(STATUS[[stage]]$names[which(STATUS[[stage]]$item == item)],
+                '(.*) \\[.*\\]',
+                '\\1')
 }
 
 MMP_test <- function() {
@@ -642,25 +644,28 @@ MMP_tryCatch_db <- function(name = 'niskin',
 MMP_checkData <- function(name = "niskin.csv",
                     stage = "STAGE2",
                     item = "aimsNiskin",
-                    label = "AIMS niskin",
+                    label = "",
+                    label.prefix = "",
+                    label.suffix = "",
                     PATH = NISKIN_PATH,
                     progressive = FALSE)
 {
+    label <- ifelse(label == "", mmp__get_name(stage, item), label)
     if (file.exists(paste0(PATH, name))) {
         if (!progressive) {
             MMP_log(status = "SUCCESS",
                     logFile = LOG_FILE,
-                    Category = paste0(label, " data exists"),
+                    Category = str_squish(paste(label.prefix,label, label.suffix, " data exists")),
                     msg=NULL)
             mmp__change_status(stage = stage, item = item, status = "success")
-            mmp__append_filesize(stage = stage, item, item, paste0(PATH, name))
+            mmp__append_filesize(stage = stage, item, label, paste0(PATH, name))
             ## filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
             ## mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
         }
     } else {
         MMP_log(status = "FAILURE",
                 logFile = LOG_FILE,
-                Category = paste0(label, " data does not exist"),
+                Category = str_squish(paste(label.prefix, label, label.suffix, " data does not exist")),
                 msg=NULL) 
         mmp__change_status(stage = stage, item = item, status = "failure")
     }

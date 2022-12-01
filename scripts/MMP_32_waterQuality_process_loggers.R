@@ -11,6 +11,8 @@ LOGGER_OUTPUT_PATH <- paste0(DATA_PATH, "/processed/loggers/")
 
 names_lookup <- read_csv(file=paste0(PARAMS_PATH, '/names_lookup.csv')) %>%
     suppressMessages()
+MAXDATE=as.Date(paste0(reportYear,'-09-30'))
+MINDATE=MAXDATE-years(1)+days(1)
 
 ## ---- AIMS flntu process
 CURRENT_ITEM <- "flntu"
@@ -19,9 +21,38 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RData"))) &
     file.exists(paste0(LOGGER_INPUT_PATH, 'flntu.csv'))) {
-    MMP_tryCatch(flntu <- read_csv(paste0(LOGGER_INPUT_PATH, 'flntu.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in Water Quality (flntu) data', return=TRUE)
+    
+    ## 1. Read in data
+    ## ---- AIMS flntu read data
+    MMP_tryCatch(
+    {
+        flntu <- read_csv(paste0(LOGGER_INPUT_PATH, 'flntu.csv')) %>%
+            suppressMessages()
+        save(flntu, file=paste0(NISKIN_OUTPUT_PATH, 'flntu.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'flntu.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(flntu)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the FLNTU data. {#tbl-sql-flntu}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in Water Quality (flntu) data', return=TRUE)
+    ## ----end
     
     ## 1. First level of data processing
     ## ---- AIMS flntu process level 1
@@ -127,61 +158,56 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
     MMP_openning_banner()
     ## ----end
 
+    ## ---- AIMS flntu outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(LOGGER_OUTPUT_PATH, 'flntu.all.daily.RData'))
+        
+        p=ggplot(flntu.all.daily %>%
+                 dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion,Season, LATITUDE) %>%
+                 distinct %>%
+                 mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
+                        nms = paste(MMP_SITE_NAME, '(',SHORT_NAME, ')'),
+                        nms = forcats::fct_reorder(nms, LATITUDE)),
+                 aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
+            geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
+            ggtitle('Water quality FLNTU data')+
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/flntu.all.daily.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-flntu}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/flntu.all.daily.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS FLNTU water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
 } else {
 }
-
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(LOGGER_OUTPUT_PATH, 'flntu.RData'))
-    load(file=paste0(LOGGER_OUTPUT_PATH, 'flntu.all.daily.RData'))
-    
-    p=ggplot(flntu.all.daily %>%
-             dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion,Season, LATITUDE) %>%
-             distinct %>%
-             mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
-                    nms = paste(MMP_SITE_NAME, '(',SHORT_NAME, ')'),
-                    nms = forcats::fct_reorder(nms, LATITUDE)),
-             aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
-        geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
-        ggtitle('Water quality FLNTU data')+
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/flntu.all.daily.png'),
-           p,
-           width=12, height=10, dpi = 100)
-
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(LOGGER_INPUT_PATH, 'flntu.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(flntu)),
-                          paste0("\n:Extraction of the first five records in each field from the FLNTU data. {#tbl-sql-flntu}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-flntu}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/flntu.all.daily.png)\n"),
-                          paste0("\nTemporal distribution of AIMS FLNTU water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (FLNTU) data', return=TRUE)
-
-## ----end
 
 MMP_checkData(name = "flntu.all.daily.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
@@ -200,9 +226,37 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData"))) &
     file.exists(paste0(LOGGER_INPUT_PATH, 'waterTempW.csv'))) {
-    MMP_tryCatch(waterTempW <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterTempW.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing:', msg='Reading in Water Temperature data', return=TRUE)
+
+    ## 1. Read in data
+    ## ---- AIMS waterTemp read data
+    MMP_tryCatch(
+    {
+        waterTempW <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterTempW.csv')) %>%
+            suppressMessages()
+        save(waterTempW, file=paste0(NISKIN_OUTPUT_PATH, 'waterTempW.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'waterTemp.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(waterTempW)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the water temperature data. {#tbl-sql-waterTempW}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing:', msg='Reading in Water Temperature data', return=TRUE)
+    ## ----end
 
     ## 1. First level of data processing
     ## ---- AIMS waterTemp process level 1
@@ -286,72 +340,50 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
     MMP_openning_banner()
     
     ## ----end
-} else{
-}
-
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW_orig.RData'))
-    load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempWAll.RData'))
     
-    p=ggplot(waterTempWAll %>% dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>% distinct %>% arrange(desc(LATITUDE)) %>% mutate(Subregion=factor(Subregion, levels=unique(Subregion)), MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))), aes(y=MMP_SITE_NAME, x=Date))+
+    ## ---- AIMS waterTemp outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempWAll.RData'))
+    
+        p=ggplot(waterTempWAll %>% dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>% distinct %>% arrange(desc(LATITUDE)) %>% mutate(Subregion=factor(Subregion, levels=unique(Subregion)), MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))), aes(y=MMP_SITE_NAME, x=Date))+
             geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey') +
             geom_point(aes(color=Season),position=position_jitter(height=0.5),size=0.1,show.legend=FALSE)+ggtitle('Water temperature logger')+
             scale_y_discrete('',limits = rev(levels(waterTempW$MMP_SITE_NAME))) +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free',space='free') +
-            theme_mmp + theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-                              strip.text.x=element_blank(),
-                              panel.border=element_rect(fill=NA,color='black',size=0.5))
+            ## theme_mmp +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterTempWAll.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-waterTempW}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS water temperature water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
         
-    ## p=ggplot(flntu.all.daily %>%
-    ##          dplyr:::select(SHORT_NAME, MMP_SITE_NAME,Date,Subregion,Season, LATITUDE) %>%
-    ##          distinct %>%
-    ##          mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=rev(unique(MMP_SITE_NAME))),
-    ##                 nms = paste(MMP_SITE_NAME, '(',SHORT_NAME, ')'),
-    ##                 nms = forcats::fct_reorder(nms, LATITUDE)),
-    ##          aes(y=(nms), x=Date))+
-    ##     geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
-    ##     geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
-    ##     ggtitle('Water quality FLNTU data')+
-    ##     scale_y_discrete('') +
-    ##     scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-    ##     scale_color_manual('',values=c('red','blue')) +
-    ##     facet_grid(Subregion~., scales='free') +
-    ##     ggplot2:::theme_grey() +
-    ##     theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-    ##           strip.text.x=element_blank(),
-    ##           panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterTempWAll.png'),
-           p,
-           width=12, height=10, dpi = 100)
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
 
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterTemp.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(waterTempW_orig)),
-                          paste0("\n:Extraction of the first five records in each field from the Water Temperature data. {#tbl-sql-waterTemp}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-waterTemp}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll.png)\n"),
-                          paste0("\nTemporal distribution of AIMS Water Temperature samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Water Temperature) data', return=TRUE)
-
-## ----end
+    ## ----end
+} else{
+}
 
 MMP_checkData(name = "waterTempWAll.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
@@ -370,9 +402,38 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RData"))) &
     file.exists(paste0(LOGGER_INPUT_PATH, 'waterSalinity.csv'))) {
-    MMP_tryCatch(waterSalinity <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterSalinity.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in Water Salinity data', return=TRUE)
+
+    ## 1. Read in data
+    ## ---- AIMS waterSalinity read data
+    MMP_tryCatch(
+    {
+        waterSalinity <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterSalinity.csv')) %>%
+            suppressMessages()
+        save(waterSalinity, file=paste0(NISKIN_OUTPUT_PATH, 'waterSalinity.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'waterSalinity.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(waterSalinity)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the water salinity data. {#tbl-sql-waterSalinity}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in Water Salinity data', return=TRUE)
+    ## ----end
 
     ## 1. First level of data processing
     ## ---- AIMS waterSalinity process level 1
@@ -471,6 +532,31 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                   progressive = TRUE)
     MMP_openning_banner()
     ## ----end 
+
+    ## ---- AIMS waterSalinity outputs
+    MMP_tryCatch(
+    {
+
+        ## MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+        ##                        SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+        ##                                                      parent = 'TABSET'),
+        ##                        FIG_REF = structure(paste0("\n::: {#fig-sql-niskin}\n"),
+        ##                                            parent = 'SUBSECTION_DESIGN'),
+        ##                        FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_aims_reef_av.png)\n"),
+        ##                                        parent = "FIG_REF"),
+        ##                        FIG_CAP = structure(paste0("\nTemporal distribution of AIMS Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+        ##                                            parent = 'FIG_REF'),
+        ##                        FIG_REF_END = structure(paste0("\n::: \n"),
+        ##                                                parent = 'SUBSECTION_DESIGN')
+        ##                       )
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
 } else{
 }
 

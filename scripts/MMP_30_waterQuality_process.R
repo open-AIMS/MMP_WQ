@@ -8,7 +8,7 @@ if (MMP_isParent()) {
 
 assign("CURRENT_STAGE", 3, env = globalenv())
 
-assign("DOC_REPORT_LIST", list(), env = globalenv())
+## assign("DOC_REPORT_LIST", list(), env = globalenv())
 
 ## - AIMS niskin
 ## - AIMS Cairns transect

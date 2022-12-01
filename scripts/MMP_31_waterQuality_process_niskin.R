@@ -8,6 +8,8 @@ if (MMP_isParent()) {
 
 NISKIN_INPUT_PATH <- paste0(DATA_PATH, "/primary/niskin/")
 NISKIN_OUTPUT_PATH <- paste0(DATA_PATH, "/processed/niskin/")
+MAXDATE=as.Date(paste0(reportYear,'-09-30'))
+MINDATE=MAXDATE-years(1)+days(1)
 
 
 ## ---- AIMS niskin process
@@ -17,9 +19,41 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'niskin.csv'))) {
-    MMP_tryCatch(niskin.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'niskin.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (Niskin) data', return=TRUE)
+
+    ## 1. Read in data
+    ## ---- AIMS niskin read data
+    MMP_tryCatch(
+    {
+        niskin.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'niskin.csv')) %>%
+            suppressMessages()
+        save(niskin.reef, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.reef.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'niskin.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(niskin.reef)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the niskin data. {#tbl-sql-niskin}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+    },
+    LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (Niskin) data', return=TRUE)
+    ## ----end
     
     ## 1. First level of data processing
     ## ---- AIMS niskin process level 1
@@ -51,7 +85,6 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
             MMP_reorderReefs() %>%            #reorder the reef.alias levels according to Latitude and then Longitude 
             MMP_selectReefs(source='niskin')  #select reefs according to the (lookup.csv) 'niskin' design (other options are 'JCU', 'flntu', 'coral', 'WaterTemp')
         save(niskin.aims.reef, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.RData'))
-        save(niskin.reef, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.reef.RData'))
     }, LOG_FILE, Category = 'Data processing:', msg='Initial parsing of Water Quality (Niskin) data', return=TRUE)
 
     MMP_checkData(name = "niskin.aims.reef.RData",
@@ -123,62 +156,58 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
 
     ## ----end
 
+    ## ---- AIMS niskin outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
+        p <- ggplot(niskin.aims.reef.av %>% 
+                    dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
+                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                    aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (AIMS)')+
+                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_aims_reef_av.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-niskin}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_aims_reef_av.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
 
 } else {
 }
 
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.reef.RData'))
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
-    p <- ggplot(niskin.aims.reef.av %>% 
-                dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
-                distinct %>%
-                arrange(desc(LATITUDE)) %>%
-                mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                       nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                       nms = forcats::fct_reorder(nms, LATITUDE)),
-                aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-        geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (AIMS)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_aims_reef_av.png'),
-           p,
-           width=12, height=10, dpi = 100)
-
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(NISKIN_INPUT_PATH, 'niskin.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(niskin.reef)),
-                          paste0("\n:Extraction of the first five records in each field from the niskin data. {#tbl-sql-niskin}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-niskin}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_aims_reef_av.png)\n"),
-                          paste0("\nTemporal distribution of AIMS Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
-
-## ----end
 
 MMP_checkData(name = "niskin.aims.reef.av.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
@@ -196,9 +225,37 @@ MMP_openning_banner()
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'cairns.csv'))) {
 
-    MMP_tryCatch(cairns.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cairns.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (Cairns) data', return=TRUE)
+    ## ---- AIMS Cairns niskin read data
+    MMP_tryCatch(
+    {
+        cairns.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cairns.csv')) %>%
+            suppressMessages()
+        save(cairns.reef, file=paste0(NISKIN_OUTPUT_PATH, 'cairns.reef.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'cairns.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(cairns.reef)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the Cairns Transect data. {#tbl-sql-cairns}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (Cairns) data', return=TRUE)
+    
+    ## ----end
+
     ## 1. First level of data processing
     ## ---- AIMS Cairns niskin process level 1
     MMP_tryCatch(
@@ -297,61 +354,57 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RDa
 
     ## ----end
 
+    ## ---- AIMS cairns niskin outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'cairns.reef.av.RData'))
+        p <- ggplot(cairns.reef.av %>% 
+                    dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
+                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                    aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality cairns data (AIMS)')+
+                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/cairns_reef_av.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-cairns}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/cairns_reef_av.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS Cairns Transect water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
 } else {
 }
 
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'cairns.reef.RData'))
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'cairns.reef.av.RData'))
-    p <- ggplot(cairns.reef.av %>% 
-                dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
-                distinct %>%
-                arrange(desc(LATITUDE)) %>%
-                mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                       nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                       nms = forcats::fct_reorder(nms, LATITUDE)),
-                aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-        geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (Cairns Transect)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/cairns_reef_av.png'),
-           p,
-           width=12, height=10, dpi = 100)
-
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(NISKIN_INPUT_PATH, 'cairns.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(cairns.reef)),
-                          paste0("\n:Extraction of the first five records in each field from the Cairns Transect data. {#tbl-sql-cairns}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-cairns}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/cairns_reef_av.png)\n"),
-                          paste0("\nTemporal distribution of AIMS Cairns Transect water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Cairns) data', return=TRUE)
-
-## ----end
 MMP_checkData(name = "cairns.reef.av.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
@@ -369,14 +422,40 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av1.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'jcu.csv'))) {
-    MMP_tryCatch({
+
+    ## 1. Read in data
+    ## ---- JCU niskin read data
+    MMP_tryCatch(
+    {
         jcu.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'jcu.csv')) %>%
                      suppressMessages()
         jcu_lookup = read_csv(paste0(PARAMS_PATH, '/jcu_location_lookup.csv'), trim_ws = TRUE) %>%
             suppressMessages()
-        },
-        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (JCU) data', return=TRUE)
 
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'jcu.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(jcu.reef)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the JCU data. {#tbl-sql-jcu}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (JCU) data', return=TRUE)
+    ## ----end
+    
     ## 1. First level of data processing
     ## ---- JCU niskin process level 1
     MMP_tryCatch(
@@ -460,35 +539,60 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
 
     ## ----end
 
+    ## ---- JCU niskin outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData'))
+        p <- ggplot(niskin.jcu.reef.av1 %>% 
+                    dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
+                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                    aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (JCU)')+
+                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_jcu_reef_av1.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-jcu}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_jcu_reef_av1.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS JCU water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
+
 } else {
 }
 ## ---- outputs
 MMP_tryCatch(
 {
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData'))
-    p <- ggplot(niskin.jcu.reef.av1 %>% 
-                dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
-                distinct %>%
-                arrange(desc(LATITUDE)) %>%
-                mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                       nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                       nms = forcats::fct_reorder(nms, LATITUDE)),
-                aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-        geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (JCU)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_jcu_reef_av1.png'),
-           p,
-           width=12, height=10, dpi = 100)
 
     MMP_add_to_report(report_list = DOC_REPORT_LIST,
                       content = list(
@@ -531,15 +635,42 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'cy.csv'))) {
-    MMP_tryCatch({
+
+    ## 1. Read in data
+    ## ---- JCU CY niskin read data
+    MMP_tryCatch(
+    {
         cy.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cy.csv')) %>%
-                     suppressMessages()
+            suppressMessages()
         lookup = read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>%
             suppressMessages()
         wq.sites = read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>%
             suppressMessages()
-        },
-        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (CY) data', return=TRUE)
+
+        save(cy.reef, file=paste0(NISKIN_OUTPUT_PATH, 'cy.reef.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'cy.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(cy.reef)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the Cape York data. {#tbl-sql-cy}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (CY) data', return=TRUE)
+    ## ----end
 
     ## 1. First level of data processing
     ## ---- CY niskin process level 1
@@ -621,60 +752,59 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
     MMP_openning_banner()
 
     ## ----end
+
+    ## ---- CY niskin outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData'))
+        p <- ggplot(niskin.cy.reef.av %>% 
+                    dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
+                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                    aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (JCU CY)')+
+                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+    
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_cy_reef_av.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-cy}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_cy_reef_av.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of Cape York Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
+    
 } else {
 }
 
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData'))
-    p <- ggplot(niskin.cy.reef.av %>% 
-                dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
-                distinct %>%
-                arrange(desc(LATITUDE)) %>%
-                mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                       nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                       nms = forcats::fct_reorder(nms, LATITUDE)),
-                aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-        geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (JCU CY)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_cy_reef_av.png'),
-           p,
-           width=12, height=10, dpi = 100)
-
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(NISKIN_INPUT_PATH, 'cy.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(cy.reef)),
-                          paste0("\n:Extraction of the first five records in each field from the JCU CY data. {#tbl-sql-cairns}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-cy}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_cy_reef_av.png)\n"),
-                          paste0("\nTemporal distribution of JCU CY water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (CY) data', return=TRUE)
-
-## ----end
 MMP_checkData(name = "niskin.cy.reef.av.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
@@ -693,6 +823,9 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.reef.av1.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'jcuEvent.csv'))) {
+
+    ## 1. Read in data
+    ## ---- JCU Event niskin read data
     MMP_tryCatch({
         jcu.event.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'jcuEvent.csv')) %>%
                      suppressMessages()
@@ -700,8 +833,31 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
             suppressMessages()
         wq.sites = read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>%
             suppressMessages()
-        },
-        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (JCU Event) data', return=TRUE)
+
+        save(niskin.reef, file=paste0(NISKIN_OUTPUT_PATH, 'jcu.event.reef.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'jcuEvent.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(jcu.event.reef)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the JCU event niskin data. {#tbl-sql-jcuEvent}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (JCU Event) data', return=TRUE)
+    ## ----end
     
     ## 1. First level of data processing
     ## ---- JCU Event niskin process level 1
@@ -779,60 +935,58 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
     MMP_openning_banner()
 
     ## ----end
+
+    ## ---- JCU Event niskin outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.event.reef.av1.RData'))
+        p <- ggplot(niskin.jcu.event.reef.av1 %>% 
+                    dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
+                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                    aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (JCU Event)')+
+                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_jcu_event_reef_av1.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-jcuEvent}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_jcu_event_reef_av1.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of JCU event Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+    ## ----end
+    
 } else {
 }
 
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.event.reef.av1.RData'))
-    p <- ggplot(niskin.jcu.event.reef.av1 %>% 
-                dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
-                distinct %>%
-                arrange(desc(LATITUDE)) %>%
-                mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                       nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                       nms = forcats::fct_reorder(nms, LATITUDE)),
-                aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-        geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (JCU Event)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_jcu_event_reef_av1.png'),
-           p,
-           width=12, height=10, dpi = 100)
-
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(NISKIN_INPUT_PATH, 'jcuEvent.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(jcu.event.reef)),
-                          paste0("\n:Extraction of the first five records in each field from the JCU Event data. {#tbl-sql-cairns}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-jcuEvent}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_jcu_event_reef_av1.png)\n"),
-                          paste0("\nTemporal distribution of JCU Event water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (JCU Event) data', return=TRUE)
-
-## ----end
 MMP_checkData(name = "niskin.jcu.event.reef.av1.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
@@ -850,15 +1004,42 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.reef.av1.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'cyEvent.csv'))) {
-    MMP_tryCatch({
+    
+    ## 1. Read in data
+    ## ---- CY Event niskin read data
+    MMP_tryCatch(
+    {
         cy.event.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cyEvent.csv')) %>%
-                     suppressMessages()
+            suppressMessages()
         jcu_lookup = read_csv(paste0(PARAMS_PATH, '/jcu_location_lookup.csv'), trim_ws = TRUE) %>%
             suppressMessages()
         wq.sites = read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>%
             suppressMessages()
-        },
-        LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (CY) data', return=TRUE)
+
+        save(cy.event.reef, file=paste0(NISKIN_OUTPUT_PATH, 'cy.event.reef.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'cyEvent.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(niskin.reef)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the Cape York event niskin data. {#tbl-sql-cyEvent}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (CY) data', return=TRUE)
+    ## ----end
     
     ## 1. First level of data processing
     ## ---- CY Event niskin process level 1
@@ -936,60 +1117,59 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.re
     MMP_openning_banner()
 
     ## ----end
+
+    ## ---- CY Event niskin outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.event.reef.av1.RData'))
+        p <- ggplot(niskin.cy.event.reef.av1 %>% 
+                    dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
+                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                    aes(y=(nms), x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (CY Event)')+
+                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue'), limits = c('Dry','Wet')) +
+            facet_grid(Subregion~., scales='free') +
+            ggplot2:::theme_grey() +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_cy_event_reef_av1.png'),
+               p,
+               width=12, height=10, dpi = 100)
+        
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-cyEvent}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_cy_event_reef_av1.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of Cape York event Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+
+    ## ----end
+    
 } else {
 }
 
-## ---- outputs
-MMP_tryCatch(
-{
-    load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.event.reef.av1.RData'))
-    p <- ggplot(niskin.cy.event.reef.av1 %>% 
-                dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
-                distinct %>%
-                arrange(desc(LATITUDE)) %>%
-                mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                       nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                       nms = forcats::fct_reorder(nms, LATITUDE)),
-                aes(y=(nms), x=Date))+
-        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-        geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (CY Event)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-        scale_y_discrete('') +
-        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-        scale_color_manual('',values=c('red','blue'), limits = c('Dry','Wet')) +
-        facet_grid(Subregion~., scales='free') +
-        ggplot2:::theme_grey() +
-        theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-              strip.text.x=element_blank(),
-              panel.border=element_rect(fill=NA,color='black',size=0.5))
-    
-    ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_cy_event_reef_av1.png'),
-           p,
-           width=12, height=10, dpi = 100)
-
-    MMP_add_to_report(report_list = DOC_REPORT_LIST,
-                      content = list(
-                          paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                     item = CURRENT_ITEM),"\n\n"),
-                          paste0("::: panel-tabset \n\n"),
-                          paste0("## SQL syntax\n"),
-                          mmp__sql(paste0(NISKIN_INPUT_PATH, 'cyEvent.sql')),
-                          paste0("## Data glimpse\n"),
-                          mmp__add_table(mmp__glimpse_like(cy.event.reef)),
-                          paste0("\n:Extraction of the first five records in each field from the CY Event data. {#tbl-sql-cairns}\n\n"),
-                          paste0("## Sampling design\n"),
-                          paste0("\n::: {#fig-sql-cyEvent}\n"),
-                          paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_cy_event_reef_av1.png)\n"),
-                          paste0("\nTemporal distribution of CY Event water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                          paste0("::: \n"),
-                          paste0("::: \n\n")
-                      )
-                      )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
-}, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (CY Event) data', return=TRUE)
-
-## ----end
 MMP_checkData(name = "niskin.cy.event.reef.av1.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,

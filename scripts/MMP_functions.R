@@ -321,6 +321,8 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(DATA_PATH, '/processed/loggers'))
     if (!dir.exists(paste0(DATA_PATH, '/processed/other')))
         dir.create(paste0(DATA_PATH, '/processed/other'))
+    if (!dir.exists(paste0(DATA_PATH, '/reports')))
+        dir.create(paste0(DATA_PATH, '/reports'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
@@ -714,5 +716,129 @@ my_html_document <- function(template = "", ...) {
   base_format$pandoc$args[template_arg] <- template
 
   base_format
+}
+
+
+MMP_add_to_report_list <- function(stage, item, ...) {
+    values <- list2(...)
+    ## values <- c(..., use.names = TRUE)
+    stage <- paste0("STAGE", stage)
+    list.filename <- paste(stage, item, ".RData", sep = "_")
+    if (!file.exists(paste0(DATA_PATH, "/reports/", list.filename))) {
+        doc_list <- list()
+        save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+    }
+    load(paste0(DATA_PATH, "/reports/", list.filename))
+    nms <- names(unlist(doc_list))
+    ## find_and_replace <- function(x, find, replace){
+    ##         if(is.list(x)){
+    ##             n <- names(x) == find
+    ##             if (any(n)) {
+    ##                 wch <- which(n)
+    ##                 ## print(wch)
+    ##                 ## print(x[wch])
+    ##                 ## print(replace)
+    ##                 ## xx <- x[[wch]]
+    ##                 ## xx <- append(xx, replace)
+    ##                 ## x[[wch]] <- xx
+    ##                 x[[wch]] <- append(x[[wch]], replace)
+    ##                 ## print(x[wch])
+    ##             }
+    ##             lapply(x, find_and_replace, find=find, replace=replace)
+    ##         }else{
+    ##             x
+    ##         }
+    ##     }
+    find_and_append <- function(x, find, replace){
+        if(is.list(x)){
+            n <- names(x) == find
+            if (any(n)) {
+                wch <- which(n)
+                x[[wch]] <- append(x[[wch]], replace)
+            }
+            lapply(x, find_and_append, find=find, replace=replace)
+        }else{
+            x
+        }
+    }
+    ## find_name <- function(haystack, needle) {
+    ##     if (hasName(haystack, needle)) {
+    ##         haystack[[needle]]
+    ##     } else if (is.list(haystack)) {
+    ##         for (obj in haystack) {
+    ##             ret <- Recall(obj, needle)
+    ##             if (!is.null(ret)) return(ret)
+    ##         }
+    ##     } else {
+    ##         NULL
+    ##     }
+    ## }
+
+## find_ref <- function(haystack, needle) {
+##  if (hasName(haystack, needle)) {
+##    haystack[needle]
+##  } else if (is.list(haystack)) {
+##    for (obj in haystack) {
+##      ret <- Recall(obj, needle)
+##      if (!is.null(ret)) return(ret)
+##    }
+##  } else {
+##    NULL
+##  }
+## }
+
+## do.call(`<-`, list(parse(text = e)[[1]], append(parse(text = e)[[1]], list('Big' = structure(list('An item'), parent = 'hat')), after = 1)))
+    for (i in 1:length(values)) {
+        nms <- names(unlist(doc_list))
+        parent <- attr(values[[i]], 'parent')
+        value <- values[i]
+        if(!is.null(parent)) {
+            if (any(str_which(nms, parent))) {
+                doc_list <- find_and_append(doc_list, parent, value)
+            }else {
+                doc_list <- append(doc_list, value)
+            }
+            ## if (!is.null(parent)) {
+            ##     doc_list[[parent]] <- append(doc_list[[parent]], value)
+        } else {
+            doc_list <- append(doc_list, value)
+        }
+        assign('doc_list', doc_list, envir = globalenv())
+    }
+    save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+}
+
+
+
+
+
+## MMP_add_to_report_list <- function(stage, item, ...) {
+##     values <- list2(...)
+##     ## values <- c(..., use.names = TRUE)
+##     stage <- paste0("STAGE", stage)
+##     list.filename <- paste(stage, item, ".RData", sep = "_")
+##     if (!file.exists(paste0(DATA_PATH, "/reports/", list.filename))) {
+##         doc_list <- list()
+##         save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+##     }
+##     load(paste0(DATA_PATH, "/reports/", list.filename))
+
+##     for (i in 1:length(values)) {
+##          parent <- attr(values[[i]], 'parent')
+##          value <- values[i]
+##          if (!is.null(parent)) {
+##              doc_list[[parent]] <- append(doc_list[[parent]], value)
+##          } else {
+##              doc_list <- append(doc_list, value)
+##          }
+##          assign('doc_list', doc_list, envir = globalenv())
+##     }
+##     save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+## }
+MMP_get_report_list <- function(stage, item) {
+    stage <- paste0("STAGE", stage)
+    list.filename <- paste(stage, item, ".RData", sep = "_")
+    load(paste0(DATA_PATH, "/reports/", list.filename))
+    doc_list
 }
 

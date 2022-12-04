@@ -90,7 +90,8 @@ MMP_reorderReefs <- function(data) {
 }
 
 MMP_selectReefs <- function(data,source='niskin') {
-    lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    ## lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
     if (source=='niskin') {
         rfs <- as.character((lookup %>% filter(Niskin==T))$SHORT_NAME)
         data <- data %>% filter(SHORT_NAME %in% rfs) %>% droplevels %>% mutate(MMP=TRUE)
@@ -495,8 +496,10 @@ MMP_depthWeightedAverages <- function(data) {
 ## The following function adds Region and Subregion to the data source ##
 #########################################################################
 MMP_region_subregion<- function(data, Source=NULL) {
-    lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
-    coral.lookup <- read_csv(paste0(PARAMS_PATH, '/coral.lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    ## lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    ## coral.lookup <- read_csv(paste0(PARAMS_PATH, '/coral.lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
+    coral.lookup <- read.csv(paste0(PARAMS_PATH, '/coral.lookup.csv'), strip.white = TRUE) %>% suppressMessages()
     if (is.null(Source)) data %>% left_join(lookup %>% dplyr:::select(SHORT_NAME,Region,Reg,Subregion,Subreg)) %>% as.data.frame
     else if (Source=='Niskin')  data %>% left_join(lookup %>% dplyr:::select(SHORT_NAME,Region,Reg,Subregion,Subreg,Niskin)) %>% as.data.frame
     else if (Source=='FLNTU')  data %>% left_join(lookup %>% dplyr:::select(SHORT_NAME,Region,Reg,Subregion,Subreg,FLNTU)) %>% as.data.frame

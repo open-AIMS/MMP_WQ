@@ -28,7 +28,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
     {
         flntu <- read_csv(paste0(LOGGER_INPUT_PATH, 'flntu.csv')) %>%
             suppressMessages()
-        save(flntu, file=paste0(NISKIN_OUTPUT_PATH, 'flntu.RData'))
+        save(flntu, file=paste0(LOGGER_OUTPUT_PATH, 'flntu.RData'))
         unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
@@ -37,7 +37,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
                                TABSET_END = paste0("::: \n\n"),
                                SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
                                                           parent = 'TABSET'),
-                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'flntu.sql')),
+                               SQL = structure(mmp__sql(paste0(LOGGER_INPUT_PATH, 'flntu.sql')),
                                                parent = 'SUBSECTION_SQL')
                                )
 
@@ -171,12 +171,12 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
                         nms = forcats::fct_reorder(nms, LATITUDE)),
                  aes(y=(nms), x=Date))+
             geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
-            geom_point(aes(color=Season), shape=16, size=0.1,show.legend=FALSE,position=position_jitter(height=0.5))+
+            geom_point(aes(color=Season), shape=16, size=0.7,show.legend=FALSE,position=position_jitter(height=0.5))+
             ggtitle('Water quality FLNTU data')+
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
@@ -233,7 +233,8 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
     {
         waterTempW <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterTempW.csv')) %>%
             suppressMessages()
-        save(waterTempW, file=paste0(NISKIN_OUTPUT_PATH, 'waterTempW.RData'))
+        wq.sites <- read.csv(paste0(PARAMS_PATH, '/wq.sites.csv'), strip.white=TRUE)
+        save(waterTempW, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW.RData'))
         unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
@@ -242,7 +243,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
                                TABSET_END = paste0("::: \n\n"),
                                SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
                                                           parent = 'TABSET'),
-                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'waterTemp.sql')),
+                               SQL = structure(mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterTempW.sql')),
                                                parent = 'SUBSECTION_SQL')
                                )
 
@@ -327,6 +328,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
                                         #waterTempWAll$Region <- MMP_regions(waterTempWAll$reef.alias)
                                         #waterTempWAll$Subregion <- MMP_subregions(waterTempWAll$reef.alias)
         save(waterTempWAll, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempWAll.RData'))      
+        save(waterTempW, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW.RData'))      
         rm(waterTempW, waterTempWAll)
         gc()
     }, LOG_FILE, Category = 'Data processing:', msg='Process Water Quality (weekly water temperature) data (stage 2)', return=TRUE)
@@ -345,11 +347,19 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
     MMP_tryCatch(
     {
         load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempWAll.RData'))
+        ## load(file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW.RData'))
     
-        p=ggplot(waterTempWAll %>% dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>% distinct %>% arrange(desc(LATITUDE)) %>% mutate(Subregion=factor(Subregion, levels=unique(Subregion)), MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))), aes(y=MMP_SITE_NAME, x=Date))+
+        p <- ggplot(waterTempWAll %>%
+                    dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(Subregion=factor(Subregion, levels=unique(Subregion)),
+                           MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))),
+                    aes(y=MMP_SITE_NAME, x=Date))+
             geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey') +
-            geom_point(aes(color=Season),position=position_jitter(height=0.5),size=0.1,show.legend=FALSE)+ggtitle('Water temperature logger')+
-            scale_y_discrete('',limits = rev(levels(waterTempW$MMP_SITE_NAME))) +
+            geom_point(aes(color=Season),position=position_jitter(height=0.5),size=0.7,show.legend=FALSE)+ggtitle('Water temperature logger')+
+            ## scale_y_discrete('',limits = rev(unique(waterTempWAll$MMP_SITE_NAME))) +
+            scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free',space='free') +
@@ -409,7 +419,8 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
     {
         waterSalinity <- read_csv(paste0(LOGGER_INPUT_PATH, 'waterSalinity.csv')) %>%
             suppressMessages()
-        save(waterSalinity, file=paste0(NISKIN_OUTPUT_PATH, 'waterSalinity.RData'))
+        wq.sites <- read.csv(paste0(PARAMS_PATH, '/wq.sites.csv'), strip.white=TRUE)
+        save(waterSalinity, file=paste0(LOGGER_OUTPUT_PATH, 'waterSalinity.RData'))
         unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
@@ -418,7 +429,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                                TABSET_END = paste0("::: \n\n"),
                                SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
                                                           parent = 'TABSET'),
-                               SQL = structure(mmp__sql(paste0(NISKIN_INPUT_PATH, 'waterSalinity.sql')),
+                               SQL = structure(mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterSalinity.sql')),
                                                parent = 'SUBSECTION_SQL')
                                )
 
@@ -536,19 +547,41 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
     ## ---- AIMS waterSalinity outputs
     MMP_tryCatch(
     {
+        load(file=paste0(LOGGER_OUTPUT_PATH, 'waterSalinityAll.RData'))
+        p <- ggplot(waterSalinityAll %>%
+                    dplyr:::select(MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
+                    distinct %>%
+                    arrange(desc(LATITUDE)) %>%
+                    mutate(Subregion=factor(Subregion, levels=unique(Subregion)),
+                           MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME)))),
+                    aes(y=MMP_SITE_NAME, x=Date))+
+            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey') +
+            geom_point(aes(color=Season),position=position_jitter(height=0.5),show.legend=FALSE)+ggtitle('Water salinity logger')+
+            scale_y_discrete('',limits = rev(levels(waterSalinityAll$MMP_SITE_NAME))) +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+            scale_color_manual('',values=c('red','blue')) +
+            facet_grid(Subregion~., scales='free',space='free') +
+            ## theme_mmp +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                              strip.text.x=element_blank(),
+                              panel.border=element_rect(fill=NA,color='black',size=0.5))
 
-        ## MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-        ##                        SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
-        ##                                                      parent = 'TABSET'),
-        ##                        FIG_REF = structure(paste0("\n::: {#fig-sql-niskin}\n"),
-        ##                                            parent = 'SUBSECTION_DESIGN'),
-        ##                        FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/niskin_aims_reef_av.png)\n"),
-        ##                                        parent = "FIG_REF"),
-        ##                        FIG_CAP = structure(paste0("\nTemporal distribution of AIMS Niskin water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-        ##                                            parent = 'FIG_REF'),
-        ##                        FIG_REF_END = structure(paste0("\n::: \n"),
-        ##                                                parent = 'SUBSECTION_DESIGN')
-        ##                       )
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterSalinityAll.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-waterSalinity}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterSalinityAll.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS water salinity water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
         ## ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')

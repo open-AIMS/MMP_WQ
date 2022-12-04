@@ -10,59 +10,44 @@ DOC_BASE_TEMPLATE <<- paste0(DOCS_PATH, "/MMP_processData.editMe")
 ## DOC_OUTPUT <<- paste0(DOCS_PATH, "/MMP_processData_report.Rmd")
 DOC_OUTPUT <<- paste0(DOCS_PATH, "/MMP_processData_report.qmd")
 
-load(file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
 
-## 1. Take the template (docs/MMP_processData.editMe)
+## 1. get the list of doc list files
+files <- list.files(paste0(DATA_PATH, "/reports"), full.names = TRUE)
 
+## 2. compile a list of items:
+##    - parameter files
+##    - STATUS items
+##  this is necessary because the parameter files are not listed in the
+##  STATUS list (since they are not extracted, compiled or processed)
+ITEMS <- c('ParamFiles', STATUS[[CURRENT_STAGE]]$items)
+
+## 3. order according to order of items in ITEMS (params then STATUS)
+files <- files[sapply(ITEMS, function(x) {
+    str_which(files, x)
+}, USE.NAMES = FALSE) %>%
+unlist]
+
+## 3. paste doc lists together into a single string
+doc_string <- sapply(str_subset(files, 'STAGE3'),
+       function(x) {
+           load(x)
+           doc_list
+       }
+       ) %>%
+    unlist(use.names = FALSE) %>%
+    paste(collapse = '\n')
+
+## 4. take the template (docs/MMP_processData.editMe) and copy it to
+## the quarto file
 file.copy(from = DOC_BASE_TEMPLATE,
           to = DOC_OUTPUT,
           overwrite = TRUE) 
-write(unlist(DOC_REPORT_LIST),
+
+## 5. append the doc_string to the quarto file
+write(doc_string,
       file = DOC_OUTPUT,
       append = TRUE)
            
-## 3. Render document to html
+## 6. Render document to html
 quarto::quarto_render(DOC_OUTPUT)
 
-## system(paste0('quarto render ', DOC_OUTPUT))
-## system(paste0('quarto render ../docs/MMP_processData.qmd'))
-
-
-
-## rmarkdown::render(DOC_OUTPUT,
-##                   output_format = my_html_document(template = paste0("../docs/resources/report_template.html"),
-##                                                    ## css = "../resources/style.css",
-##                                                    theme = "spacelab",
-##                                                    toc = TRUE,
-##                                                    toc_float = TRUE,
-##                                                    highlight = "pygments")
-##                   )
-##                output_format = html_document())
-
-
-
-
-
-## a <- readr::read_file(DOC_BASE_TEMPLATE)
-
-
-## b <- "a bit more text"
-
-## b <- str_replace(a, '# References\n', paste0(b, '\n\n# References\n'))
-
-## readr::write_file(b, DOC_OUTPUT)
-
-## file.copy(from = DOC_BASE_TEMPLATE,
-##           to = DOC_OUTPUT,
-##           overwrite = TRUE) 
-
-
-## a <- readr::read_file(DOC_BASE_TEMPLATE)
-## b <- jsonlite::toJSON(a, pretty = TRUE)
-
-## jsonlite::toJSON(rbind(list(jsonlite::fromJSON(b),
-##                             jsonlite::fromJSON(b))),
-##                  pretty = TRUE)
-## b
-
-## jsonlite::toJSON(b, auto_unbox = TRUE) %>% cat 

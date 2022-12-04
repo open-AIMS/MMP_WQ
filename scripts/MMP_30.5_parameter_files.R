@@ -1,0 +1,62 @@
+source("MMP_functions.R")
+
+## if the calling application has landed on this script as the running
+## script, then start initialisations
+if (MMP_isParent()) {
+    MMP_startMatter()
+}
+
+## ---- PARAMS
+CURRENT_ITEM <<- 'Parameter files'
+unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", "ParamFiles", "_.RData")) 
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SECTION = paste0("# ", CURRENT_ITEM, "\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n")
+                              )
+## ----end
+
+## ---- PARAMS wq.sites
+CURRENT_ITEM <<- 'wq.sites'
+wq.sites <- read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>% suppressMessages()
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_WQSITES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_wq.sites = structure(mmp__add_table(wq.sites),
+                                               parent = 'SUBSECTION_WQSITES'),
+                               TAB_CAP.wq.sites = structure(paste0("\n:Water Quality Sites design lookup.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-wqsites}\n\n"),
+                                                   parent = 'SUBSECTION_WQSITES')
+                              )
+MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## ----end
+
+
+## ---- PARAMS lookup
+CURRENT_ITEM <<- 'lookup'
+lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_LOOKUP = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_lookup = structure(mmp__add_table(lookup),
+                                               parent = 'SUBSECTION_LOOKUP'),
+                               TAB_CAP.lookup = structure(paste0("\n:Water Quality Sites design lookup.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-wqsites}\n\n"),
+                                                   parent = 'SUBSECTION_LOOKUP')
+                              )
+MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## ----end
+
+## ---- PARAMS wq.guidelines
+CURRENT_ITEM <<- 'wq.guidelines'
+wq.guidelines <- read.table(paste0(PARAMS_PATH, '/wq.guidelines.txt'), header=TRUE, sep=';', strip.white = TRUE)
+wq.guidelines <- wq.guidelines %>%
+    mutate(SHORT_NAME = str_replace_all(SHORT_NAME, ',', ', '))
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_WQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_wq.guidelines = structure(mmp__add_table(wq.guidelines),
+                                               parent = 'SUBSECTION_WQGUIDELINES'),
+                               TAB_CAP.wq.guidelines = structure(paste0("\n:Water Quality Sites design water quality guidelines.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-wqsites}\n\n"),
+                                                   parent = 'SUBSECTION_WQGUIDELINES')
+                              )
+MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## ----end

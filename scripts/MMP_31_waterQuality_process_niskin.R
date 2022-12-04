@@ -174,7 +174,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
@@ -372,7 +372,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RDa
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
@@ -557,7 +557,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
@@ -771,7 +771,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
@@ -954,7 +954,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
@@ -1136,7 +1136,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.re
             scale_y_discrete('') +
             scale_x_date('',date_breaks='2 years', date_labels='%Y')+
             scale_color_manual('',values=c('red','blue'), limits = c('Dry','Wet')) +
-            facet_grid(Subregion~., scales='free') +
+            facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),

@@ -15,18 +15,112 @@ CURRENT_ITEM <- "disturbances"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
-if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"flntu.all.daily.RData"))) &
-    file.exists(paste0(OTHER_INPUT_PATH, 'disturbance.csv'))) {
-    MMP_tryCatch(disturbance <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbance.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance data', return=TRUE)
-    
-    ## 1. First level of data processing
-    ## ---- AIMS disturbance process level 1
+if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RData"))) &
+    file.exists(paste0(OTHER_INPUT_PATH, 'disturbance_mmp.csv')))
+{
+    ## 1. Read in data
+    ## ---- disturbance data (MMP)
     MMP_tryCatch(
     {
+        disturbance_mmp <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbance_mmp.csv')) %>%
+            suppressMessages()
+        save(disturbance_mmp, file=paste0(OTHER_OUTPUT_PATH, 'disturbance_mmp.RData'))
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL_MMP = structure(paste0("## SQL syntax (MMP)\n"),
+                                                          parent = 'TABSET'),
+                               SQL_MMP = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'disturbance_mmp.sql')),
+                                               parent = 'SUBSECTION_SQL_MMP')
+                               )
 
-        disturbance.reef.mmp = disturbance %>%
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE_MMP = structure(paste0("## Data glimpse (MMP)\n"),
+                                                              parent = 'TABSET'),
+                               TAB_MMP = structure(mmp__add_table(mmp__glimpse_like(disturbance_mmp)),
+                                               parent = 'SUBSECTION_GLIMPSE_MMP'),
+                               TAB.CAP_MMP = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (MMP) data. {#tbl-sql-disturbance_mmp}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE_MMP')
+                              )
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (MMP) data', return=TRUE)
+    ## ----end
+    
+    ## ---- disturbance data (LTMP)
+    MMP_tryCatch(
+    {
+        disturbance_ltmp <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbance_ltmp.csv')) %>%
+            suppressMessages()
+        save(disturbance_ltmp, file=paste0(OTHER_OUTPUT_PATH, 'disturbance_ltmp.RData'))
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_SQL_LTMP = structure(paste0("## SQL syntax (LTMP)\n"),
+                                                          parent = 'TABSET'),
+                               SQL_LTMP = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'disturbance_ltmp.sql')),
+                                               parent = 'SUBSECTION_SQL_LTMP'),
+                               SUBSECTION_GLIMPSE_LTMP = structure(paste0("## Data glimpse (LTMP)\n"),
+                                                              parent = 'TABSET'),
+                               TAB_LTMP = structure(mmp__add_table(mmp__glimpse_like(disturbance_ltmp)),
+                                               parent = 'SUBSECTION_GLIMPSE_LTMP'),
+                               TAB.CAP_LTMP = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (LTMP) data. {#tbl-sql-disturbance_ltmp}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE_LTMP')
+                              )
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (LTMP) data', return=TRUE)
+    ## ----end
+
+    ## ---- disturbance data (cyclones)
+    MMP_tryCatch(
+    {
+        cyclones <- read_csv(paste0(OTHER_INPUT_PATH, 'cyclones.csv')) %>%
+            suppressMessages()
+        save(cyclones, file=paste0(OTHER_OUTPUT_PATH, 'cyclones.RData'))
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_SQL_CYCLONES = structure(paste0("## SQL syntax (Cyclones)\n"),
+                                                          parent = 'TABSET'),
+                               SQL_CYCLONES = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'cyclones.sql')),
+                                               parent = 'SUBSECTION_SQL_CYCLONES'),
+                               SUBSECTION_GLIMPSE_CYCLONES = structure(paste0("## Data glimpse (Cyclones)\n"),
+                                                              parent = 'TABSET'),
+                               TAB_CYCLONES = structure(mmp__add_table(mmp__glimpse_like(cyclones)),
+                                               parent = 'SUBSECTION_GLIMPSE_CYCLONES'),
+                               TAB.CAP_CYCLONES = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (Cyclones) data. {#tbl-sql-cyclones}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE_CYCLONES')
+                              )
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (Cyclones) data', return=TRUE)
+    ## ----end
+
+    ## ---- disturbance data (for plotting)
+    MMP_tryCatch(
+    {
+        disturbanceForPlots <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbanceForPlots.csv')) %>%
+            suppressMessages()
+        save(disturbanceForPlots, file=paste0(OTHER_OUTPUT_PATH, 'disturbanceForPlots.RData'))
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_SQL_DIST4PLOTS = structure(paste0("## SQL syntax (Disturbances for Plots)\n"),
+                                                          parent = 'TABSET'),
+                               SQL_DIST4PLOTS = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'disturbanceForPlots.sql')),
+                                               parent = 'SUBSECTION_SQL_DIST4PLOTS'),
+                               SUBSECTION_GLIMPSE_DIST4PLOTS = structure(paste0("## Data glimpse (Disturbances for Plots)\n"),
+                                                              parent = 'TABSET'),
+                               TAB_DIST4PLOTS = structure(mmp__add_table(mmp__glimpse_like(disturbanceForPlots)),
+                                               parent = 'SUBSECTION_GLIMPSE_DIST4PLOTS'),
+                               TAB.CAP_DIST4PLOTS = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (Disturbances for Plots) data. {#tbl-sql-disturbanceForPlots}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE_DIST4PLOTS')
+                              )
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (Disturbances for Plots) data', return=TRUE)
+    ## ----end
+
+    
+    ## 1. First level of data processing
+    ## ---- AIMS disturbance (MMP) process level 1
+    MMP_tryCatch(
+    {
+        disturbance.reef.mmp <- disturbance_mmp %>%
             mutate(Date=as.Date(paste(2004+VISIT_NO, '-08-30', sep='')))
         ## reef.alias=MMP_SITE_NAME) #%>%
                                         #mutate(reef.alias=MMP_reefAlias(.))
@@ -41,16 +135,148 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"flntu.all.daily.RDat
     MMP_checkData(name = "disturbance.reef.mmp.RData",
                   stage = paste0("STAGE", CURRENT_STAGE),
                   item = CURRENT_ITEM,
-                  label = "AIMS disturbance",
-                  PATH = LOGGER_OUTPUT_PATH,
+                  label = "AIMS MMP disturbance",
+                  PATH = OTHER_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
     ## ----end
 
+    ## ---- AIMS disturbance (LTMP) process level 1
+    MMP_tryCatch(
+    {
+        disturbance.reef.ltmp <- disturbance_ltmp %>%
+            mutate(Date=as.Date(SDATE,format='%d-%b-%Y %H:%M:%S'),
+                   ## reef.alias=MMP_SITE_NAME,
+                   DISTURBANCE=as.factor(tolower(DISTURBANCE)),
+                   DISTURBANCE=dplyr:::recode(DISTURBANCE,u='unk')
+                   ) #%>%
+                                        #mutate(reef.alias=MMP_reefAlias(.))
+        disturbance.reef.ltmp$MMP_SITE_NAME <- ifelse(disturbance.reef.ltmp$P_CODE=='RM' & disturbance.reef.ltmp$MMP_SITE_NAME=='Pandora', 'Pandora North',as.character(disturbance.reef.ltmp$MMP_SITE_NAME))
+        disturbance.reef.ltmp$MMP_SITE_NAME <- ifelse(disturbance.reef.ltmp$P_CODE=='RM' & disturbance.reef.ltmp$MMP_SITE_NAME=='Havannah', 'Havannah North',as.character(disturbance.reef.ltmp$MMP_SITE_NAME))
+
+        save(disturbance.reef.ltmp, file=paste0(OTHER_OUTPUT_PATH, 'disturbance.reef.ltmp.RData'))
+    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of disturbance (LTMP) data', return=TRUE)
+
+    MMP_checkData(name = "disturbance.reef.ltmp.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "AIMS disturbance",
+                  PATH = OTHER_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+
+    ## ---- AIMS disturbance (Cyclones) process level 1
+    MMP_tryCatch(
+    {
+        cyclones.reef <- cyclones %>%
+            mutate(STORM_DATE=as.Date(STORM_DATE,format='%d-%b-%Y %H:%M:%S'),
+                   ## reef.alias=MMP_SITE_NAME,
+                   DISTURBANCE=as.factor(tolower(DISTURBANCE)),
+                   DISTURBANCE=dplyr:::recode(DISTURBANCE,u='unk')
+                   )# %>%
+
+        save(cyclones.reef, file=paste0(OTHER_OUTPUT_PATH, 'cyclones.reef.RData'))
+    }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of disturbance (Cyclones) data', return=TRUE)
+
+    MMP_checkData(name = "cyclones.reef.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "AIMS disturbance",
+                  PATH = OTHER_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+    
+
+    ## 2. Second level of data processing
+    ## ---- Disturbance process level 2
+    MMP_tryCatch(
+    {
+        disturbance.reef.ltmp <- disturbance.reef.ltmp %>%
+            full_join(cyclones.reef %>% dplyr:::select(-DISTURBANCE))
+        ## Combine mmp and ltmp disturbances
+        disturbance.reef <- disturbance.reef.mmp %>%
+            ## dplyr:::select(-MMP_SITE_NAME) %>%
+            full_join(disturbance.reef.ltmp)
+        save(disturbance.reef, file=paste0(OTHER_OUTPUT_PATH, 'disturbance.reef.RData'))
+        disturbance.reef.core = disturbance.reef %>%
+            mutate(MMP_SITE_NAME=gsub(' Island','',MMP_SITE_NAME),
+                   MMP_SITE_NAME=gsub(' Reef',' Rf',MMP_SITE_NAME),
+                   MMP_SITE_NAME=ifelse(MMP_SITE_NAME=='Fitzroy','Fitzroy West',MMP_SITE_NAME)) %>%
+            MMP_region_subregion(Source='disturbance') 
+        save(disturbance.reef.core,file=paste0(OTHER_OUTPUT_PATH, "disturbance.reef.core.RData"))
+    }, LOG_FILE, Category = 'Data processing', msg='Combining disturbance data', return=TRUE)
+             
+    MMP_checkData(name = "disturbance.reef.RData",
+                  stage = paste0("STAGE", CURRENT_STAGE),
+                  item = CURRENT_ITEM,
+                  label = "AIMS disturbance",
+                  PATH = OTHER_OUTPUT_PATH,
+                  progressive = TRUE)
+    MMP_openning_banner()
+    ## ----end
+    
+    ## ---- disturbance outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(OTHER_OUTPUT_PATH, 'disturbance.reef.RData'))
+
+        p <-
+            disturbance.reef %>%
+            MMP_region_subregion(Source = 'disturbance') %>%
+            filter(!is.na(Subregion),
+                   DISTURBANCE %in% c('s','b','c','u','unk','m','f','d')) %>%
+            mutate(DISTURBANCE = case_when(
+                       DISTURBANCE == 's' ~ 'Storm',
+                       DISTURBANCE == 'b' ~ 'Bleaching',
+                       DISTURBANCE == 'c' ~ 'COTS',
+                       DISTURBANCE == 'f' ~ 'Flooding',
+                       DISTURBANCE %in% c('u','unk') ~ 'Unknown',
+                       DISTURBANCE == 'd' ~ 'Disease')
+                   ) %>%
+            mutate(Subregion = factor(Subregion, levels = c('Barron Daintree', 'Johnstone Russell Mulgrave',
+                                                           'Tully Herbert', 'Burdekin',
+                                                           'Mackay Whitsunday', 'Fitzroy'))) %>%
+            ggplot(aes(y = MMP_SITE_NAME, x = Date)) +
+            geom_rect(data = NULL, aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
+            geom_point(aes(colour = DISTURBANCE)) +
+            facet_grid(Subregion~., space = 'free', scales = 'free') +
+            scale_y_discrete('') +
+            scale_x_date('',date_breaks='2 years', date_labels='%Y') +
+            scale_colour_discrete('Disturbance') +
+            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+                  strip.text.x=element_blank(),
+                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/disturbance.reef.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Disturbances recorded\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-disturbances}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/disturbance.reef.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of recorded disturbances coloured according to disturbance type. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+        ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for disturbance data', return=TRUE)
+
+    ## ----end
 } else {
 }
 
-MMP_checkData(name = "disturbance.reef.mmp.RData",
+MMP_checkData(name = "disturbance.reef.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
               label = "Processed AIMS disturbance",

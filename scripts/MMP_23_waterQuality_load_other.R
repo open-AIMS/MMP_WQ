@@ -14,13 +14,14 @@ current_label <- "AIMS Disturbance table"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
-if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance", ".csv"))) {
+## ---- Disturbance MMP
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance_mmp", ".csv"))) {
     writeLines("select inshore_mon_reef_name, MMP_SITE_NAME, depth, visit_no, disturbance, storm_date
                     from in_disturbance
                     where inshore_mon_reef_name not like 'Cape%'",
-               paste0(OTHER_PATH, "disturbance.sql"))
+               paste0(OTHER_PATH, "disturbance_mmp.sql"))
 
-    MMP_tryCatch_db(name = 'disturbance',
+    MMP_tryCatch_db(name = 'disturbance_mmp',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
                     label = current_label,
@@ -34,6 +35,92 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance", ".csv"))) {
             msg=NULL)
     mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
 }
+## ----end
+
+## ---- Disturbance LTMP
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbance_ltmp", ".csv"))) {
+    writeLines("select s.mmp_site_name, d.visit_no, disturbance,p_code, MIN(sample_date) sdate
+           from disturbance.disturbances d, v_in_sample s
+           where s.fullreef_id = d.fullreef_id
+            and p_code ='RM'
+           and s.visit_no = d.visit_no
+            and d.visit_no>0
+           and s.shelf = 'I'
+            and s.a_sector in ('CA','TO','WH')
+            and sample_type = 'PPOINT'
+           group by mmp_site_name, d.visit_no, disturbance,p_code",
+               paste0(OTHER_PATH, "disturbance_ltmp.sql"))
+
+    MMP_tryCatch_db(name = 'disturbance_ltmp',
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
+                    label = current_label,
+                    PATH = OTHER_PATH,
+                    db_user = "reef reefmon", 
+                    progressive=FALSE)
+} else {
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
+}
+## ----end
+
+## ---- Disturbance LTMP Cyclones
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "cyclones", ".csv"))) {
+    writeLines("select MMP_SITE_NAME, d.visit_no, disturbance, name as storm_name, tm as STORM_DATE
+           from disturbance.disturbances d, v_in_sample s, disturbance.cyclones c
+           where s.fullreef_id = d.fullreef_id
+            and d.fullreef_id = c.fullreef_id
+            and p_code ='RM'
+           and s.visit_no = d.visit_no
+            and d.visit_no = c.visit_no
+           and d.visit_no>0
+           and s.shelf = 'I'
+            and s.a_sector in ('CA','TO','WH')
+           group by MMP_SITE_NAME, d.visit_no,disturbance, name,tm",
+               paste0(OTHER_PATH, "cyclones.sql"))
+
+    MMP_tryCatch_db(name = 'cyclones',
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
+                    label = current_label,
+                    PATH = OTHER_PATH,
+                    db_user = "reef reefmon", 
+                    progressive=FALSE)
+} else {
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
+}
+
+## ----end
+
+## ---- Disturbance for plotting
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "disturbanceForPlots", ".csv"))) {
+    writeLines("select catchment, nrm_region, inshore_mon_reef_name, MMP_SITE_NAME, depth, visit_no, disturbance, description, storm_date
+  from in_disturbance
+  where inshore_mon_reef_name not like 'Cape%'",
+               paste0(OTHER_PATH, "disturbanceForPlots.sql"))
+
+    MMP_tryCatch_db(name = 'disturbanceForPlots',
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
+                    label = current_label,
+                    PATH = OTHER_PATH,
+                    db_user = "reef reefmon", 
+                    progressive=FALSE)
+} else {
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
+}
+## ----end
 
 MMP_openning_banner()
 ## ----end

@@ -87,7 +87,7 @@ MMP_initialise_status <- function() {
                       names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
                                 "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers",
-                                "Degree heating weeks","Disturbance table", "Harmonic tides",
+                                "Degree heating weeks","Disturbance tables", "Harmonic tides",
                                 "BOM weather", "River discharge"),
                       status = c("pending","pending","pending",
                                  "pending","pending","pending",

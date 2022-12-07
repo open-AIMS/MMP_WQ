@@ -8,6 +8,8 @@ if (MMP_isParent()) {
 
 OTHER_INPUT_PATH <- paste0(DATA_PATH, "/primary/other/")
 OTHER_OUTPUT_PATH <- paste0(DATA_PATH, "/processed/other/")
+MAXDATE=as.Date(paste0(reportYear,'-09-30'))
+MINDATE=MAXDATE-years(1)+days(1)
 
 
 ## ---- AIMS Disturbance table 
@@ -296,8 +298,12 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"tides.daily.RData"))) &
     file.exists(paste0(OTHER_INPUT_PATH, 'tides.RData'))) {
+    
+    ## 1. Read in data
+    ## ---- Tidal read data
     MMP_tryCatch({
         load(file=paste0(OTHER_INPUT_PATH,"tides.RData"))
+        
     }, LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in tidal data', return=TRUE)
 
     ## 1. First level of data processing
@@ -310,6 +316,101 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"tides.daily.RData"))
         gc()
     }, LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Process tidal data', return=TRUE)
    ## ----end 
+        
+    ## ---- tides outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(OTHER_OUTPUT_PATH, 'tides.daily.RData'))
+
+        tides.sum <-
+            tides.daily %>%
+            imap(~ .x %>% mutate(MMP_SITE_NAME = .y)) %>%
+            bind_rows() %>%
+            left_join(lookup, by = c("MMP_SITE_NAME" = "reef.alias")) %>%
+            left_join(wq.sites %>%
+                      dplyr::select(reef.alias, Latitude),
+                      by = c("MMP_SITE_NAME" = "reef.alias")) %>%
+            mutate(MMP_SITE_NAME = forcats::fct_reorder(MMP_SITE_NAME, Latitude, min, .desc = TRUE)) %>%
+            group_by(Subregion) %>%
+            nest()
+        ## generate the figures
+        tides.sum <- tides.sum %>%
+            mutate(g = map(.x = data,
+                          ~ .x %>% 
+                              ggplot(aes(y = Range, x = as.Date(Date))) +
+                              geom_rect(data = NULL, aes(ymin=-Inf,ymax=Inf,xmin=as.Date(paste0(reportYear,'-10-01'))-years(1)+days(1), xmax=as.Date(paste0(reportYear,'-10-01'))), fill='grey', color=NA) +
+                              geom_line() +
+                              facet_grid(MMP_SITE_NAME  ~ ., space = 'free', switch = 'y') +
+                              scale_y_continuous('') +
+                              scale_x_date('',expand = c(0,0),date_breaks='2 years', date_labels='%Y') +
+                              theme_classic() +
+                              theme(strip.text.y.left = element_text(angle = 0, vjust = 0.5, hjust = 1),
+                                    strip.placement = 'outside',
+                                    strip.background = element_blank())
+                          ## filter(Subregion == 'Burdekin') %>%
+                          ))
+        ## output the figures 
+        purrr::pwalk(
+                   .l = list(path = paste0(OUTPUT_PATH,
+                                           '/figures/processed/tides.daily_',
+                                           tides.sum$Subregion, ".png"),
+                             plot = tides.sum$g),
+                   .f = function(path, plot){
+                       n <- plot$data %>% pull(MMP_SITE_NAME) %>% unique() %>% length()
+                       dims <- wrap_dims(n, ncol = 1, nrow = NULL)
+                       ggsave(filename = path,
+                              plot = plot,
+                              width = 10,
+                              height = 1*dims[1]+0.5,
+                              dpi = 100)
+                   }
+               )
+
+        ## output the doc list initial structure        
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                              )
+
+        ## output the doc list 
+        purrr::pwalk(
+                   .l = list(tides.sum$Subregion),
+                   .f = function(S) {
+                       SS <- str_replace_all(S, ' ','_')
+                       MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                              !!!setNames(list(
+                                                     structure(paste0("## ", S, "\n"),
+                                                               parent = 'TABSET')),
+                                                     paste0('SUBSECTION_DESIGN_',S)
+                                                     ), 
+                                              !!!setNames(list(
+                                                     structure(paste0("\n::: {#fig-sql-tides-",SS,"}\n"),
+                                                               parent = paste0('SUBSECTION_DESIGN_', S))),
+                                                     paste0('FIG_REF_',S)
+                                                      ),
+                                              !!!setNames(list(
+                                                     structure(paste0("![](",OUTPUT_PATH,"/figures/processed/tides.daily_", S, ".png)\n"),
+                                                               parent = paste0("FIG_REF_", S))),
+                                                     paste0('FIG_', S)
+                                                     ),
+                                              !!!setNames(list(
+                                                          structure(paste0("\nTemporal tidal trends for the ", S, " subregion. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                                    parent = paste0('FIG_REF_',S))),
+                                                          paste0('FIG_CAP_',SS)),
+                                              !!!setNames(list(
+                                                     structure(paste0("\n::: \n"),
+                                                               parent = paste0('SUBSECTION_DESIGN_',S))),
+                                                     paste0('FIG_END_', S)
+                                                     ) 
+                                              )
+                   }
+               )
+
+
+    }, LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Process tidal data', return=TRUE)
 } else {
 }
 
@@ -328,9 +429,35 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))) &
     file.exists(paste0(OTHER_INPUT_PATH, 'bom.csv'))) {
-    MMP_tryCatch(bom <- read_csv(paste0(OTHER_INPUT_PATH, 'bom.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in BOM weather data', return=TRUE)
+    ## 1. Read in data
+    ## ---- BOM weather data data
+    MMP_tryCatch(
+    {
+        bom <- read_csv(paste0(OTHER_INPUT_PATH, 'bom.csv')) %>%
+            suppressMessages()
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'bom.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(bom)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the BO weather data. {#tbl-sql-bom}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in BOM weather data', return=TRUE)
     
     ## 1. First level of data processing
     ## ---- BOM weather process level 1
@@ -352,12 +479,118 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
                    cwaterYear = MMP_categoricalWaterYear(Date), 
                    financialYear = MMP_waterYear(Date), 
                    cfinancialYear = MMP_categoricalWaterYear(Date), 
-                   Dt.num <- MMP_decimalDate(Date))
+                   Dt.num = MMP_decimalDate(Date))
     
         save(bom.weather, file=paste0(OTHER_OUTPUT_PATH, 'bom.weather.RData'))
     }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of BOM (historical weather) data', return=TRUE)
     ## ----end
 
+    ## ---- BOM weather outputs
+    MMP_tryCatch(
+    {
+        load(file=paste0(OTHER_OUTPUT_PATH, 'bom.weather.RData'))
+
+        ## design plot
+        p <- ggplot(bom.weather, aes(y=LOCATION, x=Date)) +
+            geom_rect(aes(ymin=-Inf,
+                          ymax=Inf,
+                          xmin=MAXDATE-years(1)+days(1),
+                          xmax=MAXDATE), fill='grey') +
+            geom_point()+
+            ggtitle('BOM weather data')+
+            scale_y_discrete('Location') +
+            theme_classic() +
+            theme(axis.line.x = element_line(),
+                  axis.line.y = element_line())
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/bom.weather.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-bom.weather}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/bom.weather.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of BOM weather data. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+        ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
+ 
+        ## Wind data values (not just dates)
+        filltime <- expand.grid(LOCATION=unique(bom.weather$LOCATION),
+                                Date=seq(MINDATE,MAXDATE,by='1 day'))
+        
+        p <- bom.weather %>%
+            filter(Date>as.Date('2005-01-01')) %>%
+            full_join(filltime) %>%
+            arrange(Date) %>%
+            ggplot(aes(y=WIND_SPEED, x=Date)) +
+            geom_line()+
+            ggtitle('Recent BOM weather data') +
+            facet_wrap(~LOCATION)+
+            scale_y_continuous('Wind speed (m)') +
+            theme_classic() +
+            theme(axis.line.x = element_line(),
+                  axis.line.y = element_line())
+
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/bom.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_SAMPLES = structure(paste0("## BOM Wind data\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF_SAMPLES = structure(paste0("\n::: {#fig-sql-bom}\n"),
+                                                   parent = 'SUBSECTION_SAMPLES'),
+                               FIG_SAMPLES = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/bom.png)\n"),
+                                               parent = "FIG_REF_SAMPLES"),
+                               FIG_CAP_SAMPLES = structure(paste0("\nBOM weather data. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF_SAMPLES'),
+                               FIG_REF_END_SAMPLES = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_SAMPLES')
+                              )
+        ## Wind data for original sites
+        lookup <- read.csv('../parameters/lookup.csv', strip.white = TRUE)
+        p <- bom.weather %>%
+            filter(Date>as.Date('2005-01-01')) %>%
+            full_join(filltime) %>% arrange(Date)  %>%
+            right_join(lookup %>% dplyr::select(LOCATION=BOM, Region, Subregion)) %>%
+            filter(!is.na(STATION_NUMBER)) %>% 
+            ggplot(aes(y=WIND_SPEED, x=Date))+
+            geom_line()+
+            ggtitle('Recent BOM weather data') +
+            facet_wrap(~LOCATION)+
+            scale_y_continuous('Wind speed (m)') +
+            theme(panel.background=element_rect(color='black'),
+                  text=element_text(size=10),
+                  axis.text.x=element_text(angle=20),
+                  panel.grid.major.x=element_line(color='gray', size=0.5),
+                  panel.grid.major.y=element_line(color='gray', size=0.5)
+                  )
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/bom1.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_SAMPLES1 = structure(paste0("## BOM Wind data\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF_SAMPLES1 = structure(paste0("\n::: {#fig-sql-bom1}\n"),
+                                                   parent = 'SUBSECTION_SAMPLES1'),
+                               FIG_SAMPLES1 = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/bom1.png)\n"),
+                                               parent = "FIG_REF_SAMPLES1"),
+                               FIG_CAP_SAMPLES1 = structure(paste0("\nBOM weather data for original MMP WQ sites. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF_SAMPLES1'),
+                               FIG_REF_END_SAMPLES1 = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_SAMPLES1')
+                              )
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for BOM weather data', return=TRUE)
+
+    ## ----end
     
 } else {
 }
@@ -377,9 +610,36 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RData"))) &
     file.exists(paste0(OTHER_INPUT_PATH, 'discharge.csv'))) {
-    MMP_tryCatch(discharge <- read_csv(paste0(OTHER_INPUT_PATH, 'discharge.csv')) %>%
-                     suppressMessages(),
-                 LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in discharge data', return=TRUE)
+    
+    ## 1. Read in data
+    ## ---- AIMS flntu read data
+    MMP_tryCatch(
+    {
+        discharge <- read_csv(paste0(OTHER_INPUT_PATH, 'discharge.csv')) %>%
+            suppressMessages()
+        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                    item = CURRENT_ITEM),"\n\n"),
+                               TABSET = paste0("::: panel-tabset \n\n"),
+                               TABSET_END = paste0("::: \n\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                          parent = 'TABSET'),
+                               SQL = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'discharge.sql')),
+                                               parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(mmp__add_table(mmp__glimpse_like(discharge)),
+                                               parent = 'SUBSECTION_GLIMPSE'),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the river discharge data. {#tbl-sql-discharge}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE')
+                              )
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in discharge data', return=TRUE)
+    ## ----end
 
     ## 1. First level of data processing
     ## ---- discharge process level 1
@@ -392,19 +652,6 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                    reneeYear = MMP_reneeYear(Date), 
                    cwaterYear = MMP_categoricalWaterYear(Date), 
                    Dt.num = MMP_decimalDate(Date))
-        ## g1 <-ggplot(discharge %>% filter(Date>as.Date('2005-01-01')), aes(y=RIVER_NAME, x=Date))+
-        ##     geom_blank() +
-        ##     geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=maxDate-years(1)+days(1), xmax=maxDate), fill='grey')  +
-        ##     geom_point()+ggtitle('River discharge data') + theme_mmp
-        ##                                 #print(g1)
-        ## pdf(file=paste0('../output/figures/discharge/discharge.pdf'), width=10, height=10)
-        ## print(g1)
-        ## dev.off()
-        ## png(file=paste0('../output/figures/discharge/discharge.png'), width=10, height=10,units='in',res=300)
-        ## print(g1)
-        ## dev.off()
-        ##                                 #textplot(capture.output(head(discharge)))
-        ##                                 #title("River discharge data")
 
     }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of discharge data', return=TRUE)
     ## ----end
@@ -413,8 +660,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     ## ---- discharge process level 2
     MMP_tryCatch(
     {
-        river.lookup<-read.csv(paste0(PARAMS_PATH, "/river.gauge.correction.factors.csv"),
-                               strip.white = TRUE)
+        load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
         discharge<-discharge %>% left_join(river.lookup) %>%
             mutate(Year=ifelse(month(Date) > 9, year(Date)+1, year(Date)))
     }, LOG_FILE, Category = 'Data processing', msg='Discharge gauge correction factors', return=TRUE)
@@ -426,16 +672,17 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     ## ---- discharge process level 3
     MMP_tryCatch(
     {
-        discharge <- discharge %>%
-            mutate(Subregion=
-                       ifelse(subregion=='Cape York', 'Cape York',
-                       ifelse(subregion=='Daintree', 'Barron Daintree',
-                       ifelse(subregion=='Johnstone', 'Johnstone Russell Mulgrave',
-                       ifelse(subregion=='Tully', 'Tully Herbert',
-                       ifelse(subregion=='Burdekin','Burdekin',
-                       ifelse(subregion=='Proserpine','Mackay Whitsunday','Fitzroy')))))))
-        discharge <- discharge %>%
-            mutate(Region = ifelse(Subregion %in% c('Barron Daintree','Johnstone Russell Mulgrave', 'Tully Herbert'), 'Wet Tropics', as.character(Subregion)))        
+        ## discharge <- discharge %>%
+        ##     mutate(Subregion=
+        ##                ifelse(subregion=='Cape York', 'Cape York',
+        ##                ifelse(subregion=='Daintree', 'Barron Daintree',
+        ##                ifelse(subregion=='Johnstone', 'Johnstone Russell Mulgrave',
+        ##                ifelse(subregion=='Tully', 'Tully Herbert',
+        ##                ifelse(subregion=='Burdekin','Burdekin',
+        ##                ifelse(subregion=='Proserpine','Mackay Whitsunday','Fitzroy')))))))
+        ## discharge <- discharge %>%
+        ##     mutate(Region = ifelse(Subregion %in% c('Barron Daintree','Johnstone Russell Mulgrave', 'Tully Herbert'), 'Wet Tropics', as.character(Subregion))) %>%
+        ##     mutate(Subregion = factor(Subregion, 
         
         joinRiverIDs <- function(id) {
             id <- as.character(id)
@@ -475,6 +722,47 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     }, LOG_FILE, Category = 'Data processing', msg='Processing discharge data', return=TRUE)
 
     ## ----end    
+    
+    ## ---- discharge outputs
+    MMP_tryCatch(
+    {
+        ## sampling design
+        load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
+        p <- discharge %>%
+            filter(Date>as.Date('2005-01-01')) %>%
+            ggplot(aes(y=RIVER_NAME, x=Date))+
+            geom_blank() +
+            geom_rect(aes(ymin=-Inf,
+                          ymax=Inf,
+                          xmin=MAXDATE-years(1)+days(1),
+                          xmax=MAXDATE), fill='grey')  +
+            geom_point()+
+            scale_y_discrete('') +
+            ggtitle('River discharge data') +
+            facet_grid(Subregion ~ ., scales = 'free_y', space = 'free') +
+            theme_classic()
+        
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/discharge.png'),
+               p,
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF = structure(paste0("\n::: {#fig-sql-discharge}\n"),
+                                                   parent = 'SUBSECTION_DESIGN'),
+                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/discharge.png)\n"),
+                                               parent = "FIG_REF"),
+                               FIG_CAP = structure(paste0("\nTemporal distribution of river discharge. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF'),
+                               FIG_REF_END = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN')
+                              )
+    }, LOG_FILE, Category = 'Data processing', msg='Processing discharge data', return=TRUE)
+
+    ## individual discharge plots
+    ## ----end    
+        
 } else {
 }
 

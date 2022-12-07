@@ -60,3 +60,35 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                               )
 MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 ## ----end
+
+## ---- PARAMS wq.guidelines
+CURRENT_ITEM <<- 'river.lookup'
+river.lookup<-read.csv(paste0(PARAMS_PATH, "/river.gauge.correction.factors.csv"),
+                       strip.white = TRUE)
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_WQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_river.lookup = structure(mmp__add_table(river.lookup),
+                                               parent = 'SUBSECTION_RIVERLOOKUP'),
+                               TAB_CAP.river.lookup = structure(paste0("\n:River discharge lookup table. In particular, this parameter file descibes the mapping between river discharge stations, river names, correction.factors and subregions. {#tbl-riverlookup}\n\n"),
+                                                   parent = 'SUBSECTION_RIVERLOOKUP')
+                              )
+MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+
+river.lookup <- river.lookup %>%
+    mutate(Subregion=
+               ifelse(subregion=='Cape York', 'Cape York',
+               ifelse(subregion=='Daintree', 'Barron Daintree',
+               ifelse(subregion=='Johnstone', 'Johnstone Russell Mulgrave',
+               ifelse(subregion=='Tully', 'Tully Herbert',
+               ifelse(subregion=='Burdekin','Burdekin',
+               ifelse(subregion=='Proserpine','Mackay Whitsunday','Fitzroy')))))),
+           Region = ifelse(Subregion %in% c('Barron Daintree',
+                                            'Johnstone Russell Mulgrave',
+                                            'Tully Herbert'),
+                           'Wet Tropics', as.character(Subregion)),
+           Subregion = factor(Subregion, levels = unique(Subregion)),
+           Region = factor(Region, levels = unique(Region))
+           )
+save(river.lookup, file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
+## ----end

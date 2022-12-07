@@ -612,6 +612,9 @@ MMP_HistoricReef <- function(reef) {
 ##    data:    a dataframe containing LOCATION                        ##
 ########################################################################
 MMP_bomStations <- function(bom) {  
+    ## it seems that in more recent times, there are additional 0's at
+    ## the start of the STATION_NUMBER
+    bom$STATION_NUMBER <- str_replace(bom$STATION_NUMBER, '^0+', '')
     bom$LOCATION <- 'NA'
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="31011", "Cairns Aero",bom$LOCATION)          #MMP
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="31037", "Low Isles Lighthouse",bom$LOCATION) #MMP

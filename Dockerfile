@@ -72,6 +72,22 @@ RUN  wget https://inla.r-inla-download.org/R/stable/src/contrib/INLA_21.02.23.ta
   && R CMD INSTALL --clean --no-multiarch --without-keep.source --byte-compile --resave-data --compact-docs --no-demo INLA_21.02.23.tar.gz \
   && rm INLA_21.02.23.tar.gz
 
+## Install quarto
+
+RUN apt-get update \
+   && apt-get install -y --no-install-recommends \
+    gdebi-core \
+  && rm -rf /var/lib/apt/lists/*
+    
+ARG QUARTO_VERSION="1.2.269"
+RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
+RUN gdebi --non-interactive quarto-linux-amd64.deb
+
+RUN R -e "options(repos = \
+    list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
+  install.packages('quarto'); \
+"
+  
 ## Create project directory in docker image
 RUN mkdir ~/MMP
 

@@ -61,7 +61,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
 MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 ## ----end
 
-## ---- PARAMS wq.guidelines
+## ---- PARAMS river.lookup
 CURRENT_ITEM <<- 'river.lookup'
 river.lookup<-read.csv(paste0(PARAMS_PATH, "/river.gauge.correction.factors.csv"),
                        strip.white = TRUE)
@@ -91,4 +91,22 @@ river.lookup <- river.lookup %>%
            Region = factor(Region, levels = unique(Region))
            )
 save(river.lookup, file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
+## ----end
+
+## ---- PARAMS LTmedian.discharge.river
+CURRENT_ITEM <<- 'LTmedian.discharge.river'
+discharge.baseline <- read.csv(paste0(PARAMS_PATH, "/LTmedian.discharge.river.csv"),
+                               strip.white = TRUE)
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_WQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_LTmedian = structure(mmp__add_table(discharge.baseline),
+                                               parent = 'SUBSECTION_LTMEDIAN'),
+                               TAB_CAP.LTmedian = structure(paste0("\n:Long-term median river discharge data from each of the major rivers. {#tbl-ltmedian}\n\n"),
+                                                   parent = 'SUBSECTION_LTMEDIAN')
+                              )
+discharge.baseline <- discharge.baseLine %>%
+    mutate(River = ifelse(River=="O'Connell River", 'OConnell River',as.character(River)))
+save(discharge.baseline, file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
+
 ## ----end

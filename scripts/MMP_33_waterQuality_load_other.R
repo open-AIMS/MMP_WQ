@@ -697,10 +697,13 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
             }
             i
         }
-        discharge.baseLine <- read.csv(paste0(PARAMS_PATH, "/LTmedian.discharge.river.csv"),
-                                       strip.white = TRUE)
-        discharge.baseLine <- discharge.baseLine %>%
-            mutate(River = ifelse(River=="O'Connell River", 'OConnell River',as.character(River)))
+        ## discharge.baseLine <- read.csv(paste0(PARAMS_PATH, "/LTmedian.discharge.river.csv"),
+        ##                                strip.white = TRUE)
+        ## discharge.baseLine <- discharge.baseLine %>%
+        ##     mutate(River = ifelse(River=="O'Connell River", 'OConnell River',as.character(River)))
+        ## save(discharge.baseline, file=paste0(OTHER_OUTPUT_PATH, 'discharge.baseline.RData'))
+        load(file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
+        
         discharge <- discharge %>%
             left_join(discharge.baseLine)
         discharge <- discharge %>%
@@ -727,40 +730,108 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     MMP_tryCatch(
     {
         ## sampling design
-        load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
-        p <- discharge %>%
-            filter(Date>as.Date('2005-01-01')) %>%
-            ggplot(aes(y=RIVER_NAME, x=Date))+
-            geom_blank() +
-            geom_rect(aes(ymin=-Inf,
-                          ymax=Inf,
-                          xmin=MAXDATE-years(1)+days(1),
-                          xmax=MAXDATE), fill='grey')  +
-            geom_point()+
-            scale_y_discrete('') +
-            ggtitle('River discharge data') +
-            facet_grid(Subregion ~ ., scales = 'free_y', space = 'free') +
-            theme_classic()
-        
-        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/discharge.png'),
+        {
+            load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
+            p <- discharge %>%
+                filter(Date>as.Date('2005-01-01')) %>%
+                ggplot(aes(y=RIVER_NAME, x=Date))+
+                geom_blank() +
+                geom_rect(aes(ymin=-Inf,
+                              ymax=Inf,
+                              xmin=MAXDATE-years(1)+days(1),
+                              xmax=MAXDATE), fill='grey')  +
+                geom_point()+
+                scale_y_discrete('') +
+                ggtitle('River discharge data') +
+                facet_grid(Subregion ~ ., scales = 'free_y', space = 'free') +
+                theme_classic()
+            
+            ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/discharge.png'),
+                   p,
+                   width=12, height=10, dpi = 100)
+
+            MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                   SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                                 parent = 'TABSET'),
+                                   FIG_REF = structure(paste0("\n::: {#fig-sql-discharge}\n"),
+                                                       parent = 'SUBSECTION_DESIGN'),
+                                   FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/discharge.png)\n"),
+                                                   parent = "FIG_REF"),
+                                   FIG_CAP = structure(paste0("\nTemporal distribution of river discharge. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                       parent = 'FIG_REF'),
+                                   FIG_REF_END = structure(paste0("\n::: \n"),
+                                                           parent = 'SUBSECTION_DESIGN')
+                                   )
+        }
+        ## individual discharge plots
+        {
+            load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
+            load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.annual.RData'))
+            load(file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
+            load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
+
+            discharge.subregion <-
+                discharge %>%
+                filter(Date >= as.Date('2006-01-01')) %>%
+                group_by(Subregion) %>%
+                nest()
+            discharge.subregion <- discharge.subregion %>%
+                mutate(Discharge = map(.x = data,
+                                       .f = ~ .x %>%
+                                           group_by(Date) %>%
+                                           summarise(DISCHARGE_RATE_DAILY = sum(PARAM_VALUE))))
+            discharge.annual <- discharge.annual %>%
+                mutate(Date = as.Date(paste0(Year, '-09-01'))) %>%
+                filter(Date >= as.Date('2006-01-01')) %>%
+                group_by(Subregion) %>%
+                nest() %>%
+                rename(Annual = data)
+            
+            discharge.baseline <-
+                discharge.baseline %>%
+                left_join(river.lookup %>% distinct(River, correction.factor, Region, Subregion)) %>%
+                mutate(Region = factor(River, levels = unique(River)),
+                       Subregion = factor(Subregion, levels = unique(Subregion))) %>%
+                group_by(Subregion) %>%
+                ## summarise(LTmedian = sum(LT.median * correction.factor)) %>% 
+                summarise(LTmedian = sum(LT.median)) %>% 
+                group_by(Subregion) %>%
+                nest() %>% 
+                rename(Baseline = data)
+                
+            discharge.subregion <-
+                discharge.subregion %>%
+                full_join(discharge.annual) %>% 
+                full_join(discharge.baseline)
+                
+            ## discharge.subregion[1,'data'][[1]][[1]] %>% head 
+
+            discharge.subregion <-
+                discharge.subregion %>%
+                mutate(plot = pmap(.l = list(Discharge, Annual, Baseline),
+                                   .f = ~ mmp__discharge_plot(Discharge = ..1,
+                                                            Annual = ..2,
+                                                            Baseline = ..3)
+                                   ))
+            
+            ## discharge.subregion[1,'plot'][[1]][[1]] 
+            ## dev.off()
+            
+            discharge.subregion$plot %>%
+                iwalk(.id = discharge.subregion$Subregion,
+                  .f = ~ ggsave(paste0(OUTPUT_PATH, '/figures/processed/discharge_', .id, '.png'),
+                                .x,
+                                width = 10, height = 6,
+                                dpi = 100)
+                  )
+           
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/bom1.png'),
                p,
                width=12, height=10, dpi = 100)
-
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
-                                                             parent = 'TABSET'),
-                               FIG_REF = structure(paste0("\n::: {#fig-sql-discharge}\n"),
-                                                   parent = 'SUBSECTION_DESIGN'),
-                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/discharge.png)\n"),
-                                               parent = "FIG_REF"),
-                               FIG_CAP = structure(paste0("\nTemporal distribution of river discharge. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                                                   parent = 'FIG_REF'),
-                               FIG_REF_END = structure(paste0("\n::: \n"),
-                                                       parent = 'SUBSECTION_DESIGN')
-                              )
+            
+            
+        }
     }, LOG_FILE, Category = 'Data processing', msg='Processing discharge data', return=TRUE)
-
-    ## individual discharge plots
     ## ----end    
         
 } else {

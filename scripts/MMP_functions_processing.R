@@ -736,3 +736,42 @@ MMP_processTides <- function(tidelist) {
     tides.daily
 }
 
+
+## The following function is used to generate individual river
+## discharge figures that blend river dischage with median and
+## long-term values
+mmp__discharge_plot <- function(Discharge = ..1, Annual = ..2, Baseline = ..3) {
+    Discharge %>%
+        ggplot(aes(y = DISCHARGE_RATE_DAILY, x = Date)) +
+        geom_rect(data = NULL,
+                  aes(ymin=-Inf,
+                      ymax=Inf,
+                      xmin=MAXDATE-years(1)+days(1),
+                      xmax=MAXDATE), fill='grey') +
+        geom_hline(data = Baseline,
+                   aes(yintercept = LTmedian/20),
+                   linetype = 'dashed') + 
+        geom_point(data = Annual, aes(y = discharge.c.annual/20),
+                   colour = '#D55E00') +
+        geom_line(data = Annual, aes(y = discharge.c.annual/20),
+                  colour = '#D55E00', alpha = 0.5) +
+        geom_path(colour = '#56B4E9') +
+        scale_y_continuous(str_wrap('Daily river discharge (ML x 10,000)', 25),
+                           sec.axis = sec_axis(~.*20,
+                                               name = str_wrap("Annual river discharge (GL x 10,000)", 25),
+                                               label = function(x) x/10000),
+                           label = function(x) x/10000) +
+        theme_classic() +
+        theme(axis.title.x = element_blank(),
+              axis.line.y.left = element_line(colour = '#56b4e9'),
+              axis.text.y.left = element_text(colour = '#56b4e9'),
+              axis.title.y.left = element_text(colour = '#56b4e9',
+                                               margin = margin(r = 2, unit = 'lines')),
+              axis.ticks.y.left = element_line(colour = '#56b4e9'),
+              axis.line.y.right = element_line(colour = '#D55E00'),
+              axis.text.y.right = element_text(colour = '#D55E00'),
+              axis.title.y.right = element_text(colour = '#D55E00',
+                                                margin = margin(l = 2, unit = 'lines')),
+              axis.ticks.y.right = element_line(colour = '#D55E00')
+              )
+}

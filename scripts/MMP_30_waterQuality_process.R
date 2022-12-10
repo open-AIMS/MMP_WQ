@@ -8,6 +8,8 @@ if (MMP_isParent()) {
 
 assign("CURRENT_STAGE", 3, env = globalenv())
 
+## assign("DOC_REPORT_LIST", list(), env = globalenv())
+
 ## - AIMS niskin
 ## - AIMS Cairns transect
 ## - JCU niskin
@@ -20,3 +22,12 @@ source("MMP_31_waterQuality_process_niskin.R")
 ## - Water temperature loggers
 ## - Salinity loggers
 source("MMP_32_waterQuality_process_loggers.R")
+
+## - Degree heating weeks
+## - Disturbance table
+## - tides
+## - BOM weather
+source("MMP_33_waterQuality_load_other.R")
+
+
+source("MMP_35_processedData_report.R")

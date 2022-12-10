@@ -13,6 +13,12 @@ MMP_isParent <- function() {
    ifelse(sys.nframe()==1, TRUE, FALSE) 
 }
 
+MMP_fakeArgs <- function() {
+    MMP_startMatter(args = c('','','','','',
+                             '--reportYear=2022',
+                             '--runStage=3',
+                             '--alwaysExtract=TRUE'))
+}
 
 #########################################################################
 ## The following function is a wrapper to a series of functions that:  ##
@@ -73,10 +79,22 @@ MMP_initialise_status <- function() {
                                  "pending","pending","pending","pending","pending","pending","pending","pending","pending","pending")
                       ),
         STAGE3 = list(title = "Stage 3 - process data",
-                      items = c("aimsNiskin", "cairnsTransect", "jcuNiskin","jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin"),
-                      names = c("AIMS niskin data", "Cairns transect data","JCU niskin data","JCY CY niskin data",
-                                "JCU Event niskin data","JCU CY Event niskin data"),
-                      status = c("pending","pending","pending","pending","pending","pending")
+                      items = c("aimsNiskin", "cairnsTransect", "jcuNiskin",
+                                "jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin",
+                                "flntu", "waterTemp", "salinity",
+                                "dhw","disturbances","tides",
+                                "BOM","discharge"),
+                      names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
+                                "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
+                                "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers",
+                                "Degree heating weeks","Disturbance tables", "Harmonic tides",
+                                "BOM weather", "River discharge"),
+                      status = c("pending","pending","pending",
+                                 "pending","pending","pending",
+                                 "pending","pending","pending",
+                                 "pending","pending","pending",
+                                 "pending","pending"
+                                 )
                       )
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -197,7 +215,8 @@ MMP_parseCLA <- function(args) {
 MMP_loadPackages <- function(log = TRUE) {           
     missing <- ''
     options(tidyverse.quiet = TRUE)
-    pkgs <- c('tidyverse','testthat','cli','rlang','crayon', 'assertthat', 'lubridate'
+    pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
+              'assertthat', 'lubridate', 'rmarkdown','bookdown'
               )
 
     for (p in pkgs) {
@@ -302,10 +321,16 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(DATA_PATH, '/processed/loggers'))
     if (!dir.exists(paste0(DATA_PATH, '/processed/other')))
         dir.create(paste0(DATA_PATH, '/processed/other'))
+    if (!dir.exists(paste0(DATA_PATH, '/reports')))
+        dir.create(paste0(DATA_PATH, '/reports'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
         dir.create(paste0(OUTPUT_PATH, '/tables'))
+    if (!dir.exists(paste0(OUTPUT_PATH, '/figures')))
+        dir.create(paste0(OUTPUT_PATH, '/figures'))
+    if (!dir.exists(paste0(OUTPUT_PATH, '/figures/processed')))
+        dir.create(paste0(OUTPUT_PATH, '/figures/processed'))
 
     if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
 
@@ -434,6 +459,12 @@ mmp__change_name <- function(stage, item, name) {
 mmp__append_filesize <- function(stage, item, label, filepath) {
     filesize <- R.utils::hsize(file.size(paste0(filepath)))
     mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+}
+
+mmp__get_name <- function(stage, item) {
+    str_replace(STATUS[[stage]]$names[which(STATUS[[stage]]$item == item)],
+                '(.*) \\[.*\\]',
+                '\\1')
 }
 
 MMP_test <- function() {
@@ -615,24 +646,28 @@ MMP_tryCatch_db <- function(name = 'niskin',
 MMP_checkData <- function(name = "niskin.csv",
                     stage = "STAGE2",
                     item = "aimsNiskin",
-                    label = "AIMS niskin",
+                    label = "",
+                    label.prefix = "",
+                    label.suffix = "",
                     PATH = NISKIN_PATH,
                     progressive = FALSE)
 {
+    label <- ifelse(label == "", mmp__get_name(stage, item), label)
     if (file.exists(paste0(PATH, name))) {
         if (!progressive) {
             MMP_log(status = "SUCCESS",
                     logFile = LOG_FILE,
-                    Category = paste0(label, " data exists"),
+                    Category = str_squish(paste(label.prefix,label, label.suffix, " data exists")),
                     msg=NULL)
             mmp__change_status(stage = stage, item = item, status = "success")
-            filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
-            mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
+            mmp__append_filesize(stage = stage, item, label, paste0(PATH, name))
+            ## filesize <- R.utils::hsize(file.size(paste0(PATH, name)))
+            ## mmp__change_name(stage = stage, item = item, name = paste0(label, "  [",filesize, "]"))
         }
     } else {
         MMP_log(status = "FAILURE",
                 logFile = LOG_FILE,
-                Category = paste0(label, " data does not exist"),
+                Category = str_squish(paste(label.prefix, label, label.suffix, " data does not exist")),
                 msg=NULL) 
         mmp__change_status(stage = stage, item = item, status = "failure")
     }
@@ -647,3 +682,163 @@ MMP_getTides <- function(ref, loc,path,file, t.start, t.end) {
     tmp<- data.frame(tmp,reef.alias=loc)
     tmp
 }
+
+
+MMP_add_to_report <- function(report_list, content) {
+    report_list <- report_list %>% append(content)
+    assign("DOC_REPORT_LIST", report_list, env = globalenv())
+}
+
+mmp__sql <- function(file) {
+    paste0("```{sql}\n",
+           "#| filename: ", file,"\n",
+           "#| eval: false\n",
+           "#| code-fold: false\n\n",
+           readr::read_file(file),
+           "```\n\n")
+}
+
+mmp__add_table <- function(tab) {
+    knitr::kable(tab)
+}
+
+mmp__glimpse_like <- function(tab) {
+    data.frame(Variable = names(tab),
+               Class = sapply(tab, typeof),
+               `First values` = sapply(tab, function(x) paste0(head(x, 5),  collapse = ", ")),
+               row.names = NULL)  
+}
+
+my_html_document <- function(template = "", ...) {
+  base_format <- rmarkdown::html_document(...)
+
+  template_arg <- which(base_format$pandoc$args == "--template") + 1L
+  base_format$pandoc$args[template_arg] <- template
+
+  base_format
+}
+
+
+MMP_add_to_report_list <- function(stage, item, ...) {
+    values <- list2(...)
+    ## values <- c(..., use.names = TRUE)
+    stage <- paste0("STAGE", stage)
+    list.filename <- paste(stage, item, ".RData", sep = "_")
+    if (!file.exists(paste0(DATA_PATH, "/reports/", list.filename))) {
+        doc_list <- list()
+        save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+    }
+    load(paste0(DATA_PATH, "/reports/", list.filename))
+    nms <- names(unlist(doc_list))
+    ## find_and_replace <- function(x, find, replace){
+    ##         if(is.list(x)){
+    ##             n <- names(x) == find
+    ##             if (any(n)) {
+    ##                 wch <- which(n)
+    ##                 ## print(wch)
+    ##                 ## print(x[wch])
+    ##                 ## print(replace)
+    ##                 ## xx <- x[[wch]]
+    ##                 ## xx <- append(xx, replace)
+    ##                 ## x[[wch]] <- xx
+    ##                 x[[wch]] <- append(x[[wch]], replace)
+    ##                 ## print(x[wch])
+    ##             }
+    ##             lapply(x, find_and_replace, find=find, replace=replace)
+    ##         }else{
+    ##             x
+    ##         }
+    ##     }
+    find_and_append <- function(x, find, replace){
+        if(is.list(x)){
+            n <- names(x) == find
+            if (any(n)) {
+                wch <- which(n)
+                x[[wch]] <- append(x[[wch]], replace)
+            }
+            lapply(x, find_and_append, find=find, replace=replace)
+        }else{
+            x
+        }
+    }
+    ## find_name <- function(haystack, needle) {
+    ##     if (hasName(haystack, needle)) {
+    ##         haystack[[needle]]
+    ##     } else if (is.list(haystack)) {
+    ##         for (obj in haystack) {
+    ##             ret <- Recall(obj, needle)
+    ##             if (!is.null(ret)) return(ret)
+    ##         }
+    ##     } else {
+    ##         NULL
+    ##     }
+    ## }
+
+## find_ref <- function(haystack, needle) {
+##  if (hasName(haystack, needle)) {
+##    haystack[needle]
+##  } else if (is.list(haystack)) {
+##    for (obj in haystack) {
+##      ret <- Recall(obj, needle)
+##      if (!is.null(ret)) return(ret)
+##    }
+##  } else {
+##    NULL
+##  }
+## }
+
+## do.call(`<-`, list(parse(text = e)[[1]], append(parse(text = e)[[1]], list('Big' = structure(list('An item'), parent = 'hat')), after = 1)))
+    for (i in 1:length(values)) {
+        nms <- names(unlist(doc_list))
+        parent <- attr(values[[i]], 'parent')
+        value <- values[i]
+        if(!is.null(parent)) {
+            if (any(str_which(nms, parent))) {
+                doc_list <- find_and_append(doc_list, parent, value)
+            }else {
+                doc_list <- append(doc_list, value)
+            }
+            ## if (!is.null(parent)) {
+            ##     doc_list[[parent]] <- append(doc_list[[parent]], value)
+        } else {
+            doc_list <- append(doc_list, value)
+        }
+        assign('doc_list', doc_list, envir = globalenv())
+    }
+    save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+}
+
+
+
+
+
+## MMP_add_to_report_list <- function(stage, item, ...) {
+##     values <- list2(...)
+##     ## values <- c(..., use.names = TRUE)
+##     stage <- paste0("STAGE", stage)
+##     list.filename <- paste(stage, item, ".RData", sep = "_")
+##     if (!file.exists(paste0(DATA_PATH, "/reports/", list.filename))) {
+##         doc_list <- list()
+##         save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+##     }
+##     load(paste0(DATA_PATH, "/reports/", list.filename))
+
+##     for (i in 1:length(values)) {
+##          parent <- attr(values[[i]], 'parent')
+##          value <- values[i]
+##          if (!is.null(parent)) {
+##              doc_list[[parent]] <- append(doc_list[[parent]], value)
+##          } else {
+##              doc_list <- append(doc_list, value)
+##          }
+##          assign('doc_list', doc_list, envir = globalenv())
+##     }
+##     save(doc_list, file = paste0(DATA_PATH, "/reports/", list.filename))
+## }
+MMP_get_report_list <- function(stage, item) {
+    stage <- paste0("STAGE", stage)
+    list.filename <- paste(stage, item, ".RData", sep = "_")
+    load(paste0(DATA_PATH, "/reports/", list.filename))
+    doc_list
+}
+

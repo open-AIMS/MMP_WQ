@@ -90,7 +90,8 @@ MMP_reorderReefs <- function(data) {
 }
 
 MMP_selectReefs <- function(data,source='niskin') {
-    lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    ## lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
     if (source=='niskin') {
         rfs <- as.character((lookup %>% filter(Niskin==T))$SHORT_NAME)
         data <- data %>% filter(SHORT_NAME %in% rfs) %>% droplevels %>% mutate(MMP=TRUE)
@@ -473,7 +474,8 @@ MMP_depthWeightedAverages <- function(data) {
             data.frame(Date=mean(x$Date), Time=mean(x$Time),
                        IntDepthSD= prepare.for.trapez(x$DIP, x$DEPTH,x$SECCHI_DEPTH)$IntDepth,
                        IntDepthAD= prepare.for.trapez(x$DIP, x$DEPTH,x$ACOUSTIC_DEPTH)$IntDepth,
-                       x %>% summarise_each(funs(mean(., na.rm=TRUE)), numeric_cols, -DEPTH),
+                       ## x %>% summarise_each(funs(mean(., na.rm=TRUE)), numeric_cols, -DEPTH),
+                       x %>% summarise(across(c(where(is.numeric),-DEPTH), ~ mean(.x, na.rm = TRUE))),
                        plyr:::numcolwise(trapezoid.mean, depth=x$DEPTH, max.depth=x$DEPTH)(x[,-which(colnames(x) %in% c("DEPTH","STATION_CLASS"))]),
                        plyr:::numcolwise(trapezoid.mean, depth=x$DEPTH, max.depth=x$SECCHI_DEPTH)(x[,-which(colnames(x) %in% c("DEPTH","STATION_CLASS"))]),             
                        plyr:::numcolwise(trapezoid.mean, depth=x$DEPTH, max.depth=x$ACOUSTIC_DEPTH)(x[,-which(colnames(x) %in% c("DEPTH","STATION_CLASS"))]),
@@ -494,8 +496,10 @@ MMP_depthWeightedAverages <- function(data) {
 ## The following function adds Region and Subregion to the data source ##
 #########################################################################
 MMP_region_subregion<- function(data, Source=NULL) {
-    lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
-    coral.lookup <- read_csv(paste0(PARAMS_PATH, '/coral.lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    ## lookup <- read_csv(paste0(PARAMS_PATH, '/lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    ## coral.lookup <- read_csv(paste0(PARAMS_PATH, '/coral.lookup.csv'), trim_ws = TRUE) %>% suppressMessages()
+    lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
+    coral.lookup <- read.csv(paste0(PARAMS_PATH, '/coral.lookup.csv'), strip.white = TRUE) %>% suppressMessages()
     if (is.null(Source)) data %>% left_join(lookup %>% dplyr:::select(SHORT_NAME,Region,Reg,Subregion,Subreg)) %>% as.data.frame
     else if (Source=='Niskin')  data %>% left_join(lookup %>% dplyr:::select(SHORT_NAME,Region,Reg,Subregion,Subreg,Niskin)) %>% as.data.frame
     else if (Source=='FLNTU')  data %>% left_join(lookup %>% dplyr:::select(SHORT_NAME,Region,Reg,Subregion,Subreg,FLNTU)) %>% as.data.frame
@@ -597,3 +601,177 @@ MMP_HistoricReef <- function(reef) {
            TRUE,FALSE)
 }
 
+
+########################################################################
+## The following function adds a Field to the bom data that indicates ##
+## a Location for where the data are collected.  This is a little     ##
+## easier to work with than the STATION_NUMBER.                       ##
+## Parameters:                                                        ##
+##    data:    a dataframe containing STATION_NUMBER                  ##
+## Returns:                                                           ##
+##    data:    a dataframe containing LOCATION                        ##
+########################################################################
+MMP_bomStations <- function(bom) {  
+    ## it seems that in more recent times, there are additional 0's at
+    ## the start of the STATION_NUMBER
+    bom$STATION_NUMBER <- str_replace(bom$STATION_NUMBER, '^0+', '')
+    bom$LOCATION <- 'NA'
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="31011", "Cairns Aero",bom$LOCATION)          #MMP
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="31037", "Low Isles Lighthouse",bom$LOCATION) #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="31192", "Green Island",bom$LOCATION)           #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="31213", "Cape Flattery",bom$LOCATION)          #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="32040", "Townsville Aero",bom$LOCATION)        #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="32141", "Lucinda Point",bom$LOCATION)          #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33106", "Hamilton Island Airport",bom$LOCATION)#MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33210", "St Lawrence",bom$LOCATION)            #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33247", "Proserpine Airport",bom$LOCATION)     #MMP 
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33255", "Hamilton Island",bom$LOCATION)        #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33294", "Yeppoon The Esplanade",bom$LOCATION)  #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33295", "Alva Beach",bom$LOCATION)             #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="33317", "Hay Point",bom$LOCATION)              #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="39059", "Lady Elliot Island",bom$LOCATION)     #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="39122", "Heron Island Res Stn",bom$LOCATION)   #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="39304", "Heron Island",bom$LOCATION)           #MMP
+    bom$LOCATION<-ifelse(bom$STATION_NUMBER=="39322", "Rundle Island",bom$LOCATION)          #MMP
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="1007", "Troughton Island",bom$LOCATION)      #Kimberleys
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="5007", "Learmonth Airport",bom$LOCATION)     #WA
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="5094", "Barrow Island Airport",bom$LOCATION) #WA
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14015", "Darwin Airport",bom$LOCATION)       #Darwin
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14072", "NA",bom$LOCATION)                   #??
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14198", "Jabiru Airport",bom$LOCATION)       #Darwin
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14274", "McCluer Island",bom$LOCATION)       #Darwin
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14508", "Gove Airport",bom$LOCATION)         #NT
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14518", "Groote Eylandt Airport",bom$LOCATION)#NT
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14948", "Port Keats Airport",bom$LOCATION)   #NT
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="27058", "Horn Island",bom$LOCATION)          #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="28008", "Lockhart River Airport",bom$LOCATION)#QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="31209", "Cooktown Airport",bom$LOCATION)     #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="33119", "Mackay M.o",bom$LOCATION)           #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="33083", "Cardowan",bom$LOCATION)             #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="39123", "Gladstone Radar",bom$LOCATION)      #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="40068", "Double Island Point Lighthouse",bom$LOCATION)#QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="200001", "Middle Percy Island",bom$LOCATION) #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="200713", "NA",bom$LOCATION)                  #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="200782", "NA",bom$LOCATION)   #??
+    bom$LOCATION <- factor(bom$LOCATION)
+    droplevels(bom)
+}
+
+## The following are a series of functions that should not be called  ##
+## directly.  They relate to calculating properties of the tidal data ##
+########################################################################
+peaks<-function(series,span=3) 
+{ 
+    z <- embed(series, span) 
+    s <- span%/%2 
+    v<- max.col(z) == 1 + s 
+    result <- c(rep(FALSE,s),v) 
+    result <- c(result,NA)
+    result
+} 
+troughs<-function(series,span=3) 
+{ 
+    series <- -1*series
+    z <- embed(series, span) 
+    s <- span%/%2 
+    v<- max.col(z) == 1 + s 
+    result <- c(rep(FALSE,s),v) 
+    result <- c(result, NA)
+    result
+} 
+highlowTide <- function(data) {
+    data$high <- peaks(data$Height)
+    data$low <- troughs(data$Height)
+    subset(data, high==TRUE | low==TRUE)
+}
+tideRange <- function(data) {
+    dt <- NULL
+    for (i in 2:nrow(data)) {
+        dt<-rbind(dt,
+                  data.frame(DateTime=data$DateTime[i], 
+                             Date=data$Date[i], 
+                             Height=data$Height[i], 
+                             range=data$Height[i-1]-data$Height[i], 
+                             high=data$high[i]))
+    }
+    dt
+}
+maxTideRange <- function(data) {
+    plyr:::ddply(data,~Date, function(df) {
+        data.frame(Range=max(abs(df$Range)))
+    })
+}
+
+########################################################################
+## The following function is used to calculate the daily tidal range. ##
+## This in turn might be useful as a proxy for tidal water movement.  ##
+## Parameters:                                                        ##
+##    tidelist:  a list - each item is tidal data for a specific      ##
+##                  location                                          ##
+## Returns:                                                           ##
+##    list:      a list of daily tidal ranges                         ##
+########################################################################
+MMP_processTides <- function(tidelist) {
+    ##The following function is written in C++     
+    ##It replaces an R function that employs a necessary for loop (cannot be vectorized because it needs to compare across rows) 
+    library(Rcpp)
+    cppFunction(' 
+  NumericVector tideRng(NumericVector x) {
+    int n=x.size();
+    NumericVector range(n);
+    for (int i=1; i<n; i++) {
+      range[i]=x[i-1]-x[i];
+    }
+    return range;
+  }', showOutput=FALSE, rebuild=TRUE
+                )
+    tides.daily <- list()
+    for (i in 1:length(tidelist)) {
+        tides.daily[[i]] <- highlowTide(tidelist[[i]])
+        tides.daily[[i]]$Range <- tideRng(tides.daily[[i]]$Height)
+        tides.daily[[i]] <- maxTideRange(tides.daily[[i]])
+        tides.daily[[i]]$Date <- as.Date(tides.daily[[i]]$Date)
+    }
+    names(tides.daily) <- names(tidelist)
+    tides.daily
+}
+
+
+## The following function is used to generate individual river
+## discharge figures that blend river dischage with median and
+## long-term values
+mmp__discharge_plot <- function(Discharge = ..1, Annual = ..2, Baseline = ..3) {
+    Discharge %>%
+        ggplot(aes(y = DISCHARGE_RATE_DAILY, x = Date)) +
+        geom_rect(data = NULL,
+                  aes(ymin=-Inf,
+                      ymax=Inf,
+                      xmin=MAXDATE-years(1)+days(1),
+                      xmax=MAXDATE), fill='grey') +
+        geom_hline(data = Baseline,
+                   aes(yintercept = LTmedian/20),
+                   linetype = 'dashed') + 
+        geom_point(data = Annual, aes(y = discharge.c.annual/20),
+                   colour = '#D55E00') +
+        geom_line(data = Annual, aes(y = discharge.c.annual/20),
+                  colour = '#D55E00', alpha = 0.5) +
+        geom_path(colour = '#56B4E9') +
+        scale_y_continuous(str_wrap('Daily river discharge (ML x 10,000)', 25),
+                           sec.axis = sec_axis(~.*20,
+                                               name = str_wrap("Annual river discharge (GL x 10,000)", 25),
+                                               label = function(x) x/10000),
+                           label = function(x) x/10000) +
+        theme_classic() +
+        theme(axis.title.x = element_blank(),
+              axis.line.y.left = element_line(colour = '#56b4e9'),
+              axis.text.y.left = element_text(colour = '#56b4e9'),
+              axis.title.y.left = element_text(colour = '#56b4e9',
+                                               margin = margin(r = 2, unit = 'lines')),
+              axis.ticks.y.left = element_line(colour = '#56b4e9'),
+              axis.line.y.right = element_line(colour = '#D55E00'),
+              axis.text.y.right = element_text(colour = '#D55E00'),
+              axis.title.y.right = element_text(colour = '#D55E00',
+                                                margin = margin(l = 2, unit = 'lines')),
+              axis.ticks.y.right = element_line(colour = '#D55E00')
+              )
+}

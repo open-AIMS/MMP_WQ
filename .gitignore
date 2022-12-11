@@ -2,6 +2,7 @@
 mmp.log
 data
 outputs
-docs
+docs/*
+!docs/MMP_processData.editMe
 *.sif
 *.tar

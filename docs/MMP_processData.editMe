@@ -1,0 +1,27 @@
+---
+title: "MMP Water Quality processed data report"
+author: "Murray Logan"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    css: resources/style.css
+    toc: true
+    toc-float: true
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    code-fold: true
+    code-tools: true
+    code-summary: "Show the code"
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+bibliography: resources/references.bib
+---
+
+# Start matter
+
+# References

@@ -110,6 +110,20 @@ module load singularity
 singularity exec - B .:/home/Project ../mmp.sif Rscript MMP_00_main.R 
 ```
 
+**4.5. Run an interactive R session from singularity (local or HPC)**
+
+- if HPC must start with `module load singularity`
+
+- in emacs, open shell (`M-x shell`)
+- navigate to `scripts` folder
+- run the following
+```console
+singularity exec - B .:/home/Project ../mmp.sif R 
+```
+- `M-x ess-remote`
+- open the R script and start sending code (if necessary switch process)
+
+
 **5. Clean up (remove all docker containers, images, and cache).**
 As we saw in Step 1, it can take quite a while to build the docker image. This is because the image is quite large (i.e. uses a lot of memory). Therefore, when we are completely finished with Docker, we should restore this memory. 
 

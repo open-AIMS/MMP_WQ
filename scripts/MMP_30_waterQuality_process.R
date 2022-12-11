@@ -10,6 +10,13 @@ assign("CURRENT_STAGE", 3, env = globalenv())
 
 ## assign("DOC_REPORT_LIST", list(), env = globalenv())
 
+## - wq.sites
+## - lookup
+## - wd.guidelines
+## - river.lookup
+## - LTmedian.discharge.river
+source("MMP_30.5_parameter_files.R")
+
 ## - AIMS niskin
 ## - AIMS Cairns transect
 ## - JCU niskin

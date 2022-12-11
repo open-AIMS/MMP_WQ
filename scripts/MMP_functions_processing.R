@@ -748,9 +748,9 @@ mmp__discharge_plot <- function(Discharge = ..1, Annual = ..2, Baseline = ..3) {
                       ymax=Inf,
                       xmin=MAXDATE-years(1)+days(1),
                       xmax=MAXDATE), fill='grey') +
-        geom_hline(data = Baseline,
+        {if(!is.null(nrow(Baseline))) geom_hline(data = Baseline,
                    aes(yintercept = LTmedian/20),
-                   linetype = 'dashed') + 
+                   linetype = 'dashed') } + 
         geom_point(data = Annual, aes(y = discharge.c.annual/20),
                    colour = '#D55E00') +
         geom_line(data = Annual, aes(y = discharge.c.annual/20),

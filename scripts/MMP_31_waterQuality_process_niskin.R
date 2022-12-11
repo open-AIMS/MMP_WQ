@@ -612,8 +612,6 @@ MMP_tryCatch(
                           paste0("::: \n\n")
                       )
                       )
-    
-    save(DOC_REPORT_LIST, file = paste0(DATA_PATH, "/processed/DOC_REPORT_LIST.RData"))
 }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (JCU) data', return=TRUE)
 
 ## ----end
@@ -1180,4 +1178,3 @@ MMP_checkData(name = "niskin.cy.event.reef.av1.RData",
 MMP_openning_banner()
 
 ## ----end
-

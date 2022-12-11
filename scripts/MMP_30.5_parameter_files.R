@@ -27,7 +27,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                TAB_CAP.wq.sites = structure(paste0("\n:Water Quality Sites design lookup.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-wqsites}\n\n"),
                                                    parent = 'SUBSECTION_WQSITES')
                               )
-MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 ## ----end
 
 
@@ -42,7 +42,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                TAB_CAP.lookup = structure(paste0("\n:Water Quality Sites design lookup.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-wqsites}\n\n"),
                                                    parent = 'SUBSECTION_LOOKUP')
                               )
-MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 ## ----end
 
 ## ---- PARAMS wq.guidelines
@@ -58,7 +58,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                TAB_CAP.wq.guidelines = structure(paste0("\n:Water Quality Sites design water quality guidelines.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-wqsites}\n\n"),
                                                    parent = 'SUBSECTION_WQGUIDELINES')
                               )
-MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 ## ----end
 
 ## ---- PARAMS river.lookup
@@ -73,7 +73,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                TAB_CAP.river.lookup = structure(paste0("\n:River discharge lookup table. In particular, this parameter file descibes the mapping between river discharge stations, river names, correction.factors and subregions. {#tbl-riverlookup}\n\n"),
                                                    parent = 'SUBSECTION_RIVERLOOKUP')
                               )
-MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 
 river.lookup <- river.lookup %>%
     mutate(Subregion=
@@ -105,7 +105,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                TAB_CAP.LTmedian = structure(paste0("\n:Long-term median river discharge data from each of the major rivers. {#tbl-ltmedian}\n\n"),
                                                    parent = 'SUBSECTION_LTMEDIAN')
                               )
-discharge.baseline <- discharge.baseLine %>%
+discharge.baseline <- discharge.baseline %>%
     mutate(River = ifelse(River=="O'Connell River", 'OConnell River',as.character(River)))
 save(discharge.baseline, file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
 

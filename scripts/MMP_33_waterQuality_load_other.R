@@ -305,6 +305,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"tides.daily.RData"))
         load(file=paste0(OTHER_INPUT_PATH,"tides.RData"))
         
     }, LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in tidal data', return=TRUE)
+    ## ----end
 
     ## 1. First level of data processing
     ## ---- tides process level 1
@@ -411,6 +412,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"tides.daily.RData"))
 
 
     }, LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Process tidal data', return=TRUE)
+    ## ----end
 } else {
 }
 
@@ -458,6 +460,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in BOM weather data', return=TRUE)
+    ## ----end
     
     ## 1. First level of data processing
     ## ---- BOM weather process level 1
@@ -705,7 +708,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
         load(file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
         
         discharge <- discharge %>%
-            left_join(discharge.baseLine)
+            left_join(discharge.baseline)
         discharge <- discharge %>%
             filter(waterYear<=reportYear)
         save(discharge, file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
@@ -804,7 +807,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                 full_join(discharge.annual) %>% 
                 full_join(discharge.baseline)
                 
-            ## discharge.subregion[1,'data'][[1]][[1]] %>% head 
+            discharge.subregion[1,'data'][[1]][[1]] %>% as.data.frame %>% head 
+            discharge.subregion[4,'Baseline'][[1]][[1]] %>% as.data.frame %>% head 
 
             discharge.subregion <-
                 discharge.subregion %>%
@@ -816,22 +820,48 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
             
             ## discharge.subregion[1,'plot'][[1]][[1]] 
             ## dev.off()
-            
-            discharge.subregion$plot %>%
-                iwalk(.id = discharge.subregion$Subregion,
-                  .f = ~ ggsave(paste0(OUTPUT_PATH, '/figures/processed/discharge_', .id, '.png'),
+
+            ## save the figures
+            walk2(.x = discharge.subregion$plot,
+                  .y = discharge.subregion$Subregion,
+                  .f = ~ ggsave(paste0(OUTPUT_PATH, '/figures/processed/discharge_', .y, '.png'),
                                 .x,
                                 width = 10, height = 6,
                                 dpi = 100)
                   )
-           
-        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/bom1.png'),
-               p,
-               width=12, height=10, dpi = 100)
-            
-            
+            walk(.x = discharge.subregion$Subregion,
+                 .f = function(S) {
+                       SS <- str_replace_all(S, ' ','_')
+                       MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                              !!!setNames(list(
+                                                     structure(paste0("## ", S, "\n"),
+                                                               parent = 'TABSET')),
+                                                     paste0('SUBSECTION_DESIGN_',S)
+                                                     ), 
+                                              !!!setNames(list(
+                                                     structure(paste0("\n::: {#fig-sql-discharge-",SS,"}\n"),
+                                                               parent = paste0('SUBSECTION_DESIGN_', S))),
+                                                     paste0('FIG_REF_',S)
+                                                      ),
+                                              !!!setNames(list(
+                                                     structure(paste0("![](",OUTPUT_PATH,"/figures/processed/discharge_", S, ".png)\n"),
+                                                               parent = paste0("FIG_REF_", S))),
+                                                     paste0('FIG_', S)
+                                                     ),
+                                              !!!setNames(list(
+                                                          structure(paste0("\nDaily river discharge (blue) and annual river discharge (red) for the ", S, " subregion. The dashed horizontal line represents the long term median discharge.  Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                                    parent = paste0('FIG_REF_',S))),
+                                                          paste0('FIG_CAP_',SS)),
+                                              !!!setNames(list(
+                                                     structure(paste0("\n::: \n"),
+                                                               parent = paste0('SUBSECTION_DESIGN_',S))),
+                                                     paste0('FIG_END_', S)
+                                                     ) 
+                                              )
+                 }
+                 )
         }
-    }, LOG_FILE, Category = 'Data processing', msg='Processing discharge data', return=TRUE)
+    }, LOG_FILE, Category = 'Data processing:', msg='Producing discharge outputs', return=TRUE)
     ## ----end    
         
 } else {

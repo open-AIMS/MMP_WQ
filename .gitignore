@@ -4,5 +4,6 @@ data
 outputs
 docs/*
 !docs/MMP_processData.editMe
+!docs/resources/
 *.sif
 *.tar

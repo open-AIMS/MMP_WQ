@@ -188,6 +188,7 @@ tbody>tr:last-child {
 
 table>caption {
     text-align: left;
+    max-width:665px;
 }
 
 .table{
@@ -197,3 +198,25 @@ table>caption {
     overflow:auto;
 }
 
+.table2>thead {
+    border-top:1px soild black;
+    border-bottom:1px soild black;
+}
+.table2>thead>tr>th {
+    position:sticky;
+    top:0;
+    background-color:white;
+}
+.table2>thead>tr>th:nth-child(-n+3) {
+    position:sticky;
+    left:0;
+    background-color:white;
+    z-index: 2;
+}
+
+.table2>tbody>tr>td:nth-child(-n+3) {
+    position:sticky;
+    left:0;
+    background-color:white;
+    z-index: 1;
+}

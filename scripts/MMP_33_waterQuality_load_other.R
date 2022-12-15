@@ -615,7 +615,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     file.exists(paste0(OTHER_INPUT_PATH, 'discharge.csv'))) {
     
     ## 1. Read in data
-    ## ---- AIMS flntu read data
+    ## ---- discharge read data
     MMP_tryCatch(
     {
         discharge <- read_csv(paste0(OTHER_INPUT_PATH, 'discharge.csv')) %>%
@@ -664,7 +664,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     MMP_tryCatch(
     {
         load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
-        discharge<-discharge %>% left_join(river.lookup) %>%
+        discharge<-discharge %>%
+            left_join(river.lookup) %>%
             mutate(Year=ifelse(month(Date) > 9, year(Date)+1, year(Date)))
     }, LOG_FILE, Category = 'Data processing', msg='Discharge gauge correction factors', return=TRUE)
 
@@ -732,7 +733,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     ## ---- discharge outputs
     MMP_tryCatch(
     {
-        ## sampling design
+        ## ---- sampling design
         {
             load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
             p <- discharge %>%
@@ -766,7 +767,9 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                                                            parent = 'SUBSECTION_DESIGN')
                                    )
         }
-        ## individual discharge plots
+        ## ----end
+        
+        ## ---- individual discharge plots
         {
             load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
             load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.annual.RData'))
@@ -807,8 +810,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                 full_join(discharge.annual) %>% 
                 full_join(discharge.baseline)
                 
-            discharge.subregion[1,'data'][[1]][[1]] %>% as.data.frame %>% head 
-            discharge.subregion[4,'Baseline'][[1]][[1]] %>% as.data.frame %>% head 
+            ## discharge.subregion[1,'data'][[1]][[1]] %>% as.data.frame %>% head 
+            ## discharge.subregion[4,'Baseline'][[1]][[1]] %>% as.data.frame %>% head 
 
             discharge.subregion <-
                 discharge.subregion %>%
@@ -829,20 +832,31 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                                 width = 10, height = 6,
                                 dpi = 100)
                   )
+            
+            ## report string
+            MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                   SUBSECTION_TEMPORAL_TRENDS = structure("## Temporal trends\n",
+                                                                          parent = "TABSET"),
+                                   TABSET_trends = structure(paste0("::: panel-tabset \n\n"),
+                                                             parent = "SUBSECTION_TEMPORAL_TRENDS"),
+                                   TABSET_trends_END = structure(paste0("::: \n\n"),
+                                                                parent = "SUBSECTION_TEMPORAL_TRENDS")
+                                   )
+
             walk(.x = discharge.subregion$Subregion,
                  .f = function(S) {
                        SS <- str_replace_all(S, ' ','_')
                        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                               !!!setNames(list(
-                                                     structure(paste0("## ", S, "\n"),
-                                                               parent = 'TABSET')),
-                                                     paste0('SUBSECTION_DESIGN_',S)
-                                                     ), 
+                                                      structure(paste0("### ", S, "\n"),
+                                                                parent = 'TABSET_trends')),
+                                                      paste0('SUBSECTION_DESIGN_',S)
+                                                      ), 
                                               !!!setNames(list(
                                                      structure(paste0("\n::: {#fig-sql-discharge-",SS,"}\n"),
                                                                parent = paste0('SUBSECTION_DESIGN_', S))),
                                                      paste0('FIG_REF_',S)
-                                                      ),
+                                                     ),
                                               !!!setNames(list(
                                                      structure(paste0("![](",OUTPUT_PATH,"/figures/processed/discharge_", S, ".png)\n"),
                                                                parent = paste0("FIG_REF_", S))),
@@ -861,6 +875,153 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                  }
                  )
         }
+        ## ----end
+
+        ## ---- table
+        {
+            load(file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
+            load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
+            REGIONS <- river.lookup %>% pull(Region) %>% unique
+            ## generate a lookup of shortened river names (this is for
+            ## arranging the rivers in order from North to South as
+            ## per the arrangement in the river.lookup file)
+            RIVERS <- river.lookup %>% pull(River) %>% unique %>% str_replace('\\ River', '') %>%
+                str_replace('-','|') %>%
+                str_replace('Water Park Creek','Waterpark') %>%
+                str_subset("^$", negate = TRUE)
+
+            ## - for each RIVER_NAME
+            ##   - make a river label that includes the station id
+            ## - some rivers have changed their id's so average or sum per river
+            ## - calculate discharge as discharge times the correction factor
+            ## - in a given year, some rivers have multiple gauges, sum these together
+            ## - remove RIVER_NAME
+            ## - sort by year
+            ## - declare factor levels
+            ## - widen the data so that their is a column per year
+            discharge.table <- discharge %>%
+                group_by(RIVER_NAME) %>%
+                mutate(STATION_ID=paste0(unique(RIVER_NAME), " (",joinRiverIDs(unique(STATION_ID)),")"))  %>%
+                ungroup %>%
+                group_by(RIVER_NAME, correction.factor,waterYear) %>%
+                summarise(Region=(unique(Region)),
+                          River=unique(STATION_ID),
+                          Median=median(as.numeric(LT.median), na.rm=TRUE),
+                          Dis=sum(PARAM_VALUE, na.rm=TRUE)) %>%
+                mutate(Dis=Dis*correction.factor) %>%
+                ungroup %>%
+                group_by(RIVER_NAME, waterYear) %>%
+                summarise(Region = unique(na.omit(Region)),
+                          Dis = sum(Dis, na.rm = TRUE),
+                          River = unique(River),
+                          Median = median(Median, na.rm = TRUE)) %>%
+                ungroup() %>%
+                dplyr::select(-RIVER_NAME) %>% 
+                arrange(waterYear) %>% 
+                mutate(Region=factor(Region, levels=unique(Region)),
+                       River=factor(River, levels=unique(River))) %>%    
+                pivot_wider(id_cols = c(Region, River, Median),
+                            values_from = Dis, names_from = waterYear)
+            ## Restrict table to the last 15 years
+            nc <- ncol(discharge.table)
+            discharge.table <- data.frame(discharge.table[,1:2],
+                                          "Long term" = discharge.table$Median,
+                                          discharge.table[,(nc-min(14,nc-3)+1):(nc)])
+            colnames(discharge.table)[-1:-3] <- as.character(
+                as.numeric(gsub("X","",colnames(discharge.table)[-1:-3])))
+            ## remove the word 'river' from the labels
+            discharge.table <- discharge.table %>%
+                mutate(
+                    River = factor(River,
+                                   levels = River[unlist(sapply(1:length(RIVERS), function(x) str_which(River, RIVERS[x])))]),
+                    River = str_replace(River, "\\ River", ""),
+                    Region = factor(Region, levels = REGIONS)) %>%
+                arrange(Region, River)
+
+            ## express discharge values relative to long term averages
+            discharge.table <- discharge.table %>%
+                mutate(across(matches("[0-9]{4}"),
+                              function(x) round(x/Long.term,2))) 
+
+            ## get a vector of column numbers of the focal years                
+            wch <- discharge.table %>% colnames() %>% str_which("^[0-9]{4}$") 
+            ## create a reference table of colours based on discharge ratio
+            table.colours <- discharge.table %>%
+                mutate(across(matches("[0-9]{4}"),
+                              function(x) case_when(x<1.5 ~ "black",
+                                                    x>=1.5 & x < 2 ~ heat.colors(5)[3],
+                                                    x>=2 & x < 3 ~ heat.colors(5)[2],
+                                                    x>=3 ~ heat.colors(5)[1]
+                                                   ))) %>%
+                mutate(across(matches("[0-9]{4}"), function(x) replace_na(x, "white")))
+
+            ## convert table to kable table
+            discharge.table.kbl <- discharge.table %>%
+                ## knitr::kable(format = 'markdown') 
+                knitr::kable(format = 'html', caption = '**{@tbl-discharge}**: A new caption') %>%
+                kableExtra::kable_styling(fixed_thead = TRUE) %>%
+                purrr::reduce(wch, function(x, y) {
+                    kableExtra::column_spec(x,y, color = table.colours[,y])
+                    }, .init = .
+                    )
+            ##     kableExtra::scroll_box(height = '500px', width = '100%')
+            ## discharge.table.kbl
+
+            ## discharge.table.kbl <- discharge.table %>%
+            ##     DT::datatable(
+            ##             caption = 'This is the caption',
+            ##             extensions = c('Buttons','FixedColumns',
+            ##                            'FixedHeader', 'Scroller'),
+            ##             options = list(dom = 'BFrtip',
+            ##                            buttons = c('copy', 'csv',
+            ##                                        'excel', 'pdf', 'print'),
+            ##                            fixedColumns = list(leftColumns = 3),
+            ##                            scrollX = TRUE,
+            ##                            pageLength = 10,
+            ##                            fixedHeader = TRUE,
+            ##                            scrollY = 400,
+            ##                            scroller = TRUE),
+            ##             rownames = FALSE) 
+            ## save(discharge.table.kbl, file = paste0(OUTPUT_PATH, "/tables/discharge_table.RData"))
+            ##     ## htmltools::save_html(file = paste0(OUTPUT_PATH, "/tables/discharge_table.html")) 
+                ## htmltools::tagList() %>% paste()
+            discharge.table.kbl <- mmp__make_table_chunk(tab = discharge.table.kbl,
+                                 caption = "Relative annual freshwater discharge (fraction of long-term median) for the major GBR Catchment rivers influencing the sampling sites of the MMP Inshore Water Quality Monitoring Program. Shaded cells highlight years for which river flow exceeded the median annual flow as estimated from available long-term time series for each river (LT median; from October 1970 to August 2017): yellow= 1.5 to 2-times LT median, orange= 2 to 3 times LT median, red= >3-times LT median. Records for the 2016 water year are incomplete (to August 2017). Discharge data were supplied by the Queensland Department of Natural Resources and Mines (gauging station codes given after river names). *** Indicates years for which >15% of daily flow estimates were not available, ** similarly indicate years for which >15% of daily flow was not available but these missing records are likely have been zero flow and so annual flow estimates are valid, whereas an * indicates that between 5% and 15% of daily observations were missing. Discharge data were supplied by the Queensland Department of Natural Resources and Mines (gauging station codes given after river names).")
+
+
+            
+            ## ## - dump and capture the raw kable object
+            ## ## - create an R chunk as a string to put into the qmd
+            ## a <- paste(capture.output(dump("discharge.table.kbl","")), collapse='') %>%
+            ##     str_replace_all("NA","")
+            ## discharge.table.kbl <-
+            ##     paste0('\n```{r dischargeTable, results = "asis", echo=FALSE}\n',
+            ##            '#| label: tbl-dischargeTable\n',
+            ##            '#| tbl-cap: "Relative annual freshwater discharge (fraction of long-term median) for the major GBR Catchment rivers influencing the sampling sites of the MMP Inshore Water Quality Monitoring Program. Shaded cells highlight years for which river flow exceeded the median annual flow as estimated from available long-term time series for each river (LT median; from October 1970 to August 2017): yellow= 1.5 to 2-times LT median, orange= 2 to 3 times LT median, red= >3-times LT median. Records for the 2016 water year are incomplete (to August 2017). Discharge data were supplied by the Queensland Department of Natural Resources and Mines (gauging station codes given after river names). *** Indicates years for which >15% of daily flow estimates were not available, ** similarly indicate years for which >15% of daily flow was not available but these missing records are likely have been zero flow and so annual flow estimates are valid, whereas an * indicates that between 5% and 15% of daily observations were missing. Discharge data were supplied by the Queensland Department of Natural Resources and Mines (gauging station codes given after river names)."\n\n',
+            ##            "options(knitr.kable.NA = '')\n",
+            ##           ## paste0('load("',OUTPUT_PATH,'/tables/discharge_table.RData")\n'),
+            ##            a,
+            ##           '\n',
+            ##           '\ndischarge.table.kbl\n',
+            ##           ## paste0('cat("<table>",paste0("<caption>", "(#tab:dischargeTable)", "caption", "Relative annual freshwater discharge (fraction of long-term median) for the major GBR Catchment rivers influencing the sampling sites of the MMP Inshore Water Quality Monitoring Program. Shaded cells highlight years for which river flow exceeded the median annual flow as estimated from available long-term time series for each river (LT median; from October 1970 to August 2017): yellow= 1.5 to 2-times LT median, orange= 2 to 3 times LT median, red= >3-times LT median. Records for the 2016 water year are incomplete (to August 2017). Discharge data were supplied by the Queensland Department of Natural Resources and Mines (gauging station codes given after river names). *** Indicates years for which >15% of daily flow estimates were not available, ** similarly indicate years for which >15% of daily flow was not available but these missing records are likely have been zero flow and so annual flow estimates are valid, whereas an * indicates that between 5% and 15% of daily observations were missing. Discharge data were supplied by the Queensland Department of Natural Resources and Mines (gauging station codes given after river names).", "</caption>"),"</table>", sep ="\n")\n'),
+            ##           '```\n\n'
+            ##           ) %>%
+            ##     str_replace_all("\"", "'")
+            
+
+            
+                ## knitr::kable(format = "html",
+                ##              table.attr = "class=\"table2\"") 
+                ## kableExtra::scroll_box(fixed_thead = TRUE, height = "100%", width = "100%")
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_annual = structure(paste0("## Annual discharge\n"),
+                                                              parent = 'TABSET'),
+                               TAB = structure(discharge.table.kbl,
+                                               parent = 'SUBSECTION_annual')## ,
+                              )
+
+        }
+        ## ----end
     }, LOG_FILE, Category = 'Data processing:', msg='Producing discharge outputs', return=TRUE)
     ## ----end    
         

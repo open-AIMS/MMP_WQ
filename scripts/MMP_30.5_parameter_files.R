@@ -59,6 +59,13 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                                    parent = 'SUBSECTION_WQGUIDELINES')
                               )
 ## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+wq.guidelines <- wq.guidelines %>%
+    separate_rows(SHORT_NAME, sep=', ') %>%
+    full_join(wq.sites) %>%
+    left_join(names_lookup %>%
+              dplyr::select(SHORT_NAME, MMP_SITE_NAME) %>%
+              distinct())
+save(wq.guidelines, file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
 ## ----end
 
 ## ---- PARAMS river.lookup
@@ -66,7 +73,7 @@ CURRENT_ITEM <<- 'river.lookup'
 river.lookup<-read.csv(paste0(PARAMS_PATH, "/river.gauge.correction.factors.csv"),
                        strip.white = TRUE)
 MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
-                       SUBSECTION_WQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                       SUBSECTION_RIVERLOOKUP = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
                                               parent = 'TABSET'),
                                TAB_river.lookup = structure(mmp__add_table(river.lookup),
                                                parent = 'SUBSECTION_RIVERLOOKUP'),
@@ -98,15 +105,30 @@ CURRENT_ITEM <<- 'LTmedian.discharge.river'
 discharge.baseline <- read.csv(paste0(PARAMS_PATH, "/LTmedian.discharge.river.csv"),
                                strip.white = TRUE)
 MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
-                       SUBSECTION_WQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                       SUBSECTION_LTmedian = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
                                               parent = 'TABSET'),
                                TAB_LTmedian = structure(mmp__add_table(discharge.baseline),
-                                               parent = 'SUBSECTION_LTMEDIAN'),
+                                               parent = 'SUBSECTION_LTmedian'),
                                TAB_CAP.LTmedian = structure(paste0("\n:Long-term median river discharge data from each of the major rivers. {#tbl-ltmedian}\n\n"),
-                                                   parent = 'SUBSECTION_LTMEDIAN')
+                                                   parent = 'SUBSECTION_LTmedian')
                               )
 discharge.baseline <- discharge.baseline %>%
     mutate(River = ifelse(River=="O'Connell River", 'OConnell River',as.character(River)))
 save(discharge.baseline, file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
 
+## ----end
+
+## ---- PARAMS wq.units
+CURRENT_ITEM <<- 'wq.units'
+wq.units <- read.table(file=paste0(PARAMS_PATH, '/wq.units.txt'), header=TRUE, sep=';', strip.white=TRUE)
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_wqunits = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_river.lookup = structure(mmp__add_table(wq.units),
+                                               parent = 'SUBSECTION_wqunits'),
+                               TAB_CAP.river.lookup = structure(paste0("\n:Units associated with each of the analytes. {#tbl-wqunits}\n\n"),
+                                                   parent = 'SUBSECTION_wqunits')
+                              )
+
+save(wq.units, file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
 ## ----end

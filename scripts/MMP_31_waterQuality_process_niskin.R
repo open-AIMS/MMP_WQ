@@ -205,6 +205,101 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
 
     ## ----end
 
+    ## ---- AIMS niskin boxplots
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
+        load(file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
+        load(file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
+        
+        niskin.boxplotData <- niskin.aims.reef.av %>%
+            dplyr:::select(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,
+                           SECCHI_DEPTH.wm,PP.wm,PN.wm,NOx.wm,DIN.wm,            #select only necessary info
+                           MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,Season,
+                           GBRMPA_water_area,Region,Reg,Subregion,Subreg,waterYear,reneeYear,cwaterYear) %>%
+            pivot_longer(cols = c(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,PP.wm,PN.wm,NOx.wm,DIN.wm),
+                         names_to = "Measure",
+                         values_to = "Value") %>% 
+            left_join(wq.guidelines %>%
+                      dplyr:::rename(Season=GL.Season) %>%
+                      dplyr:::select(GBRMPA_group,Measure,Season,Location,GL,DirectionOfFailure,SHORT_NAME,Latitude) %>%
+                      distinct) %>%
+            left_join(wq.units) %>%
+            arrange(desc(Latitude)) %>%
+            mutate(Subreg=factor(Subreg, levels=unique(Subreg))) %>%
+            group_by(Subreg) %>%
+            filter(!is.na(Subreg)) %>%
+            droplevels() %>%
+            group_by(Subregion) %>%
+            nest() %>%
+            mutate(Boxplots = map(.x = data,
+                                  .f = ~ mmp__boxplots(.x)
+                                  )
+                   )
+        
+        niskin.boxplotData %>%
+            {walk2(
+                .x = .$Boxplots,
+                .y = .$Subregion,
+                .f =  function(g, Subregion){
+                    ncols <- g$data %>% pull(Site) %>% unique %>% length()
+                    nrows <- g$data %>% pull(Measure) %>% unique %>% length()
+                    ggsave(filename = paste0(OUTPUT_PATH, '/figures/processed/boxplots_',
+                                             str_replace_all(Subregion, ' ', '_'), '.png'),
+                           g,
+                           width = nrows*1.5 + 0.5,
+                           height = ncols*2 + 0.5,
+                           dpi = 100
+                           )
+                })}
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_BOXPLOTS = structure(paste0("## Boxplots\n"),
+                                                             parent = 'TABSET'),
+                               TABSET_BOXPLOTS = structure(paste0("::: panel-tabset \n\n"),
+                                                         parent = "SUBSECTION_BOXPLOTS"),
+                               TABSET_BOXPLOTS_END = structure(paste0("::: \n\n"),
+                                                                parent = "SUBSECTION_BOXPLOTS")
+                              )
+
+
+        walk(.x = niskin.boxplotData$Subregion,
+             .f = function(S) {
+                 SS <- str_replace_all(S, ' ','_')
+                 MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                        !!!setNames(list(
+                                               structure(paste0("### ", S, "\n"),
+                                                         parent = 'TABSET_BOXPLOTS')),
+                                               paste0('SUBSECTION_BOXPLOTS_',S)
+                                               ), 
+                                        !!!setNames(list(
+                                               structure(paste0("\n::: {#fig-sql-boxplots-",SS,"}\n"),
+                                                         parent = paste0('SUBSECTION_BOXPLOTS_', S))),
+                                               paste0('FIG_REF_',S)
+                                               ),
+                                        !!!setNames(list(
+                                               structure(paste0("![](",OUTPUT_PATH,"/figures/processed/boxplots_", SS, ".png)\n"),
+                                                         parent = paste0("FIG_REF_", S))),
+                                               paste0('FIG_', S)
+                                               ),
+                                        !!!setNames(list(
+                                               structure(paste0("\nBoxplots of select analytes for sites withing the ", S, " subregion.  Blue and red colouring represents wet and dry season respectively.  Solid points represent means.  Dashed horizontal lines represent guideline values.\n"),
+                                                         parent = paste0('FIG_REF_',S))),
+                                               paste0('FIG_CAP_',SS)),
+                                        !!!setNames(list(
+                                               structure(paste0("\n::: \n"),
+                                                         parent = paste0('SUBSECTION_BOXPLOTS_',S))),
+                                               paste0('FIG_END_', S)
+                                               ) 
+                                        )
+             }
+             )
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) boxplots', return=TRUE)
+
+    ## ----end
+
 } else {
 }
 
@@ -588,6 +683,98 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
 
     ## ----end
 
+    ## ---- JCU niskin boxplots
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData'))
+        
+        niskin.jcu.boxplotData <- niskin.jcu.reef.av1 %>%
+            dplyr:::select(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,
+                           SECCHI_DEPTH.wm,PP.wm,PN.wm,NOx.wm,DIN.wm,            #select only necessary info
+                           MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,Season,
+                           GBRMPA_water_area,Region,Reg,Subregion,Subreg,waterYear,reneeYear,cwaterYear) %>%
+            pivot_longer(cols = c(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,PP.wm,PN.wm,NOx.wm,DIN.wm),
+                         names_to = "Measure",
+                         values_to = "Value") %>% 
+            left_join(wq.guidelines %>%
+                      dplyr:::rename(Season=GL.Season) %>%
+                      dplyr:::select(GBRMPA_group,Measure,Season,Location,GL,DirectionOfFailure,SHORT_NAME,Latitude) %>%
+                      distinct) %>%
+            left_join(wq.units) %>%
+            arrange(desc(Latitude)) %>%
+            mutate(Subreg=factor(Subreg, levels=unique(Subreg))) %>%
+            group_by(Subreg) %>%
+            filter(!is.na(Subreg)) %>%
+            droplevels() %>%
+            group_by(Subregion) %>%
+            nest() %>%
+            mutate(Boxplots = map(.x = data,
+                                  .f = ~ mmp__boxplots(.x)
+                                  )
+                   )
+        
+        niskin.jcu.boxplotData %>%
+            {walk2(
+                .x = .$Boxplots,
+                .y = .$Subregion,
+                .f =  function(g, Subregion){
+                    ncols <- g$data %>% pull(Site) %>% unique %>% length()
+                    nrows <- g$data %>% pull(Measure) %>% unique %>% length()
+                    ggsave(filename = paste0(OUTPUT_PATH, '/figures/processed/boxplots_jcu_',
+                                             str_replace_all(Subregion, ' ', '_'), '.png'),
+                           g,
+                           width = nrows*1.5 + 0.5,
+                           height = ncols*2 + 0.5,
+                           dpi = 100
+                           )
+                })}
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_BOXPLOTS = structure(paste0("## Boxplots\n"),
+                                                             parent = 'TABSET'),
+                               TABSET_BOXPLOTS = structure(paste0("::: panel-tabset \n\n"),
+                                                         parent = "SUBSECTION_BOXPLOTS"),
+                               TABSET_BOXPLOTS_END = structure(paste0("::: \n\n"),
+                                                                parent = "SUBSECTION_BOXPLOTS")
+                              )
+
+
+        walk(.x = niskin.jcu.boxplotData$Subregion,
+             .f = function(S) {
+                 SS <- str_replace_all(S, ' ','_')
+                 MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                        !!!setNames(list(
+                                               structure(paste0("### ", S, "\n"),
+                                                         parent = 'TABSET_BOXPLOTS')),
+                                               paste0('SUBSECTION_BOXPLOTS_',S)
+                                               ), 
+                                        !!!setNames(list(
+                                               structure(paste0("\n::: {#fig-sql-boxplots-",SS,"}\n"),
+                                                         parent = paste0('SUBSECTION_BOXPLOTS_', S))),
+                                               paste0('FIG_REF_',S)
+                                               ),
+                                        !!!setNames(list(
+                                               structure(paste0("![](",OUTPUT_PATH,"/figures/processed/boxplots_jcu_", SS, ".png)\n"),
+                                                         parent = paste0("FIG_REF_", S))),
+                                               paste0('FIG_', S)
+                                               ),
+                                        !!!setNames(list(
+                                               structure(paste0("\nBoxplots of select analytes for sites withing the ", S, " subregion.  Blue and red colouring represents wet and dry season respectively.  Solid points represent means.  Dashed horizontal lines represent guideline values.\n"),
+                                                         parent = paste0('FIG_REF_',S))),
+                                               paste0('FIG_CAP_',SS)),
+                                        !!!setNames(list(
+                                               structure(paste0("\n::: \n"),
+                                                         parent = paste0('SUBSECTION_BOXPLOTS_',S))),
+                                               paste0('FIG_END_', S)
+                                               ) 
+                                        )
+             }
+             )
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) boxplots', return=TRUE)
+
+    ## ----end
 } else {
 }
 ## ---- outputs
@@ -800,6 +987,98 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
 
     ## ----end
     
+    ## ---- CY niskin boxplots
+    MMP_tryCatch(
+    {
+        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData'))
+        
+        niskin.cy.boxplotData <- niskin.cy.reef.av %>%
+            dplyr:::select(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,
+                           SECCHI_DEPTH.wm,PP.wm,PN.wm,NOx.wm,DIN.wm,            #select only necessary info
+                           MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,Season,
+                           GBRMPA_water_area,Region,Reg,Subregion,Subreg,waterYear,reneeYear,cwaterYear) %>%
+            pivot_longer(cols = c(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,PP.wm,PN.wm,NOx.wm,DIN.wm),
+                         names_to = "Measure",
+                         values_to = "Value") %>% 
+            left_join(wq.guidelines %>%
+                      dplyr:::rename(Season=GL.Season) %>%
+                      dplyr:::select(GBRMPA_group,Measure,Season,Location,GL,DirectionOfFailure,SHORT_NAME,Latitude) %>%
+                      distinct) %>%
+            left_join(wq.units) %>%
+            arrange(desc(Latitude)) %>%
+            mutate(Subreg=factor(Subreg, levels=unique(Subreg))) %>%
+            group_by(Subreg) %>%
+            filter(!is.na(Subreg)) %>%
+            droplevels() %>%
+            group_by(Subregion) %>%
+            nest() %>%
+            mutate(Boxplots = map(.x = data,
+                                  .f = ~ mmp__boxplots(.x)
+                                  )
+                   )
+        
+        niskin.cy.boxplotData %>%
+            {walk2(
+                .x = .$Boxplots,
+                .y = .$Subregion,
+                .f =  function(g, Subregion){
+                    ncols <- g$data %>% pull(Site) %>% unique %>% length()
+                    nrows <- g$data %>% pull(Measure) %>% unique %>% length()
+                    ggsave(filename = paste0(OUTPUT_PATH, '/figures/processed/boxplots_cy_',
+                                             str_replace_all(Subregion, ' ', '_'), '.png'),
+                           g,
+                           width = nrows*1.5 + 0.5,
+                           height = ncols*2 + 0.5,
+                           dpi = 100
+                           )
+                })}
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_BOXPLOTS = structure(paste0("## Boxplots\n"),
+                                                             parent = 'TABSET'),
+                               TABSET_BOXPLOTS = structure(paste0("::: panel-tabset \n\n"),
+                                                         parent = "SUBSECTION_BOXPLOTS"),
+                               TABSET_BOXPLOTS_END = structure(paste0("::: \n\n"),
+                                                                parent = "SUBSECTION_BOXPLOTS")
+                              )
+
+
+        walk(.x = niskin.cy.boxplotData$Subregion,
+             .f = function(S) {
+                 SS <- str_replace_all(S, ' ','_')
+                 MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                        !!!setNames(list(
+                                               structure(paste0("### ", S, "\n"),
+                                                         parent = 'TABSET_BOXPLOTS')),
+                                               paste0('SUBSECTION_BOXPLOTS_',S)
+                                               ), 
+                                        !!!setNames(list(
+                                               structure(paste0("\n::: {#fig-sql-boxplots-",SS,"}\n"),
+                                                         parent = paste0('SUBSECTION_BOXPLOTS_', S))),
+                                               paste0('FIG_REF_',S)
+                                               ),
+                                        !!!setNames(list(
+                                               structure(paste0("![](",OUTPUT_PATH,"/figures/processed/boxplots_cy_", SS, ".png)\n"),
+                                                         parent = paste0("FIG_REF_", S))),
+                                               paste0('FIG_', S)
+                                               ),
+                                        !!!setNames(list(
+                                               structure(paste0("\nBoxplots of select analytes for sites withing the ", S, " subregion.  Blue and red colouring represents wet and dry season respectively.  Solid points represent means.  Dashed horizontal lines represent guideline values.\n"),
+                                                         parent = paste0('FIG_REF_',S))),
+                                               paste0('FIG_CAP_',SS)),
+                                        !!!setNames(list(
+                                               structure(paste0("\n::: \n"),
+                                                         parent = paste0('SUBSECTION_BOXPLOTS_',S))),
+                                               paste0('FIG_END_', S)
+                                               ) 
+                                        )
+             }
+             )
+
+        
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) boxplots', return=TRUE)
+
+    ## ----end
 } else {
 }
 

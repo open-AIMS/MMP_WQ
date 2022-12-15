@@ -775,3 +775,186 @@ mmp__discharge_plot <- function(Discharge = ..1, Annual = ..2, Baseline = ..3) {
               axis.ticks.y.right = element_line(colour = '#D55E00')
               )
 }
+
+mmp__boxplots <- function(data) {
+    load(file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
+    load(file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
+
+    dt <- data %>%
+        left_join(wq.units %>% dplyr::select(Measure, Name.graphs)) %>%
+        mutate(Site = str_replace_all(MMP_SITE_NAME, ' ', '~')) %>%
+        mutate(Site = str_replace_all(Site, '\'', '*minute*')) 
+
+    wq.guide <- dt %>%
+        dplyr::select(Site, MMP_SITE_NAME, Measure, Name.graphs) %>%
+        distinct() %>% 
+        left_join(wq.guidelines %>%
+                  dplyr::select(MMP_SITE_NAME, Measure, GL, DirectionOfFailure, GL.Season, Location) %>%
+                  distinct()) %>%
+        mutate(GL.Season = factor(GL.Season))
+
+    dt %>%
+        ggplot(aes(y = Value, x = Season)) +
+        geom_boxplot(aes(colour = Season, fill = Season), width = 0.2, alpha = 0.3, show.legend = FALSE) +
+        geom_point(stat = 'summary', fun = mean, aes(colour = Season, fill = Season), show.legend = FALSE) +
+        geom_segment(data = wq.guide %>% filter(GL.Season %in% c('Dry','Wet')) %>% droplevels,
+                     aes(y = GL, yend = GL,
+                         x = as.numeric(GL.Season)-0.5,
+                         xend = as.numeric(GL.Season) +0.5,
+                         colour = GL.Season),
+                     linetype = '21', size = 0.7, show.legend = FALSE) +
+        geom_hline(data = wq.guide %>% filter(GL.Season == 'Annual') %>% droplevels,
+                   aes(yintercept = GL), linetype = 'dashed') +
+        facet_grid2(Site ~ Name.graphs, axes = "all", scales = 'free', independent = 'y',
+                    labeller = label_parsed) +
+        theme_classic() +
+        theme(strip.background = element_blank(),
+              axis.title = element_blank())
+}
+
+mmp__timeseries_plot <- function(flntu, tides, temperature, weather, discharge, GL.chl=NA, GL.ntu=NA, subtitle='') {
+    flntu <- flntu %>%
+        arrange(Date) %>%
+        filter(Date>=START_DATE) %>%
+        droplevels() %>%
+        complete(Date = seq.Date(min(Date), max(Date), by = 'day')) 
+
+    ## Define min and max dates
+    minDate <- min(flntu$Date)
+    maxDate <- max(flntu$Date)
+    
+    ##Construct base plot
+    par(mar=c(4,6.5,0.5,6))
+    plot(1:nrow(flntu)~Date, data = flntu,
+         type="n",
+         axes=F,
+         ann=F,
+         ylim=c(0,1),
+         xlim=c(min(c(flntu$Date)), max(c(flntu$Date,flntu$Date))))
+
+    ##Construct yearly ribbon underlay
+    tm2 <-seq(as.Date("2001-09-01"), max(flntu$Date), by="2 year")
+    tm3 <-seq(as.Date("2002-08-30"), max(flntu$Date), by="2 year")
+    tm2 <- tm2[tm2>as.Date("2007-08-01")]
+    tm3 <- tm3[tm3>as.Date("2007-08-01")]
+    if(length(tm2)>length(tm3)) tm3 <- c(tm3, max(c(flntu$Date,flntu$Date)))
+    rect(tm2,par()$usr[3],tm3,1, col="gray95", border=NA)
+
+    ##Construct time axes
+    if ((maxDate - minDate) < 365) {
+        tm <- seq(as.Date("2000-01-01"), maxDate, by = '1 month')
+    } else if ((maxDate - minDate) > (365*7)) {
+        tm <- seq(as.Date("2000-01-01"), maxDate, by = '6 month')
+    } else {
+        tm <-seq(as.Date("2000-01-01"), maxDate, by="3 month")
+    }
+    tm1 <-seq(as.Date("2000-04-01"), maxDate, by="year")
+    axis(1, at=tm, lab=strtrim(format(tm,"%b"),3), cex.axis=1, mgp=c(0,.5,0),tcl=-0.3)
+    axis(1, at=tm1, lab=format(tm1,"%Y"), cex.axis=1.25, cex.lab=1.25,cex=1.25,tcl=0, mgp=c(0,2.5,0))
+
+    ##Chlorophyll========================================================
+    ch.dat <-  flntu
+    ## tt<-data.frame(Date=seq(startDate,endDate,by="day"))
+    ## ch.ddat<-merge(ch.dat, tt, by="Date", all=TRUE) 
+    ## ch.ddat <- ch.ddat[order(ch.ddat$Date),]
+    ch.ddat <- flntu
+    maxy <- max(ch.ddat$CHL_QA_AVG, na.rm=TRUE)
+    lines(scales::rescale(CHL_QA_AVG,from=c(0,maxy),to=c(0,0.3))~Date,ch.ddat, col="#008000")
+    abline(h=scales::rescale(GL.chl, from=c(0,maxy),to=c(0,0.3)), col="#008000",lty=2)
+    axis(2, las=1, at=scales::rescale(pretty(seq(0,maxy,l=100)), to=c(0,0.3)), 
+         lab=pretty(seq(0,maxy,l=100)),
+         cex.axis=1,
+         tcl=-0.2,
+         mgp=c(0,0.5,0),
+         col="#008000",
+         col.ticks="#008000",
+         col.axis="#008000")
+    mtext(expression(paste(atop("Chlorophyll-a",(mu*g~L^-1)))),
+          2,
+          col="#008000",
+          line=2.5,
+          at=scales::rescale(mean(maxy,0), to=c(0,0.3)),
+          cex=1)
+
+    ##Tides
+    tides <- tides %>%
+        filter(Date >= minDate, Date <= maxDate) %>%
+        droplevels()
+    ## tides <- subset(tides, Date >= startDate & Date <= endDate)
+    maxy <- max(tides$Range, na.rm=TRUE)
+    lines(scales::rescale(Range,from=c(0,maxy),to=c(0.50,0.70))~Date, tides, col="grey60")
+    axis(4, las=1, at=scales::rescale(pretty(seq(0,maxy,l=100),n=3), to=c(0.50,0.70)), 
+         lab=pretty(seq(0,maxy,l=100),n=3), cex.axis=1, tcl=-0.2, mgp=c(0,0.3,0))
+    mtext(expression(paste(atop("Daily Tidal","Range (m)"))),4, line=4.5,
+          at=scales::rescale(mean(maxy,0), to=c(0.5,0.7)), cex=1)
+    
+    ##Turbidity - log
+    flntu <- flntu %>%
+        mutate(logNTU = log(NTU_QA_AVG))
+    maxy <- max(flntu$logNTU, na.rm=TRUE)
+    maxy <- max(log(50))
+    miny <- min(flntu$logNTU, na.rm=TRUE)
+    lo <-0.1
+    miny <- log(lo)
+    lines(scales::rescale(logNTU,from=c(miny,maxy),to=c(0.33,0.6))~Date, flntu, col="#7B0000")
+    abline(h=scales::rescale(log(GL.ntu+lo), from=c(miny,maxy),to=c(0.33,0.6)), col="#7B0000",lty=2)
+    pret <- pretty(flntu$NTU_QA_AVG)+lo
+    pret <- c(lo,1,2,5,10,20,50)
+    axis(2, las=1, at=scales::rescale(log(pret+lo), from=c(miny,maxy),to=c(0.33,0.6)), 
+         lab=pret, cex.axis=1, tcl=-0.2,
+         mgp=c(0,0.5,0), col="#7B0000", col.ticks="#7B0000", col.axis="#7B0000")
+    mtext(expression(paste(atop("Turbidity","(NTU)"))),
+          2, col="#7B0000", line=2.5,
+          at=scales::rescale(mean(maxy,0), to=c(0.33,0.65)),
+          cex=1)
+
+    ## Temperature
+    if (!all(is.na(temperature$Temp))) {
+        maxy <- max(temperature$Temp, na.rm=TRUE)
+        miny <- min(temperature$Temp, na.rm=TRUE)
+        lines(scales::rescale(Temp,from=c(20,maxy),to=c(0.20,0.35))~Date, temperature, col="grey60")
+        axis(4, las=1, at=scales::rescale(pretty(seq(20,maxy,l=100),n=3), to=c(0.20,0.35)), 
+             lab=pretty(seq(20,maxy,l=100),n=3), cex.axis=1, tcl=-0.2, mgp=c(0,0.3,0))
+        mtext(expression(paste(atop("Daily Temp.",(degree~C)))),4, line=4.5, at=scales::rescale(mean(maxy,0), to=c(0.2,0.35)), cex=1)
+    }
+
+    ##Windspeed
+    weather <- weather %>% mutate(Dt = as.numeric(Date))
+    lx <-seq(min(weather$Dt, na.rm=TRUE), max(weather$Dt, na.rm=TRUE), l=100)
+  ##   dd <- seq(startDate, endDate,by="day")
+  ## weather <- merge(weather,data.frame(Date=dd), all=TRUE)
+  ##   weather <- weather[order(weather$Date),]
+    maxy <- max(weather$WIND_SPEED, na.rm=TRUE)
+    lines(scales::rescale(WIND_SPEED,from=c(0,maxy),to=c(0.83,1))~Date, weather, col="grey60")
+    library(mgcv)
+    tryCatch({
+        ll <- gam(WIND_SPEED~s(Dt), data=weather)
+        ly <- predict(ll, newdata=data.frame(Dt=lx), type="response", se=TRUE)
+        lx <- as.Date(lx, "1970-01-01")
+        predvar <- ly$se.fit^2
+        SE2<-sqrt(predvar+ll$sig2)
+        lines(scales::rescale(ly$fit,from=c(0,maxy),to=c(0.83,1))~lx, col="gray30")
+        lines(scales::rescale(ly$fit+1*SE2,from=c(0,maxy),to=c(0.83,1))~lx, col="gray30", lty=2)
+        lines(scales::rescale(ly$fit-1*SE2,from=c(0,maxy),to=c(0.83,1))~lx, col="gray30", lty=2)
+    },error=function(x) print("Not enough wind data"))
+    axis(4, las=1, at=scales::rescale(pretty(seq(0,maxy,l=100),n=3), to=c(0.83,1)), 
+         lab=pretty(seq(0,maxy,l=100),n=3), cex.axis=1, tcl=-0.2, mgp=c(0,0.5,0))
+    mtext(expression(paste(atop("Wind speed",(km~h^-1)))),4, line=4.5, at=scales::rescale(mean(maxy,0), to=c(0.83,1)), cex=1) 
+
+    ##Discharge
+    if (nrow(discharge)>0) {
+        maxy <- max(discharge$DISCHARGE_RATE_DAILY, na.rm=TRUE)
+        lines(scales::rescale(DISCHARGE_RATE_DAILY,from=c(0,maxy),to=c(0.70,1))~Date, discharge, col="blue")
+                                        #abline(h=scales::rescale(1.5, from=c(0,maxy),to=c(0.70,1)), col="blue",lty=2)
+        axis(2, las=1, at=scales::rescale(pretty(seq(0,maxy,l=100)), to=c(0.70,1)), 
+             lab=pretty(seq(0,maxy,l=100)/10000), cex.axis=1, tcl=-0.2, mgp=c(0,0.5,0), col="blue", col.ticks="blue", col.axis="blue")
+        mtext(expression(paste(atop("River discharge",(ML~day^-1 %*% 10^4)))),2, col="blue", line=2.5, at=scales::rescale(mean(maxy,0), to=c(0.7,1)), cex=1)
+    } else {
+        axis(2, las=1, at=scales::rescale(pretty(seq(0,10000,l=100)), to=c(0.70,1)), 
+             lab=pretty(seq(0,10000,l=100)/10000), cex.axis=1, tcl=-0.2, mgp=c(0,0.5,0), col="blue", col.ticks="blue", col.axis="blue")
+        mtext(expression(paste(atop("River discharge",(ML~day^-1 %*% 10^4)))),2, col="blue", line=2.5, at=scales::rescale(mean(10000,0), to=c(0.7,1)), cex=1)
+        
+    }
+  
+    legend("topleft",legend=subtitle, bty="n", text.font=1, cex=1,inset=-0.03,xpd=TRUE)#,xjust=0,adj=c(0,1), cex=1.5)
+}

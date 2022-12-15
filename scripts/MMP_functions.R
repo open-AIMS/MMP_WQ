@@ -83,17 +83,20 @@ MMP_initialise_status <- function() {
                                 "jcuCYNiskin","jcuEventNiskin","jcuCYEventNiskin",
                                 "flntu", "waterTemp", "salinity",
                                 "dhw","disturbances","tides",
-                                "BOM","discharge"),
+                                "BOM","discharge",
+                                "timeseries"),
                       names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
                                 "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers",
                                 "Degree heating weeks","Disturbance tables", "Harmonic tides",
-                                "BOM weather", "River discharge"),
+                                "BOM weather", "River discharge",
+                                "Compilation timeseries"),
                       status = c("pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending","pending",
-                                 "pending","pending"
+                                 "pending","pending",
+                                 "pending"
                                  )
                       )
     )
@@ -699,7 +702,7 @@ mmp__sql <- function(file) {
 }
 
 mmp__add_table <- function(tab) {
-    knitr::kable(tab)
+    knitr::kable(tab, format = "markdown")
 }
 
 mmp__glimpse_like <- function(tab) {
@@ -842,3 +845,24 @@ MMP_get_report_list <- function(stage, item) {
     doc_list
 }
 
+mmp__make_table_chunk <- function(tab, caption) {
+    tab <- deparse(substitute(tab))
+    name <- str_replace_all(tab, "\\.", "-")
+    label <- paste0('tbl-',name)
+    
+    ## - dump and capture the raw kable object
+    ## - create an R chunk as a string to put into the qmd
+    a <- paste(capture.output(dump(tab,"")), collapse='') %>%
+        str_replace_all("NA","")
+
+    paste0('\n```{r ',name,', results = "asis", echo=FALSE}\n',
+                       '#| label: ',label,'\n',
+                       '#| tbl-cap: "',caption,'"\n\n',
+                       "options(knitr.kable.NA = '')\n",
+                       a,
+                      '\n',
+                      '\n',tab,'\n',
+                      '```\n\n'
+                      ) %>%
+                str_replace_all("\"", "'")
+}

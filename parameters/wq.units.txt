@@ -1,0 +1,79 @@
+Measure;Name.graphs;Name.graphs.abbr;Name.tab.abbr;Name.latex;Name.latex.abbr;ymin;ymax
+DRIFTCHL_UGPERL.wm;atop(Chlorophyll~a,(mu*g~L^{-1}));Chl-italic(a)~(mu*g~L^{-1});Chl-a (µg L⁻¹);Chlorophyll a ($\mu g L^{-1}$);$Chl~a~(\mu g L^{-1})$;0.1;1.5
+TSS_MGPERL.wm;atop(Suspended,solids~(mg~L^-{1}));TSS~(mg~L^{-1});TSS (mg L⁻¹);Suspended solids ($mg L^{-1}$);$TSS~(mg L^{-1})$;0.1;12
+SECCHI_DEPTH.wm;atop(Secchi~depth,(m));Secchi~(m);Secchi (m);Secchi ($m$);$Secchi~(m)$;1;25
+Temp;atop(Water,temperature~(degree*C));Temp. (degree*C);Temperature (°C);Water temperature ($^\degree C$);$Temp.~(\degree C)$;4;37
+Salinity;atop(~,Salinity);Salinity;Salinity;Salinity;$Salinity$;4;37
+PN.wm;atop(Particulate,nitrogen~(mu*g~L^{-1}));PN~(mu*g~L^{-1});PN (µg L⁻¹);Particulate nitrogen ($\mu g L^{-1}$);$PN~(\mu g L^{-1})$;4;37
+PN_UM.wm;atop(Particulate,nitrogen~(mu*mol~L^{-1}));PN~(mu*mol~L^{-1});PN (µmolL⁻¹);Particulate nitrogen ($\mu g L^{-1}$);$PN~(\mu molL^{-1})$;NA;NA
+PP.wm;atop(Particulate,phosphorus~(mu*g~L^{-1}));PP~(mu*g~L^{-1});PP (µg L⁻¹);Particulate phosphorus ($\mu g L^{-1}$);$PP~(\mu g L^{-1})$;1;14
+PP_UM.wm;atop(Particulate,phosphorus~(mu*mol~L^{-1}));PP~(mu*mol~L^{-1});PP (µmolL⁻¹);Particulate phosphorus ($\mu mol L^{-1}$);$PP~(\mu molL^{-1})$;0.1;14
+DIN.wm;atop(Dissolv.~Inorganic,nitrogen~(mu*g~L^{-1}));DIN~(mu*g~L^{-1});DIN (µg L⁻¹);DIN ($\mu g L^{-1}$);$DIN~(\mu g L^{-1})$;0.1;14
+DIN_UM.wm;atop(Dissolv.~Inorganic,nitrogen~(mu*mol~L^{-1}));DIN~(mu*mol~L^{-1});DIN (µmolL⁻¹);DIN ($\mu mol L^{-1}$);$DIN~(\mu molL^{-1})$;0.1;14
+NOx.wm;atop(NO[X],(mu*g~L^{-1}));NO[X]~(mu*g~L^{-1});NOₓ (µg L⁻¹);NO_X ($\mu g L^{-1}$);$NO_X~(\mu g L^{-1})$;0.1;25
+NOx_UM.wm;atop(NO[X],(mu*mol~L^{-1}));NO[X]~(mu*mol~L^{-1});NOₓ (µmolL⁻¹);NO_X ($\mu mol L^{-1}$);$NO_X~(\mu molL^{-1})$;0.1;25
+NTU;atop(Turbidity,(NTU));Turbidity~(NTU);Turbidity (NTU);NTU;$Turbidity~(NTU)$;0.5;15
+NH4.wm;atop(Ammonia,(mu*g~L^{-1}));NH[4]~(mu*g~L^{-1});NH4 (µg L⁻¹);NH_4 ($\mu g L^{-1}$);$NH_4~(\mu g L^{-1})$;0.1;20
+NH4_UM.wm;atop(Ammonia,(mu*mol~L^{-1}));NH[4]^{+}~(mu*mol~L^{-1});NH4 (µmolL⁻¹);NH_4 ($\mu mol L^{-1}$);$NH_4~(\mu molL^{-1})$;0.1;20
+NO2.wm;atop(Nitrite,(mu*g~L^{-1}));NO[2]~(mu*g~L^{-1});NO2 (µg L⁻¹);NO_2 ($\mu g L^{-1}$);$NO_2~(\mu g L^{-1})$;0.01;2
+NO2_UM.wm;atop(Nitrite,(mu*mol~L^{-1}));NO[2]~(mu*mol~L^{-1});NO2 (µmolL⁻¹);NO_2 ($\mu mol L^{-1}$);$NO_2~(\mu molL^{-1})$;0.01;2
+NO3.wm;atop(Nitrate,(mu*g~L^{-1}));NO[3]~(mu*g~L^{-1});NO3 (µg L⁻¹);NO_3 ($\mu g L^{-1}$);$NO_3~(\mu g L^{-1})$;0.1;25
+NO3_UM.wm;atop(Nitrate,(mu*mol~L^{-1}));NO[3]~(mu*mol~L^{-1});NO3 (µmolL⁻¹);NO_3 ($\mu mol L^{-1}$);$NO_3~(\mu molL^{-1})$;0.1;25
+TDN.wm;atop(Total~Dissolved,nitrogen~(mu*g~L^{-1}));TDN~(mu*g~L^{-1});TDN (µg L⁻¹);Total Dissolved Nitrogen ($\mu g L^{-1}$);$TDN~(\mu g L^{-1})$;50;250
+TDN_UM.wm;atop(Total~Dissolved,nitrogen~(mu*mol~L^{-1}));TDN~(mu*mol~L^{-1});TDN (µmolL⁻¹);Total Dissolved Nitrogen ($\mu mol L^{-1}$);$TDN~(\mu molL^{-1})$;50;250
+TotalN.wm;atop(Total,nitrogen~(mu*g~L^{-1}));TN~(mu*g~L^{-1});TN (µg L⁻¹);Total Nitrogen ($\mu g L^{-1}$);$TN~(\mu g L^{-1})$;20;250
+TotalN_UM.wm;atop(Total,nitrogen~(mu*mol~L^{-1}));TN~(mu*mol~L^{-1});TN (µmolL⁻¹);Total Nitrogen ($\mu mol L^{-1}$);$TN~(\mu molL^{-1})$;20;250
+DIP.wm;atop(Dissolved~Inorganic,phosphorus~(mu*g~L^{-1}));DOP~(mu*g~L^{-1});DOP (µg L⁻¹);Dissolved inorganic phosphorus ($mg L^{-1}$);$DOP~(\mu g L^{-1})$;0.1;10
+DIP_UM.wm;atop(Dissolved~Inorganic,phosphorus~(mu*mol~L^{-1}));DOP~(mu*mol~L^{-1});DOP (µmolL⁻¹);Dissolved inorganic phosphorus ($mmol L^{-1}$);$DOP~(\mu molL^{-1})$;0.1;10
+TDP.wm;atop(Total~Dissolved,phosphorus~(mu*g~L^{-1}));TDP~(mu*g~L^{-1});TDP (µg L⁻¹);Total Dissolved Phosphorus ($\mu g L^{-1}$);$TDP~(\mu g L^{-1})$;0.1;25
+TDP_UM.wm;atop(Total~Dissolved,phosphorus~(mu*mol~L^{-1}));TDP~(mu*mol~L^{-1});TDP (µmolL⁻¹);Total Dissolved Phosphorus ($\mu mol L^{-1}$);$TDP~(\mu molL^{-1})$;0.1;25
+PO4.wm;atop(Orthophosphate,(mu*g~L^{-1}));PO[4]~(mu*g~L^{-1});PO₄ (µg L⁻¹);Orthophosphate ($\mu g L^{-1}$);$PO_4~(\mu g L^{-1})$;0.5;10
+PO4_UM.wm;atop(Orthophosphate,(mu*mol~L^{-1}));HPO[4]^\2-\~(mu*mol~L^{-1});PO₄ (µmolL⁻¹);Orthophosphate ($\mu mol L^{-1}$);$PO_4~(\mu molL^{-1})$;0.1;10
+TotalP.wm;atop(Total,phosphate~(mu*g~L^{-1}));TP~(mu*g~L^{-1});TP (µg L⁻¹);Total Phosphate ($\mu g L^{-1}$);$TP~(\mu g L^{-1})$;2;25
+TotalP_UM.wm;atop(Total,phosphate~(mu*mol~L^{-1}));TP~(mu*mol~L^{-1});TP (µmolL⁻¹);Total Phosphate ($\mu mol L^{-1}$);$TP~(\mu molL^{-1})$;2;25
+DOC.wm;atop(Dissolved~Organic,carbon~(mu*g~L^{-1}));DOC~(mu*g~L^{-1});DOC (µg L⁻¹);Dissolved organic carbon ($\mu g L^{-1}$);$DOC~(\mu g L^{-1})$;500;1500
+DOC_UM.wm;atop(Dissolved~Organic,carbon~(mu*mol~L^{-1}));DOC~(mu*mol~L^{-1});DOC (µ mol L⁻¹);Dissolved organic carbon ($mmol L^{-1}$);$DOC~(\mu molL^{-1})$;500;1500
+DON.wm;atop(Dissolved~Organic,nitrogen~(mu*g~L^{-1}));DON~(mu*g~L^{-1});DON (µg L⁻¹);Dissolved organic Nitrogen ($mu*g L^{-1}$);$DON~(\mu g L^{-1})$;50;200
+DON_UM.wm;atop(Dissolved~Organic,nitrogen~(mu*mol~L^{-1}));DON~(mu*mol~L^{-1});DON (µmolL⁻¹);Dissolved organic Nitrogen ($mu*mol L^{-1}$);$DON~(\mu molL^{-1})$;50;200
+DOP.wm;atop(Dissolved~Organic,phosphorus~(mu*g~L^{-1}));DOP~(mu*g~L^{-1});DOP (µg L⁻¹);Dissolved organic Phosphorus ($mu*g L^{-1}$);$DOP~(\mu g L^{-1})$;0.1;15
+DOP_UM.wm;atop(Dissolved~Organic,phosphorus~(mu*mol~L^{-1}));DOP~(mu*mol~L^{-1});DOP (µmolL⁻¹);Dissolved organic Phosphorus ($mu*mol L^{-1}$);$DOP~(\mu molL^{-1})$;0.1;15
+POC.wm;atop(Particulate~Org.,carbon~(mu*g~L^{-1}));POC~(mu*g~L^{-1});POC (mg L⁻¹);Particulate organic carbon ($mg L^{-1}$);$POC~(mg L^{-1})$;50;700
+POC_UM.wm;atop(Particulate~Org.,carbon~(mu*mol~L^{-1}));POC~(mu*mol~L^{-1});POC (mmolL⁻¹);Particulate organic carbon ($mmol L^{-1}$);$POC~(mmolL^{-1})$;20;700
+POC_CHL.wm;atop(POC:Chla,(mu*g~L^{-1})/(mu*g~L^{-1}));POC:Chla~(mu*g~L^{-1});POC:Chla (µg L⁻¹)/(µg L⁻¹);Particulate organic carbon : Chlorophyll ($mg L^{-1}$);$POC:Chla~(\mu g L^{-1})/(\mu g L^{-1})$;20;1000
+POC_CHL_UM.wm;atop(POC:Chla,(mu*g~L^{-1})/(mu*g~L^{-1}));POC:Chl.a;POC:Chla (µg L⁻¹)/(µg L⁻¹);Particulate organic carbon : Chlorophyll ($mg L^{-1}$);$POC:Chla~(\mu g L^{-1})/(\mu g L^{-1})$;20;1000
+PN_CHL.wm;atop(PN:Chla,(mu*g~L^{-1})/(mu*g~L^{-1}));PN:Chla~(mu*g~L^{-1});PN:Chla (µg L⁻¹)/(µg L⁻¹);Particulate nitrogen : Chlorophyll ($mg L^{-1}$);$PN:Chla~(\mu g L^{-1})/(\mu g L^{-1})$;5;200
+PN_CHL_UM.wm;atop(PN:Chla,(mu*mol~L^{-1})/(mu*mol~L^{-1}));PN:Chl.a;PN:Chla (µmolL⁻¹)/(µmolL⁻¹);Particulate nitrogen : Chlorophyll ($mmol L^{-1}$);$PN:Chla~(\mu molL^{-1})/(\mu molL^{-1})$;5;200
+PP_CHL.wm;atop(PP:Chla,(mu*g~L^{-1})/(mu*g~L^{-1}));PP:Chla~(mu*g~L^{-1});PP:Chla (µg L⁻¹)/(µg L⁻¹);Particulate phosphorus : Chlorophyll ($mg L^{-1}$);$PP:Chla~(\mu g L^{-1})/(\mu g L^{-1})$;2;15
+PP_CHL_UM.wm;atop(PP:Chla,(mu*mol~L^{-1})/(mu*mol~L^{-1}));PP:Chl.a;PP:Chla (µmolL⁻¹)/(µmolL⁻¹);Particulate phosphorus : Chlorophyll ($mmol L^{-1}$);$PP:Chla~(\mu molL^{-1})/(\mu molL^{-1})$;2;15
+CHL_TSS.wm;atop(Chla:TSS,(mu*g~L^{-1})/(mg~L^{-1}));Chla:TSS~(mu*g~L^{-1});Chla:TSS (µg L⁻¹)/(mg L⁻¹);Chlorophyll : Total Suspended Solids ($mg L^{-1}$);$Chla:TSS~(\mu g L^{-1})/(mg L^{-1})$;0.1;15
+CHL_TSS_UM.wm;atop(Chla:TSS,(mu*mol~L^{-1})/(mmol~L^{-1}));Chla:TSS;Chla:TSS (µmolL⁻¹)/(mmolL⁻¹);Chlorophyll : Total Suspended Solids ($mmol L^{-1}$);$Chla:TSS~(\mu molL^{-1})/(mmolL^{-1})$;0.1;15
+POC_TSS.wm;atop(POC:TSS,(mg~L^{-1})/(mg~L^{-1}));POC:TSS~(mu*g~L^{-1});POC:TSS (mg L⁻¹)/(mg L⁻¹);Particulate organic carbon : Total Suspended Solids ($mg L^{-1}$);$POC:TSS~(\mu g L^{-1})/(mg L^{-1})$;0.1;15
+POC_TSS_UM.wm;atop(POC:TSS,(mmol~L^{-1})/(mmol~L^{-1}));POC:TSS;POC:TSS (mmolL⁻¹)/(mmolL⁻¹);Particulate organic carbon : Total Suspended Solids ($mmol L^{-1}$);$POC:TSS~(\mu molL^{-1})/(mmolL^{-1})$;0.1;15
+PN_TSS.wm;atop(PN:TSS,(mg~L^{-1})/(mg~L^{-1}));PN:TSS~(mu*g~L^{-1});PN:TSS (mg L⁻¹)/(mg L⁻¹);Particulate nitrogen : Total Suspended Solids ($mg L^{-1}$);$PN:TSS~(\mu g L^{-1})/(mg L^{-1})$;0.1;15
+PN_TSS_UM.wm;atop(PN:TSS,(mmol~L^{-1})/(mmol~L^{-1}));PN:TSS;PN:TSS (mmolL⁻¹)/(mmolL⁻¹);Particulate nitrogen : Total Suspended Solids ($mmol L^{-1}$);$PN:TSS~(\mu molL^{-1})/(mmolL^{-1})$;0.1;15
+PP_TSS.wm;atop(PP:TSS,(mg~L^{-1})/(mg~L^{-1}));PP:TSS~(mu*g~L^{-1});PP:TSS (mg L⁻¹)/(mg L⁻¹);Particulate phosphorus : Total Suspended Solids ($mg L^{-1}$);$PP:TSS~(\mu g L^{-1})/(mg L^{-1})$;0.1;15
+PP_TSS_UM.wm;atop(PP:TSS,(mmol~L^{-1})/(mmol~L^{-1}));PP:TSS;PP:TSS (mmolL⁻¹)/(mmolL⁻¹);Particulate phosphorus : Total Suspended Solids ($mmol L^{-1}$);$PP:TSS~(\mu molL^{-1})/(mmolL^{-1})$;0.1;15
+POC_PN.wm;atop(POC:PN,(mu*M~C)/(mu*M~N));POC:PN~(mu*g~L^{-1});POC:PN (µM)/(µM);Particulate organic carbon : Particulate nitrogen ($mg L^{-1}$);$POC:PN~(\mu M)/(\mu M)$;2;50
+POC_PN_UM.wm;atop(POC:PN,(mu*M~C)/(mu*M~N));POC:PN;POC:PN (µM)/(µM);Particulate organic carbon : Particulate nitrogen ($mmol L^{-1}$);$POC:PN~(\mu M)/(\mu M)$;2;50
+POC_PP.wm;atop(POC:PP,(mu*M~C)/(mu*M~P));POC:PP~(mu*g~L^{-1});POC:PP (µM)/(µM);Particulate organic carbon : Particulate phosphorus ($mg L^{-1}$);$POC:PP~(\mu M)/(\mu M)$;20;500
+POC_PP_UM.wm;atop(POC:PP,(mu*M~C)/(mu*M~P));POC:PP;POC:PP (µM)/(µM);Particulate organic carbon : Particulate phosphorus ($mgt L^{-1}$);$POC:PP~(\mu M)/(\mu M)$;20;500
+PN_PP.wm;atop(PN:PP,(mu*M~N)/(mu*M~P));PN:PP~(mu*g~L^{-1});PN:PP (µM)/(µP);Particulate nitrogen : Particulate phosphorus ($mg L^{-1}$);$PN:PP~(\mu M)/(\mu M)$;5;25
+PN_PP_UM.wm;atop(PN:PP,(mu*M~N)/(mu*M~P));PN:PP;PN:PP(µM)/(µP);Particulate nitrogen : Particulate phosphorus ($mmol L^{-1}$);$PN:PN~(\mu M)/(\mu M)$;5;25
+TN_TP.wm;atop(TotalN:TotalP,(mu*M~N)/(mu*M~P));TN:TP~(mu*g~L^{-1});TN:TP (µM)/(µM);Total nitrogen : Total phosphorus ($\mu M$)/($\mu M$);$TN:TP~(\mu M)/(\mu M)$;1;25
+TN_TP_UM.wm;atop(TotalN:TotalP,(mu*M~N)/(mu*M~P));TN:TP;TN:TP (µM)/(µM);Total nitrogen : Total phosphorus ($\mu M$)/($\mu M$);$TN:TP~(\mu M)/(\mu M)$;1;25
+DOC_DON.wm;atop(DOC:DON,(mu*M~N)/(mu*M~P));DOC:DON~(mu*g~L^{-1});DOC:DON (µM)/(µM);DOC : DON ($\mu M$)/($\mu M$);$DOC:DON~(\mu M)/(\mu M)$;2;50
+DOC_DON_UM.wm;atop(DOC:DON,(mu*M~N)/(mu*M~P));DOC:DON;DOC:DON (µM)/(µM);DOC : DON ($\mu M$)/($\mu M$);$DOC:DON~(\mu M)/(\mu M)$;2;50
+DOC_DOP.wm;atop(DOC:DOP,(mu*M~N)/(mu*M~P));DOC:DOP~(mu*g~L^{-1});DOC:DOP (µM)/(µM);DOC : DOP ($\mu M$)/($\mu M$);$DOC:DOP~(\mu M)/(\mu M)$;2;25
+DOC_DOP_UM.wm;atop(DOC:DOP,(mu*M~N)/(mu*M~P));DOC:DOP;DOC:DOP (µM)/(µM);DOC : DOP ($\mu M$)/($\mu M$);$DOC:DOP~(\mu M)/(\mu M)$;2;25
+DON_DOP.wm;atop(DON:DOP,(mu*M~N)/(mu*M~P));DON:DOP~(mu*g~L^{-1});DON:DOP (µM)/(µM);DON : DOP ($\mu M$)/($\mu M$);$DON:DOP~(\mu M)/(\mu M)$;5;500
+DON_DOP_UM.wm;atop(DON:DOP,(mu*M~N)/(mu*M~P));DON:DOP;DON:DOP (µM)/(µM);DON : DOP ($\mu M$)/($\mu M$);$DON:DOP~(\mu M)/(\mu M)$;5;500
+HAND_NH4.wm;atop(Ammonia,(mu*g~L^{-1}));NH[4]^{"+"}~(mu*g~L^{-1});NH4 (µg L⁻¹);NH4 ($\mu g L^{-1}$;$NH_4~(\mu g L^{-1})$;NA;NA
+HAND_NH4_UM.wm;atop(Ammonia,(mu*mol~L^{-1}));NH[4]^\+\~(mu*mol~L^{-1});NH4 (µmolL⁻¹);NH_4 ($\mu mol L^{-1}$;$NH_4~(\mu molL^{-1})$;NA;NA
+NOx_PO4_UM.wm;atop(NO[X]:PO[4],(mu*g~L^{-1})/(mu*g~L^{-1}));NO[X]:HPO[4]^\2-\;NOx:PO₄ (µg L⁻¹)/(µg L⁻¹);NO_X:Phosphate ($\mu g L^{-1}$)/($\mu g L^{-1}$);$NO_X:PO_4~(\mu g L^{-1})/(\mu g L^{-1})$;NA;NA
+NOx_PO4_UM.wm;atop(NO[X]:PO4,(mu*mol~L^{-1})/(mu*mol~L^{-1}));NO[X]:HPO[4]^\2-\;NOx:PO₄ (µmolL⁻¹)/(µmolL⁻¹);NO_X:Phosphate ($\mu mol L^{-1}$)/($\mu mol L^{-1}$);$NO_X:PO_4~(\mu molL^{-1})/(\mu molL^{-1})$;NA;NA
+SI_NOx.wm;atop(SI:NO[X],(mu*g~L^{-1})/(mu*g~L^{-1}));NO[X]:HPO[4]^\2-\;SI:NOx (µg L⁻¹)/(µg L⁻¹);Silicates:NO_X ($\mu g L^{-1}$)/($\mu g L^{-1}$);$SI:NO_X~(\mu g L^{-1})/(\mu g L^{-1})$;NA;NA
+SI_NOx_UM.wm;atop(SI:NO[X],(mu*mol~L^{-1})/(mu*mol~L^{-1}));SiO[4]:NO[X];SI:NOx (µmolL⁻¹)/(µmolL⁻¹);Silicates:NOx ($\mu mol L^{-1}$)/($\mu mol L^{-1}$);$SI:NOx~(\mu molL^{-1})/(\mu molL^{-1})$;NA;NA
+SI_PO4.wm;atop(SI:PO[4],(mu*g~L^{-1})/(mu*g~L^{-1}));SI:HPO[4]^\2-\;SI:PO₄ (µg L⁻¹)/(µg L⁻¹);Silicates:Phosphate ($\mu g L^{-1}$)/($\mu g L^{-1}$);$SI:PO_4~(\mu g L^{-1})/(\mu g L^{-1})$;NA;NA
+SI_PO4_UM.wm;atop(SI:PO4,(mu*mol~L^{-1})/(mu*mol~L^{-1}));SiO[4]:HPO[4]^\2-\;SiO₄:HPO₄ (µmolL⁻¹)/(µmolL⁻¹);Silicates:Phosphate ($\mu mol L^{-1}$)/($\mu mol L^{-1}$);$SI:PO_4~(\mu g L^{-1})/(\mu g L^{-1})$;NA;NA
+SI.wm;atop(Silicates,(mu*g~L^{-1}));SiO[4]~(mg~L^{-1});SiO₄ (mg L⁻¹);Silicates ($\mu g L^{-1}$);$SiO_4~(\mu g L^{-1})$;NA;NA
+SI_UM.wm;atop(Silicates,(mu*g~L^{-1}));SiO[4]~(mg~L^{-1});SiO₄ (mg L⁻¹);Silicates ($\mu g L^{-1}$);$SiO_4~(\mu molL^{-1})$;NA;NA

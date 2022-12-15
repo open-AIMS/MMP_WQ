@@ -36,5 +36,7 @@ source("MMP_32_waterQuality_process_loggers.R")
 ## - BOM weather
 source("MMP_33_waterQuality_load_other.R")
 
+source("MMP_34_waterQuality_process_timeseries.R")
+
 
 source("MMP_35_processedData_report.R")

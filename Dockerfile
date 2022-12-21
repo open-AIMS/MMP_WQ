@@ -95,6 +95,11 @@ RUN R -e "options(repos = \
     list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
   install.packages('quarto'); \
 "
+
+RUN R -e "options(repos = \
+    list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
+   install.packages('furrr'); \
+"
   
 ## Create project directory in docker image
 RUN mkdir ~/MMP

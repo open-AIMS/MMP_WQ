@@ -219,7 +219,8 @@ MMP_loadPackages <- function(log = TRUE) {
     missing <- ''
     options(tidyverse.quiet = TRUE)
     pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
-              'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x'
+              'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x',
+              'furrr'
               )
 
     for (p in pkgs) {

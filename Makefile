@@ -18,6 +18,8 @@ docs_container:
 	docker run --rm -v "$(shell pwd)":/home/Project mmp $(MAKE) -f docs/Makefile
 
 # docker run --rm -v "$(pwd):/home/Project" mmp $(MAKE) -f docs/Makefile
+code_singularity:
+	$(MAKE) -f scripts/Makefile singularity 
 
 code_local:
 	$(MAKE) -f scripts/Makefile

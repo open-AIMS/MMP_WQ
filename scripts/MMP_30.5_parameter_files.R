@@ -45,6 +45,20 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
 ## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
 ## ----end
 
+## ---- PARAMS names.lookup
+CURRENT_ITEM <<- 'names.lookup'
+names_lookup <- read.csv(paste0(PARAMS_PATH, '/names_lookup.csv'), strip.white = TRUE) %>% suppressMessages()
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_NAMESLOOKUP = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_lookup = structure(mmp__add_table(names_lookup),
+                                               parent = 'SUBSECTION_NAMESLOOKUP'),
+                               TAB_CAP.lookup = structure(paste0("\n:Provides a mapping between `SHORT_NAME` and `MMP_SITE_NAME`. {#tbl-nameslookup}\n\n"),
+                                                   parent = 'SUBSECTION_NAMESLOOKUP')
+                              )
+save(names_lookup, file=paste0(DATA_PATH, '/primary/other/names_lookup.RData'))
+## ----end
+
 ## ---- PARAMS wq.guidelines
 CURRENT_ITEM <<- 'wq.guidelines'
 wq.guidelines <- read.table(paste0(PARAMS_PATH, '/wq.guidelines.txt'), header=TRUE, sep=';', strip.white = TRUE)
@@ -64,7 +78,9 @@ wq.guidelines <- wq.guidelines %>%
     full_join(wq.sites) %>%
     left_join(names_lookup %>%
               dplyr::select(SHORT_NAME, MMP_SITE_NAME) %>%
-              distinct())
+              distinct()) %>%
+    suppressMessages() %>%
+    suppressWarnings()
 save(wq.guidelines, file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
 ## ----end
 

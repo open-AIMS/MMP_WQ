@@ -196,11 +196,15 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
     MMP_tryCatch(
     {
         disturbance.reef.ltmp <- disturbance.reef.ltmp %>%
-            full_join(cyclones.reef %>% dplyr:::select(-DISTURBANCE))
+            full_join(cyclones.reef %>% dplyr:::select(-DISTURBANCE)) %>%
+            suppressWarnings() %>%
+            suppressMessages()
         ## Combine mmp and ltmp disturbances
         disturbance.reef <- disturbance.reef.mmp %>%
             ## dplyr:::select(-MMP_SITE_NAME) %>%
-            full_join(disturbance.reef.ltmp)
+            full_join(disturbance.reef.ltmp) %>% 
+            suppressWarnings() %>%
+            suppressMessages()
         save(disturbance.reef, file=paste0(OTHER_OUTPUT_PATH, 'disturbance.reef.RData'))
         disturbance.reef.core = disturbance.reef %>%
             mutate(MMP_SITE_NAME=gsub(' Island','',MMP_SITE_NAME),
@@ -237,6 +241,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
                        DISTURBANCE %in% c('u','unk') ~ 'Unknown',
                        DISTURBANCE == 'd' ~ 'Disease')
                    ) %>%
+            suppressMessages() %>%
+            suppressWarnings() %>% 
             mutate(Subregion = factor(Subregion, levels = c('Barron Daintree', 'Johnstone Russell Mulgrave',
                                                            'Tully Herbert', 'Burdekin',
                                                            'Mackay Whitsunday', 'Fitzroy'))) %>%
@@ -249,7 +255,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
             scale_colour_discrete('Disturbance') +
             theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',size=0.5)) 
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/disturbance.reef.png'),
                p,
@@ -532,6 +538,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
             filter(Date>as.Date('2005-01-01')) %>%
             full_join(filltime) %>%
             arrange(Date) %>%
+            suppressMessages() %>%
+            suppressWarnings() %>% 
             ggplot(aes(y=WIND_SPEED, x=Date)) +
             geom_line()+
             ggtitle('Recent BOM weather data') +
@@ -563,7 +571,9 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
             filter(Date>as.Date('2005-01-01')) %>%
             full_join(filltime) %>% arrange(Date)  %>%
             right_join(lookup %>% dplyr::select(LOCATION=BOM, Region, Subregion)) %>%
-            filter(!is.na(STATION_NUMBER)) %>% 
+            filter(!is.na(STATION_NUMBER)) %>%
+            suppressMessages() %>%
+            suppressMessages() %>% 
             ggplot(aes(y=WIND_SPEED, x=Date))+
             geom_line()+
             ggtitle('Recent BOM weather data') +
@@ -666,11 +676,12 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
         load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
         discharge<-discharge %>%
             left_join(river.lookup) %>%
-            mutate(Year=ifelse(month(Date) > 9, year(Date)+1, year(Date)))
+            mutate(Year=ifelse(month(Date) > 9, year(Date)+1, year(Date))) %>%
+            suppressWarnings() %>%
+            suppressMessages()
     }, LOG_FILE, Category = 'Data processing', msg='Discharge gauge correction factors', return=TRUE)
 
     ## ----end
-
 
     ## 3. Further processing 
     ## ---- discharge process level 3
@@ -709,7 +720,9 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
         load(file=paste0(DATA_PATH, '/primary/other/discharge.baseline.RData'))
         
         discharge <- discharge %>%
-            left_join(discharge.baseline)
+            left_join(discharge.baseline) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         discharge <- discharge %>%
             filter(waterYear<=reportYear)
         save(discharge, file=paste0(OTHER_OUTPUT_PATH, 'discharge.RData'))
@@ -723,7 +736,10 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
             group_by(Subregion,waterYear) %>%
             summarise( discharge.c.annual=sum(discharge.c)) %>%
             ungroup %>%
-            mutate(Year=waterYear)
+            mutate(Year=waterYear) %>%
+            suppressMessages() %>%
+            suppressWarnings()
+
         
         save(discharge.annual, file=paste0(OTHER_OUTPUT_PATH, 'discharge.annual.RData'))
     }, LOG_FILE, Category = 'Data processing', msg='Processing discharge data', return=TRUE)
@@ -803,12 +819,17 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                 summarise(LTmedian = sum(LT.median)) %>% 
                 group_by(Subregion) %>%
                 nest() %>% 
-                rename(Baseline = data)
+                rename(Baseline = data) %>%
+                suppressMessages() %>%
+                suppressWarnings()
                 
             discharge.subregion <-
                 discharge.subregion %>%
                 full_join(discharge.annual) %>% 
-                full_join(discharge.baseline)
+                full_join(discharge.baseline) %>%
+                suppressMessages() %>%
+                suppressWarnings()
+
                 
             ## discharge.subregion[1,'data'][[1]][[1]] %>% as.data.frame %>% head 
             ## discharge.subregion[4,'Baseline'][[1]][[1]] %>% as.data.frame %>% head 
@@ -830,7 +851,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
                   .f = ~ ggsave(paste0(OUTPUT_PATH, '/figures/processed/discharge_', .y, '.png'),
                                 .x,
                                 width = 10, height = 6,
-                                dpi = 100)
+                                dpi = 100) %>%
+                      suppressWarnings()
                   )
             
             ## report string

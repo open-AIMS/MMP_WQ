@@ -19,7 +19,7 @@ files <- list.files(paste0(DATA_PATH, "/reports"), full.names = TRUE)
 ##    - STATUS items
 ##  this is necessary because the parameter files are not listed in the
 ##  STATUS list (since they are not extracted, compiled or processed)
-ITEMS <- c('ParamFiles', STATUS[[CURRENT_STAGE]]$items)
+ITEMS <- c('ParamFiles', STATUS[[paste0("STAGE",CURRENT_STAGE)]]$items)
 
 ## 3. order according to order of items in ITEMS (params then STATUS)
 files <- files[sapply(ITEMS, function(x) {
@@ -37,17 +37,25 @@ doc_string <- sapply(str_subset(files, 'STAGE3'),
     unlist(use.names = FALSE) %>%
     paste(collapse = '\n')
 
-## 4. take the template (docs/MMP_processData.editMe) and copy it to
+## 4. add the current log onto the end
+doc_string <- paste0(doc_string,
+                     "\n\n# Log file\n\n",
+                     '``` LOG\n',
+                     read_file(LOG_FILE),
+                     '```\n'
+                     )
+
+## 5. take the template (docs/MMP_processData.editMe) and copy it to
 ## the quarto file
 file.copy(from = DOC_BASE_TEMPLATE,
           to = DOC_OUTPUT,
           overwrite = TRUE) 
 
-## 5. append the doc_string to the quarto file
+## 6. append the doc_string to the quarto file
 write(doc_string,
       file = DOC_OUTPUT,
       append = TRUE)
            
-## 6. Render document to html
+## 7. Render document to html
 quarto::quarto_render(DOC_OUTPUT)
 

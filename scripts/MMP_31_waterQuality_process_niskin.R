@@ -235,7 +235,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
             mutate(Boxplots = map(.x = data,
                                   .f = ~ mmp__boxplots(.x)
                                   )
-                   )
+                   ) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         
         niskin.boxplotData %>%
             {walk2(
@@ -250,7 +252,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
                            width = nrows*1.5 + 0.5,
                            height = ncols*2 + 0.5,
                            dpi = 100
-                           )
+                           ) %>% suppressWarnings()
                 })}
 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
@@ -619,7 +621,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
                     Dtt.num = as.integer(Time),
                     Mnth = as.integer(format(Date, format='%m')),
                     Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
-             mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME))
+            mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME)) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         save(niskin.jcu.reef.av1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData'))
     }, LOG_FILE, Category = "Data processing:", msg='Process Water Quality (JCU) data', return=TRUE)
 
@@ -711,7 +715,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
             mutate(Boxplots = map(.x = data,
                                   .f = ~ mmp__boxplots(.x)
                                   )
-                   )
+                   ) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         
         niskin.jcu.boxplotData %>%
             {walk2(
@@ -726,7 +732,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
                            width = nrows*1.5 + 0.5,
                            height = ncols*2 + 0.5,
                            dpi = 100
-                           )
+                           ) %>%
+                        suppressWarnings()
                 })}
 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
@@ -777,6 +784,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
     ## ----end
 } else {
 }
+if (1==2) {
 ## ---- outputs
 MMP_tryCatch(
 {
@@ -802,7 +810,7 @@ MMP_tryCatch(
 }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (JCU) data', return=TRUE)
 
 ## ----end
-
+}
 MMP_checkData(name = "niskin.jcu.reef.av1.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
@@ -923,7 +931,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
              mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
                     Dtt.num = as.integer(Time),
                     Mnth = as.integer(format(Date, format='%m')),
-                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
+             suppressWarnings() %>%
+             suppressMessages()
         save(niskin.cy.reef.av, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData'))
     }, LOG_FILE, Category = "Data processing:", msg='Process Water Quality (CY) data', return=TRUE)
 
@@ -1015,7 +1025,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
             mutate(Boxplots = map(.x = data,
                                   .f = ~ mmp__boxplots(.x)
                                   )
-                   )
+                   ) %>%
+            suppressMessages() %>%
+            suppressWarnings()
         
         niskin.cy.boxplotData %>%
             {walk2(
@@ -1030,7 +1042,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
                            width = nrows*1.5 + 0.5,
                            height = ncols*2 + 0.5,
                            dpi = 100
-                           )
+                           ) %>%
+                        suppressWarnings()
                 })}
 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,

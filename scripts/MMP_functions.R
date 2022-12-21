@@ -84,13 +84,13 @@ MMP_initialise_status <- function() {
                                 "flntu", "waterTemp", "salinity",
                                 "dhw","disturbances","tides",
                                 "BOM","discharge",
-                                "timeseries"),
+                                "timeseries" ),
                       names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
                                 "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers",
                                 "Degree heating weeks","Disturbance tables", "Harmonic tides",
                                 "BOM weather", "River discharge",
-                                "Compilation timeseries"),
+                                "Compilation timeseries" ),
                       status = c("pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending","pending",
@@ -219,7 +219,7 @@ MMP_loadPackages <- function(log = TRUE) {
     missing <- ''
     options(tidyverse.quiet = TRUE)
     pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
-              'assertthat', 'lubridate', 'rmarkdown','bookdown'
+              'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x'
               )
 
     for (p in pkgs) {

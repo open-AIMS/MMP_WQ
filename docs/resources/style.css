@@ -220,3 +220,7 @@ table>caption {
     background-color:white;
     z-index: 1;
 }
+
+pre>code {
+    height: 200px;
+}

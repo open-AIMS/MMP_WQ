@@ -958,3 +958,83 @@ mmp__timeseries_plot <- function(flntu, tides, temperature, weather, discharge, 
   
     legend("topleft",legend=subtitle, bty="n", text.font=1, cex=1,inset=-0.03,xpd=TRUE)#,xjust=0,adj=c(0,1), cex=1.5)
 }
+
+mmp__timeseries_prepare_flntu <- function(flntu, Site, START_DATE) {
+    flntu %>%
+        filter(MMP_SITE_NAME == Site,
+               Date >= START_DATE) %>%
+        droplevels()
+}
+mmp__timeseries_prepare_waterTemp <- function(waterTemp, Site, START_DATE) {
+    if (waterTemp %>% filter(MMP_SITE_NAME == Site) %>% nrow() >0) { 
+        waterTemp <- waterTemp %>% filter(MMP_SITE_NAME == Site) %>% droplevels() %>%
+            filter(!is.na(Date),
+                   Date >= START_DATE) %>%
+            droplevels() %>% 
+            arrange(Date) %>%
+            complete(Date = seq.Date(min(Date), max(Date), by = 'week'))
+    } else {
+        waterTemp <- NULL
+    }
+    waterTemp
+}
+mmp__timeseries_prepare_wind <- function(wind, Site, START_DATE) { 
+    lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
+    wind %>%
+        left_join(lookup %>% filter(reef.alias == Site) %>%
+                  dplyr::select(reef.alias, BOM),
+                  by = c('LOCATION' = 'BOM')) %>%
+        mutate(MMP_SITE_NAME = reef.alias) %>% 
+        filter(MMP_SITE_NAME == Site) %>% droplevels() %>%
+        filter(!is.na(Date),
+               Date >= START_DATE) %>%
+        arrange(Date) %>%
+        complete(Date = seq.Date(min(Date), max(Date), by = 'week'))
+}
+mmp__timeseries_prepare_discharge <- function(discharge, Subregion, START_DATE) {
+    discharge %>%
+        filter(Subregion == Subregion) %>%
+        droplevels() %>%
+        ## filter(Date >= as.Date('2006-01-01')) %>%
+        filter(Date >= START_DATE) %>%
+        group_by(Subregion, Date) %>%
+        summarise(DISCHARGE_RATE_DAILY = sum(PARAM_VALUE)) %>%
+        suppressMessages() %>%
+        suppressWarnings()
+}
+mmp__timeseries_prepare_guidelines <- function(Site) {
+    load(file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
+    GL.chl <- wq.guidelines %>%
+        filter(MMP_SITE_NAME==Site, GL.Season=="Annual", Measure=="DRIFTCHL_UGPERL.wm") %>%
+        pull(GL) %>%
+        unique()
+    GL.chl <- ifelse(length(GL.chl>0), as.vector(GL.chl),NA)
+    GL.ntu <- wq.guidelines %>%
+        filter(MMP_SITE_NAME==Site, GL.Season=="Annual", Measure=="NTU") %>%
+        pull(GL) %>%
+        unique()
+    GL.ntu <- ifelse(length(GL.ntu>0), as.vector(GL.ntu),NA)
+    list(GL.chl = GL.chl, GL.ntu = GL.ntu)
+}
+mmp__timeseries_prepare_data <- function(flntu, tides, waterTemp, wind, discharge, Site, START_DATE) {
+    ## FLNTU
+    flntu <- mmp__timeseries_prepare_flntu(flntu.all.daily, Site, START_DATE)
+    if (nrow(flntu)<1) return(NULL)
+    ## Tides
+    tides <- tides[[Site]]
+    ## Water temperature
+    waterTemp <- mmp__timeseries_prepare_waterTemp(waterTemp, Site, START_DATE)
+    ## Wind
+    wind <- mmp__timeseries_prepare_wind(wind, Site, START_DATE) 
+    ## Discharge
+    Subregion <- flntu %>% pull(Subregion) %>% unique() %>% na.omit() %>% as.character()
+    discharge <- mmp__timeseries_prepare_discharge(discharge, Subregion = Subregion, START_DATE)
+    ## Guideline values
+    GL <- mmp__timeseries_prepare_guidelines(Site)
+    
+    return(list(flntu = flntu, tides = tides,
+                waterTemp = waterTemp, wind = wind,
+                discharge = discharge,
+                GL.chl = GL$GL.chl,
+                GL.ntu = GL$GL.ntu))
+}

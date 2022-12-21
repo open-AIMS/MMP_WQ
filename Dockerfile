@@ -67,6 +67,7 @@ RUN R -e "options(repos = \
   install.packages('s2'); \
   install.packages('R.utils'); \
   install.packages('quarto'); \
+  install.packages('ggh4x'); \
 "
 #############################################################################
 ## NOTE: we could opt for installing specific versions of packages

@@ -13,7 +13,7 @@ MINDATE=MAXDATE-years(1)+days(1)
 
 START_DATE <<- as.Date("2014-09-30")
 
-## ---- AIMS Disturbance table 
+## ---- timeseries plots 
 CURRENT_ITEM <- "timeseries"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
@@ -32,58 +32,73 @@ if (alwaysExtract &
       load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
       lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
 
-      walk(.x = unique(flntu.all.daily$MMP_SITE_NAME)[1:4],
-           .f = function(S) {
-               print(S)
-               flntu <- flntu.all.daily %>% filter(MMP_SITE_NAME == S) %>% droplevels()
-               tides <- tides.daily[[S]]
-               ## wind <- bom.weather %>% filter(MMP_SITE_NAME == S) %>% droplevels()
-               waterTemp <- waterTempWAll %>% filter(MMP_SITE_NAME == S) %>% droplevels() %>%
-                   filter(!is.na(Date)) %>%
-                   arrange(Date) %>%
-                   complete(Date = seq.Date(min(Date), max(Date), by = 'week')) 
-               weather <- bom.weather %>%
-                   left_join(lookup %>% filter(reef.alias == S) %>%
-                             dplyr::select(reef.alias, BOM),
-                             by = c('LOCATION' = 'BOM')) %>%
-                   mutate(MMP_SITE_NAME = reef.alias) %>% 
-                   filter(MMP_SITE_NAME == S) %>% droplevels() %>%
-                   filter(!is.na(Date)) %>%
-                   arrange(Date) %>%
-                   complete(Date = seq.Date(min(Date), max(Date), by = 'week')) 
-               Sr <- flntu %>% pull(Subregion) %>% unique() %>% na.omit()
-               disch <- discharge %>%
-                   filter(Subregion == as.character(Sr)) %>%
-                   droplevels() %>%
-                   filter(Date >= as.Date('2006-01-01')) %>%
-                   group_by(Subregion, Date) %>%
-                   summarise(DISCHARGE_RATE_DAILY = sum(PARAM_VALUE))
+      unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+      MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                             SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                  item = CURRENT_ITEM),"\n\n"),
+                             TABSET = paste0("::: panel-tabset \n\n"),
+                             TABSET_END = paste0("::: \n\n")
+                             )
 
-               GL.chl <- wq.guidelines %>%
-                   filter(MMP_SITE_NAME==S, GL.Season=="Annual", Measure=="DRIFTCHL_UGPERL.wm") %>%
-                   pull(GL) %>%
-                   unique()
-               GL.chl <- ifelse(length(GL.chl>0), as.vector(GL.chl),NA)
-               GL.ntu <- wq.guidelines %>%
-                   filter(MMP_SITE_NAME==S, GL.Season=="Annual", Measure=="NTU") %>%
-                   pull(GL) %>%
-                   unique()
-               GL.ntu <- ifelse(length(GL.ntu>0), as.vector(GL.ntu),NA)
+      walk(.x = unique(flntu.all.daily$MMP_SITE_NAME),
+           .f = function(S) {
+               ## print(S)
+               data <- mmp__timeseries_prepare_data(flntu.all.daily,
+                                                    tides = tides.daily,
+                                                    waterTemp = waterTempWAll,
+                                                    wind = bom.weather,
+                                                    discharge = discharge,
+                                                    Site = S,
+                                                    START_DATE)
+               if (length(data)>1) {
 
                wch <- which(unique(flntu.all.daily$MMP_SITE_NAME) == S)
                png(filename = paste0(OUTPUT_PATH, '/figures/processed/timeseries_', S, '.png'),
                    res=300, width=6.299, height=2.756,units='in', pointsize=6
                    )
-               mmp__timeseries_plot(flntu, tides,
-                                    temperature = waterTemp,
-                                    weather = weather,
-                                    discharge = disch,
-                                    GL.chl = GL.chl, GL.ntu = GL.ntu,
+               mmp__timeseries_plot(flntu = data$flntu,
+                                    tides = data$tides,
+                                    temperature = data$waterTemp,
+                                    weather = data$wind,
+                                    discharge = data$discharge,
+                                    GL.chl = data$GL.chl, GL.ntu = data$GL.ntu,
                                     subtitle = paste0(letters[wch], ") ", S))
-               dev.off()
+                   dev.off()
+               }
            }
            )
 
+      walk(.x = unique(flntu.all.daily$MMP_SITE_NAME),
+                 .f = function(S) {
+                       SS <- str_replace_all(S, ' ','_')
+                       MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                              !!!setNames(list(
+                                                      structure(paste0("### ", S, "\n"),
+                                                                parent = 'TABSET')),
+                                                      paste0('SUBSECTION_timeseries_',S)
+                                                      ), 
+                                              !!!setNames(list(
+                                                     structure(paste0("\n::: {#fig-sql-timeseries-",SS,"}\n"),
+                                                               parent = paste0('SUBSECTION_timeseries_', S))),
+                                                     paste0('FIG_REF_',S)
+                                                     ),
+                                              !!!setNames(list(
+                                                     structure(paste0("![](",OUTPUT_PATH,"/figures/processed/timeseries_", S, ".png)\n"),
+                                                               parent = paste0("FIG_REF_", S))),
+                                                     paste0('FIG_', S)
+                                                     ),
+                                              !!!setNames(list(
+                                                          structure(paste0("\nDaily river discharge (blue), turbidity (NTU: red), chlorophyll-a (green), wind speed, tidal range and water temperature for the ", S, " subregion. Horizontal dashed lines represent guideline values.\n"),
+                                                                    parent = paste0('FIG_REF_',S))),
+                                                          paste0('FIG_CAP_',SS)),
+                                              !!!setNames(list(
+                                                     structure(paste0("\n::: \n"),
+                                                               parent = paste0('SUBSECTION_timeseries_',S))),
+                                                     paste0('FIG_END_', S)
+                                                     ) 
+                                              )
+                 }
+                 )
       
       ## flntu <- flntu.all.daily %>%
       ##     filter(Date>=START_DATE) %>%
@@ -142,8 +157,9 @@ if (alwaysExtract &
 MMP_checkData(name = "disturbance.reef.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
-              label = "Processed AIMS disturbance",
+              label = "Processed timeseries plots",
               PATH = OTHER_OUTPUT_PATH)
 MMP_openning_banner()
 
 ## ----end
+

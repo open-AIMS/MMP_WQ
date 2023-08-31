@@ -15,8 +15,8 @@ MMP_isParent <- function() {
 
 MMP_fakeArgs <- function() {
     MMP_startMatter(args = c('','','','','',
-                             '--reportYear=2022',
-                             '--runStage=3',
+                             '--reportYear=2023',
+                             '--runStage=1',
                              '--alwaysExtract=TRUE'))
 }
 

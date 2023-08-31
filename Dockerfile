@@ -100,7 +100,11 @@ RUN R -e "options(repos = \
     list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
    install.packages('furrr'); \
 "
-  
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  install.packages(c('kableExtra'))"  
+
 ## Create project directory in docker image
 RUN mkdir ~/MMP
 

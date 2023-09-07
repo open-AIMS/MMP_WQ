@@ -646,7 +646,7 @@ MMP_bomStations <- function(bom) {
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="27058", "Horn Island",bom$LOCATION)          #QLD
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="28008", "Lockhart River Airport",bom$LOCATION)#QLD
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="31209", "Cooktown Airport",bom$LOCATION)     #QLD
-    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="33119", "Mackay M.o",bom$LOCATION)           #QLD
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="33119", "Mackay M.O",bom$LOCATION)           #QLD
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="33083", "Cardowan",bom$LOCATION)             #QLD
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="39123", "Gladstone Radar",bom$LOCATION)      #QLD
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="40068", "Double Island Point Lighthouse",bom$LOCATION)#QLD
@@ -821,7 +821,8 @@ mmp__timeseries_plot <- function(flntu, tides, temperature, weather, discharge, 
 
     ## Define min and max dates
     minDate <- min(flntu$Date)
-    maxDate <- max(flntu$Date)
+    ## maxDate <- max(flntu$Date)
+    maxDate <- MAXDATE
     
     ##Construct base plot
     par(mar=c(4,6.5,0.5,6))
@@ -830,14 +831,18 @@ mmp__timeseries_plot <- function(flntu, tides, temperature, weather, discharge, 
          axes=F,
          ann=F,
          ylim=c(0,1),
-         xlim=c(min(c(flntu$Date)), max(c(flntu$Date,flntu$Date))))
+         ## xlim=c(min(c(flntu$Date)), max(c(flntu$Date,flntu$Date))))
+         xlim=c(min(c(flntu$Date)), MAXDATE))
 
     ##Construct yearly ribbon underlay
-    tm2 <-seq(as.Date("2001-09-01"), max(flntu$Date), by="2 year")
-    tm3 <-seq(as.Date("2002-08-30"), max(flntu$Date), by="2 year")
+    ## tm2 <-seq(as.Date("2001-09-01"), max(flntu$Date), by="2 year")
+    ## tm3 <-seq(as.Date("2002-08-30"), max(flntu$Date), by="2 year")
+    tm2 <-seq(as.Date("2001-09-01"), MAXDATE, by="2 year")
+    tm3 <-seq(as.Date("2002-08-30"), MAXDATE, by="2 year")
     tm2 <- tm2[tm2>as.Date("2007-08-01")]
     tm3 <- tm3[tm3>as.Date("2007-08-01")]
-    if(length(tm2)>length(tm3)) tm3 <- c(tm3, max(c(flntu$Date,flntu$Date)))
+    ## if(length(tm2)>length(tm3)) tm3 <- c(tm3, max(c(flntu$Date,flntu$Date)))
+    if(length(tm2)>length(tm3)) tm3 <- c(tm3, MAXDATE)
     rect(tm2,par()$usr[3],tm3,1, col="gray95", border=NA)
 
     ##Construct time axes

@@ -236,9 +236,43 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- BOM weather data 
-
 CURRENT_ITEM <- "BOM"
 current_label <- "BOM weather"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+MMP_openning_banner()
+
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
+    writeLines("select STATION_NUMBER,TO_CHAR(SAMPLE_DATE,'dd/mm/yyyy') as Dt,
+  AVG(TO_CHAR(SAMPLE_DATE, 'yyyy')) as YEAR,
+  AVG(AIR_TEMP) as TEMPERATURE,
+  AVG(WIND_SPEED_KMH) as WIND_SPEED
+  from 
+   BOM_CLIMATE.BOM_CLIMATE_DATA_REQUEST where DATA_REQUEST_TYPE like '%HOURLY'
+     GROUP BY STATION_NUMBER,TO_CHAR(SAMPLE_DATE,'dd/mm/yyyy')
+     ORDER BY STATION_NUMBER,TO_CHAR(SAMPLE_DATE,'dd/mm/yyyy')"
+, paste0(OTHER_PATH, "bom.sql"))
+
+    MMP_tryCatch_db(name = 'bom',
+                    stage = paste0("STAGE", CURRENT_STAGE),
+                    item = CURRENT_ITEM,
+                    label = current_label,
+                    PATH = OTHER_PATH,
+                    db_user = "reef rwqpp_user", 
+                    progressive=TRUE)
+} else {
+    MMP_log(status = "SUCCESS",
+            logFile = LOG_FILE,
+            Category = paste0("Using existing ", current_label, " data (no extraction performed)"),
+            msg=NULL)
+    mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "success")
+}
+
+MMP_openning_banner()
+## ----end
+
+## ---- BOM weather data 2
+CURRENT_ITEM <- "BOM 2"
+current_label <- "BOM weather 2"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -246,11 +280,12 @@ if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
     writeLines("select station_number, station_name, TO_CHAR(sample_day,'YYYY-MM-DD') as SAMPLE_DAY_ISO,
   to_char(sample_day, 'YYYY') as YEAR, parameter, avg_value
  from bom_climate.mv_daily_data_generic
- where (parameter like 'Wind speed%' or parameter like 'Wind direction%' or parameter like 'WIND_SPD_KMH' or parameter like 'WIND_DIR')
- order by station_number, sample_day, parameter)"
-, paste0(OTHER_PATH, "bom.sql"))
+ where (parameter like 'Wind speed%' or parameter like 'Wind direction%' or parameter like 'WIND_SPD_KMH' 
+ or parameter like 'WIND_DIR')
+ order by station_number, sample_day, parameter"
+, paste0(OTHER_PATH, "bom2.sql"))
 
-    MMP_tryCatch_db(name = 'bom',
+    MMP_tryCatch_db(name = 'bom2',
                     stage = paste0("STAGE", CURRENT_STAGE),
                     item = CURRENT_ITEM,
                     label = current_label,

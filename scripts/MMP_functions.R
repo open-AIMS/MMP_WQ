@@ -13,10 +13,10 @@ MMP_isParent <- function() {
    ifelse(sys.nframe()==1, TRUE, FALSE) 
 }
 
-MMP_fakeArgs <- function() {
+MMP_fakeArgs <- function(stage = 1) {
     MMP_startMatter(args = c('','','','','',
                              '--reportYear=2023',
-                             '--runStage=1',
+                             paste0('--runStage=', paste0(stage)),
                              '--alwaysExtract=TRUE'))
 }
 
@@ -32,9 +32,9 @@ MMP_startMatter <- function(args = commandArgs()) {
     MMP_parseCLA(args)         ## parse command line arguments
     if (CURRENT_STAGE == 1) {
         ## clear data and outputs from previous runs
-        MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH',
-                                  'DOCS_PATH'
-                                  ))      
+        MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH'))      
+        ## clear DOCS_PATH files
+        unlink(paste0(DOCS_PATH, paste0("/MMP_processData_report", c(".qmd", ".html"))))
         MMP_prepare_paths()    ## prepare file structure
     }
     MMP_openning_banner()
@@ -84,21 +84,37 @@ MMP_initialise_status <- function() {
                                 "flntu", "waterTemp", "salinity",
                                 "dhw","disturbances","tides",
                                 "BOM","discharge",
-                                "timeseries" ),
+                                "timeseries","indicesData",
+                                "gamData"),
                       names = c("AIMS niskin data", "Cairns transect data","JCU niskin data",
                                 "JCY CY niskin data","JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers","Water temperature loggers","Salinity loggers",
                                 "Degree heating weeks","Disturbance tables", "Harmonic tides",
                                 "BOM weather", "River discharge",
-                                "Compilation timeseries" ),
+                                "Compilation timeseries", "Prepare Indices data",
+                                "Prepare GAMM data"),
                       status = c("pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending",
+                                 "pending", "pending",
                                  "pending"
                                  )
+                      ),
+        STAGE4 = list(title = "Stage 4 - fit GAMMs",
+                      items = c("fitGAMM", "fitFLNTUGAMM",
+                                "fitAIMSJCUGAMM", "fitAIMSJCUOMOGAMM"),
+                      names = c("fit GAMMs", "fit FLNTU GAMMs",
+                                "fit AIMS/JCU GAMMs", "fit AIMS/JCU OMO GAMMs"),
+                      status = c("pending", "pending", "pending", "pending")
+                      ),
+        STAGE5 = list(title = "Stage 5 - calculate indices",
+                      items = c("Type0", "Type1"),
+                      names = c("Type 0", "Type 1"),
+                      status = c("pending", "pending")
                       )
+        
     )
     assign("STATUS", STATUS, env = globalenv())
 }
@@ -325,8 +341,14 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(DATA_PATH, '/processed/loggers'))
     if (!dir.exists(paste0(DATA_PATH, '/processed/other')))
         dir.create(paste0(DATA_PATH, '/processed/other'))
+    if (!dir.exists(paste0(DATA_PATH, '/models')))
+        dir.create(paste0(DATA_PATH, '/models'))
+    if (!dir.exists(paste0(DATA_PATH, '/indices')))
+        dir.create(paste0(DATA_PATH, '/indices'))
     if (!dir.exists(paste0(DATA_PATH, '/reports')))
         dir.create(paste0(DATA_PATH, '/reports'))
+    if (!dir.exists(paste0(DATA_PATH, '/final')))
+        dir.create(paste0(DATA_PATH, '/final'))
 
     if (!dir.exists(OUTPUT_PATH)) dir.create(OUTPUT_PATH)
     if (!dir.exists(paste0(OUTPUT_PATH, '/tables')))
@@ -335,6 +357,10 @@ MMP_prepare_paths <- function() {
         dir.create(paste0(OUTPUT_PATH, '/figures'))
     if (!dir.exists(paste0(OUTPUT_PATH, '/figures/processed')))
         dir.create(paste0(OUTPUT_PATH, '/figures/processed'))
+    if (!dir.exists(paste0(OUTPUT_PATH, '/figures/indices')))
+        dir.create(paste0(OUTPUT_PATH, '/figures/indices'))
+    if (!dir.exists(paste0(OUTPUT_PATH, '/figures/models')))
+        dir.create(paste0(OUTPUT_PATH, '/figures/models'))
 
     if (!dir.exists(DOCS_PATH)) dir.create(DOCS_PATH)
 
@@ -866,4 +892,16 @@ mmp__make_table_chunk <- function(tab, caption) {
                       '```\n\n'
                       ) %>%
                 str_replace_all("\"", "'")
+}
+
+theme_mmp <- ggplot2:::theme_classic(10) + ggplot2:::theme(axis.line.x=ggplot2:::element_line(),
+                                                           axis.line.y=ggplot2:::element_line())
+
+####################################################################
+## The following function defines nicer tick marks for log scales ##
+####################################################################
+base_breaks <- function(n = 10){
+    function(x) {
+        axisTicks(log10(range(x, na.rm = TRUE)), log = TRUE, n = n)
+    }
 }

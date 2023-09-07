@@ -28,6 +28,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                                    parent = 'SUBSECTION_WQSITES')
                               )
 ## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+save(wq.sites, file=paste0(DATA_PATH, '/primary/other/wq.sites.RData'))
 ## ----end
 
 
@@ -43,6 +44,7 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                                    parent = 'SUBSECTION_LOOKUP')
                               )
 ## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+save(lookup, file=paste0(DATA_PATH, '/primary/other/lookup.RData'))
 ## ----end
 
 ## ---- PARAMS names.lookup
@@ -82,6 +84,31 @@ wq.guidelines <- wq.guidelines %>%
     suppressMessages() %>%
     suppressWarnings()
 save(wq.guidelines, file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
+## ----end
+
+## ---- PARAMS old.wq.guidelines
+CURRENT_ITEM <<- 'old.wq.guidelines'
+old.wq.guidelines <- read.csv(paste0(PARAMS_PATH, '/old.wq.guidelines.csv'), strip.white=TRUE)
+old.wq.guidelines <- old.wq.guidelines %>%
+    mutate(SHORT_NAME = str_replace_all(MMP_SITE_NAME, ',', ', '))
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_OLDWQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_old.wq.guidelines = structure(mmp__add_table(old.wq.guidelines),
+                                               parent = 'SUBSECTION_OLDWQGUIDELINES'),
+                               TAB_CAP.old.wq.guidelines = structure(paste0("\n:Water Quality Sites design water quality guidelines.  In particular, this parameter file descibes the mapping between GBRMPA groups and short names and AIMS reef.alias as well as which sites should have what type of samples. {#tbl-oldwqguidelines}\n\n"),
+                                                   parent = 'SUBSECTION_OLDWQGUIDELINES')
+                              )
+## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
+old.wq.guidelines <- old.wq.guidelines %>%
+    separate_rows(SHORT_NAME, sep=', ') %>%
+    full_join(wq.sites) %>%
+    left_join(names_lookup %>%
+              dplyr::select(SHORT_NAME, MMP_SITE_NAME) %>%
+              distinct()) %>%
+    suppressMessages() %>%
+    suppressWarnings()
+save(old.wq.guidelines, file=paste0(DATA_PATH, '/primary/other/old.wq.guidelines.RData'))
 ## ----end
 
 ## ---- PARAMS river.lookup
@@ -140,11 +167,26 @@ wq.units <- read.table(file=paste0(PARAMS_PATH, '/wq.units.txt'), header=TRUE, s
 MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                        SUBSECTION_wqunits = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
                                               parent = 'TABSET'),
-                               TAB_river.lookup = structure(mmp__add_table(wq.units),
+                               TAB_units.lookup = structure(mmp__add_table(wq.units),
                                                parent = 'SUBSECTION_wqunits'),
-                               TAB_CAP.river.lookup = structure(paste0("\n:Units associated with each of the analytes. {#tbl-wqunits}\n\n"),
+                               TAB_CAP.units.lookup = structure(paste0("\n:Units associated with each of the analytes. {#tbl-wqunits}\n\n"),
                                                    parent = 'SUBSECTION_wqunits')
                               )
 
 save(wq.units, file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
+## ----end
+
+## ---- PARAMS hierarchy
+CURRENT_ITEM <<- 'hierarchy'
+hierarchy <- read.csv(file=paste0(PARAMS_PATH, '/hierarchy.csv'), strip.white=TRUE)
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_hier = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_hier.lookup = structure(mmp__add_table(hierarchy),
+                                               parent = 'SUBSECTION_hier'),
+                               TAB_CAP.hier.lookup = structure(paste0("\n:Index aggregation hierarchy. {#tbl-hier}\n\n"),
+                                                   parent = 'SUBSECTION_hier')
+                              )
+
+save(hierarchy, file=paste0(DATA_PATH, '/primary/other/hierarchy.RData'))
 ## ----end

@@ -436,7 +436,8 @@ mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, 
 MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))) &
-    file.exists(paste0(OTHER_INPUT_PATH, 'bom.csv'))) {
+    file.exists(paste0(OTHER_INPUT_PATH, 'bom.csv')) &
+    file.exists(paste0(OTHER_INPUT_PATH, 'bom2.csv'))) {
     ## 1. Read in data
     ## ---- BOM weather data data
     MMP_tryCatch(
@@ -449,23 +450,54 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
                                                                     item = CURRENT_ITEM),"\n\n"),
                                TABSET = paste0("::: panel-tabset \n\n"),
                                TABSET_END = paste0("::: \n\n"),
-                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                               SUBSECTION_SQL = structure(paste0("## SQL syntax (source 1)\n"),
                                                           parent = 'TABSET'),
                                SQL = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'bom.sql')),
                                                parent = 'SUBSECTION_SQL')
                                )
 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse (source 1)\n"),
                                                               parent = 'TABSET'),
                                TAB = structure(mmp__add_table(mmp__glimpse_like(bom)),
                                                parent = 'SUBSECTION_GLIMPSE'),
-                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the BO weather data. {#tbl-sql-bom}\n\n"),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the BO weather data (source 1). {#tbl-sql-bom}\n\n"),
                                                    parent = 'SUBSECTION_GLIMPSE')
                               )
 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in BOM weather data', return=TRUE)
+    ## ----end
+
+    ## ---- BOM weather data 2
+    ## CURRENT_ITEM <- "BOM 2"
+    ## mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+    ## MMP_openning_banner()
+    
+    ## 2. Read in data 2
+    ## ---- BOM weather data2
+    MMP_tryCatch(
+    {
+        bom2 <- read_csv(paste0(OTHER_INPUT_PATH, 'bom2.csv')) %>%
+            suppressMessages()
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_SQL2 = structure(paste0("## SQL syntax (source 2)\n"),
+                                                          parent = 'TABSET'),
+                               SQL2 = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'bom2.sql')),
+                                               parent = 'SUBSECTION_SQL2')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_GLIMPSE2 = structure(paste0("## Data glimpse (source 2)\n"),
+                                                              parent = 'TABSET'),
+                               TAB2 = structure(mmp__add_table(mmp__glimpse_like(bom2)),
+                                               parent = 'SUBSECTION_GLIMPSE2'),
+                               TAB.CAP2 = structure(paste0("\n:Extraction of the first five records in each field from the BOM weather data (source 2). {#tbl-sql-bom2}\n\n"),
+                                                   parent = 'SUBSECTION_GLIMPSE2')
+                              )
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in BOM 2 weather data', return=TRUE)
     ## ----end
     
     ## 1. First level of data processing
@@ -477,9 +509,36 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
                    WIND_SPEED = as.numeric(as.character(WIND_SPEED)), 
                    Date = as.Date(DT, format='%d/%m/%Y')) %>%
             MMP_bomStations() %>%
-            mutate(LOCATION = factor(LOCATION))
+            mutate(LOCATION = factor(LOCATION)) %>%
+            filter(Date > as.Date("2005-01-01")) 
         
-        bom.weather <- bom %>% 
+        bom2 <- bom2 %>%
+            mutate(PARAMETER=dplyr::recode_factor(PARAMETER,
+                                                  `Wind direction in degrees true`='WIND_DIR',
+                                                  `WIND_SPD_KMH` = 'WIND_SPEED',
+                                                  `Wind speed in km/h`='WIND_SPEED')) %>%
+            group_by(STATION_NUMBER, STATION_NAME, PARAMETER, YEAR, SAMPLE_DAY_ISO) %>%
+            summarise(AVG_VALUE = mean(AVG_VALUE)) %>%
+            ungroup %>% 
+            spread(key=PARAMETER, value=AVG_VALUE) %>%
+            mutate(Date = as.Date(SAMPLE_DAY_ISO, format = "%Y-%m-%d")) %>%
+            filter(Date > as.Date("2005-01-01")) %>%
+            dplyr::select(STATION_NUMBER, SAMPLE_DAY_ISO, YEAR,
+                          WIND_DIR, WIND_SPEED, Date) %>%
+            MMP_bomStations() %>%
+            mutate(LOCATION = factor(LOCATION)) %>%
+            suppressWarnings() %>%
+            suppressMessages()
+
+        ## unify the two bom streams (e.g. one has WIND_DIR, the other does not and
+        ## one has TEMPERATURE, the other does not)
+        bom <- bom %>%
+            dplyr::select(STATION_NUMBER, YEAR, Date, LOCATION, WIND_SPEED)
+        bom2 <- bom2 %>%
+            dplyr::select(STATION_NUMBER, YEAR, Date, LOCATION, WIND_SPEED)
+
+        ## bring these two together
+        bom.weather <- bom %>% full_join(bom2) %>%
             mutate(waterYear = MMP_waterYear(Date),
                    cwaterYear = MMP_categoricalWaterYear(Date),
                    Dt.num = MMP_decimalDate(Date)
@@ -488,13 +547,15 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
                    cwaterYear = MMP_categoricalWaterYear(Date), 
                    financialYear = MMP_waterYear(Date), 
                    cfinancialYear = MMP_categoricalWaterYear(Date), 
-                   Dt.num = MMP_decimalDate(Date))
+                   Dt.num = MMP_decimalDate(Date)) %>%
+            suppressWarnings() %>%
+            suppressMessages()
     
         save(bom.weather, file=paste0(OTHER_OUTPUT_PATH, 'bom.weather.RData'))
     }, LOG_FILE, Category = 'Data processing', msg='Initial parsing of BOM (historical weather) data', return=TRUE)
     ## ----end
 
-    ## ---- BOM weather outputs
+    ## ---- BOM weather outputs 
     MMP_tryCatch(
     {
         load(file=paste0(OTHER_OUTPUT_PATH, 'bom.weather.RData'))
@@ -532,7 +593,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
  
         ## Wind data values (not just dates)
         filltime <- expand.grid(LOCATION=unique(bom.weather$LOCATION),
-                                Date=seq(MINDATE,MAXDATE,by='1 day'))
+                                Date=seq(min(bom.weather$Date),MAXDATE,by='1 day'))
         
         p <- bom.weather %>%
             filter(Date>as.Date('2005-01-01')) %>%
@@ -541,6 +602,10 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
             suppressMessages() %>%
             suppressWarnings() %>% 
             ggplot(aes(y=WIND_SPEED, x=Date)) +
+            geom_rect(aes(ymin=-Inf,
+                          ymax=Inf,
+                          xmin=MAXDATE-years(1)+days(1),
+                          xmax=MAXDATE), fill='grey') +
             geom_line()+
             ggtitle('Recent BOM weather data') +
             facet_wrap(~LOCATION)+
@@ -571,14 +636,21 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
             filter(Date>as.Date('2005-01-01')) %>%
             full_join(filltime) %>% arrange(Date)  %>%
             right_join(lookup %>% dplyr::select(LOCATION=BOM, Region, Subregion)) %>%
-            filter(!is.na(STATION_NUMBER)) %>%
+            #filter(!is.na(STATION_NUMBER)) %>%
+            filter(!is.na(LOCATION), LOCATION != "") %>%
+            droplevels() %>%
             suppressMessages() %>%
             suppressMessages() %>% 
             ggplot(aes(y=WIND_SPEED, x=Date))+
+            geom_rect(aes(ymin=-Inf,
+                          ymax=Inf,
+                          xmin=MAXDATE-years(1)+days(1),
+                          xmax=MAXDATE), fill='grey') +
             geom_line()+
             ggtitle('Recent BOM weather data') +
             facet_wrap(~LOCATION)+
             scale_y_continuous('Wind speed (m)') +
+            theme_classic() +
             theme(panel.background=element_rect(color='black'),
                   text=element_text(size=10),
                   axis.text.x=element_text(angle=20),

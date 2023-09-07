@@ -11,8 +11,10 @@ LOGGER_OUTPUT_PATH <- paste0(DATA_PATH, "/processed/loggers/")
 
 names_lookup <- read_csv(file=paste0(PARAMS_PATH, '/names_lookup.csv')) %>%
     suppressMessages()
-MAXDATE=as.Date(paste0(reportYear,'-09-30'))
-MINDATE=MAXDATE-years(1)+days(1)
+MAXDATE <- as.Date(paste0(reportYear,'-09-30'))
+MINDATE <- MAXDATE-years(1)+days(1)
+TRIMDATE <- as.Date(paste0(reportYear,'-10-01')) + days(1)
+TRIMDATE <- c(TRIMDATE - years(5) - days(2), TRIMDATE)
 
 ## ---- AIMS flntu process
 CURRENT_ITEM <- "flntu"
@@ -200,12 +202,31 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
                                FIG_REF_END = structure(paste0("\n::: \n"),
                                                        parent = 'SUBSECTION_DESIGN')
                               )
+
+        ## Last five years only
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/flntu.all.daily_5.png'),
+               p  + scale_x_date('',date_breaks='1 years', date_labels='%Y',
+                                 limits = TRIMDATE, expand = c(0,0)),
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN2 = structure(paste0("## Sampling design < 5yrs\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF2 = structure(paste0("\n::: {#fig-sql-flntu5}\n"),
+                                                   parent = 'SUBSECTION_DESIGN2'),
+                               FIG2 = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/flntu.all.daily_5.png)\n"),
+                                               parent = "FIG_REF2"),
+                               FIG_CAP2 = structure(paste0("\nTemporal distribution of AIMS FLNTU water quality samples within 5yrs of the end of the ",as.numeric(reportYear) - 1,"/",as.numeric(reportYear)," water year. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear) - 1,"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF2'),
+                               FIG_REF_END2 = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN2')
+                              )
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
 
         
-    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
+    }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (FLNTU) data', return=TRUE)
 
     ## ----end
 } else {
@@ -390,6 +411,25 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
 
+        ## Last five years only
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterTempWAll_5.png'),
+               p  + scale_x_date('',date_breaks='1 years', date_labels='%Y',
+                                 limits = TRIMDATE, expand = c(0,0)),
+               width=12, height=10, dpi = 100)
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN2 = structure(paste0("## Sampling design < 5yrs\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF2 = structure(paste0("\n::: {#fig-sql-waterTempW5}\n"),
+                                                   parent = 'SUBSECTION_DESIGN2'),
+                               FIG2 = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll_5.png)\n"),
+                                               parent = "FIG_REF2"),
+                               FIG_CAP2 = structure(paste0("\nTemporal distribution of AIMS water temperature water quality samples within 5yrs of the end of the ",as.numeric(reportYear) - 1,"/",as.numeric(reportYear)," water year. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF2'),
+                               FIG_REF_END2 = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN2')
+                              )
+        
         
     }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
 
@@ -588,6 +628,24 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
         ## ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
+
+        ## Last five years only
+        ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterSalinityAll_5.png'),
+               p + scale_x_date('',date_breaks='1 years', date_labels='%Y',
+                                 limits = TRIMDATE, expand = c(0,0)),
+               width=12, height=10, dpi = 100)
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_DESIGN2 = structure(paste0("## Sampling design < 5yrs\n"),
+                                                             parent = 'TABSET'),
+                               FIG_REF2 = structure(paste0("\n::: {#fig-sql-waterSalinity5}\n"),
+                                                   parent = 'SUBSECTION_DESIGN2'),
+                               FIG2 = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterSalinityAll_5.png)\n"),
+                                               parent = "FIG_REF2"),
+                               FIG_CAP2 = structure(paste0("\nTemporal distribution of AIMS water salinity water quality samples within 5yrs of the end of the ",as.numeric(reportYear) - 1,"/",as.numeric(reportYear)," water year. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                   parent = 'FIG_REF2'),
+                               FIG_REF_END2 = structure(paste0("\n::: \n"),
+                                                       parent = 'SUBSECTION_DESIGN2')
+                              )
 
         
     }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)

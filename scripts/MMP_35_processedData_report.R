@@ -19,7 +19,16 @@ files <- list.files(paste0(DATA_PATH, "/reports"), full.names = TRUE)
 ##    - STATUS items
 ##  this is necessary because the parameter files are not listed in the
 ##  STATUS list (since they are not extracted, compiled or processed)
-ITEMS <- c('ParamFiles', STATUS[[paste0("STAGE",CURRENT_STAGE)]]$items)
+## ITEMS <- c('ParamFiles',
+##           str_remove(STATUS[[paste0("STAGE",CURRENT_STAGE)]]$title, "Stage.*-."),
+##            STATUS[[paste0("STAGE",CURRENT_STAGE)]]$items)
+ITEMS <- 'ParamFiles'
+for (i in 3:CURRENT_STAGE) {
+    ITEMS <- c(ITEMS, 
+               str_remove(STATUS[[paste0("STAGE",i)]]$title, "Stage.*-."),
+               STATUS[[paste0("STAGE",i)]]$items)
+}
+
 
 ## 3. order according to order of items in ITEMS (params then STATUS)
 files <- files[sapply(ITEMS, function(x) {
@@ -28,7 +37,8 @@ files <- files[sapply(ITEMS, function(x) {
 unlist]
 
 ## 3. paste doc lists together into a single string
-doc_string <- sapply(str_subset(files, 'STAGE3'),
+## doc_string <- sapply(str_subset(files, 'STAGE3'),
+doc_string <- sapply(files,
        function(x) {
            load(x)
            doc_list

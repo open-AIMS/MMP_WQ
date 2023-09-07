@@ -38,5 +38,11 @@ source("MMP_33_waterQuality_load_other.R")
 
 source("MMP_34_waterQuality_process_timeseries.R")
 
+## Preapare data for indices
+source("MMP_35_processedData_indices_data.R")
 
+## Prepare data for GAMMs
+source("MMP_36_processedData_gam_data.R")
+
+## Produce report
 source("MMP_35_processedData_report.R")

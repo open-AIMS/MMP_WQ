@@ -13,4 +13,12 @@ if (2 %in% runStage) {
 if (3 %in% runStage) {
     source("MMP_30_waterQuality_process.R")
 }
+
+if (4 %in% runStage) {
+    source("MMP_40_fit_gams.R")
+}
+
+if (5 %in% runStage) {
+    source("MMP_50_indices.R")
+}
 ## MMP_test()

@@ -153,58 +153,10 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.old.idx.RData")
     MMP_tryCatch(
     {
         ##QAQC figure
-        wq.old.qaqc <-
-            wq.old.qaqc %>%
-            filter(Measure %in% c('DRIFTCHL_UGPERL.wm','TSS_MGPERL.wm',
-                                  'SECCHI_DEPTH.wm','PP.wm','PN.wm','NOx.wm', 'NTU')) %>%
-            mutate(Subregion=gsub(' ','~',Subregion),
-                   Subregion=factor(Subregion, levels=unique(Subregion))) %>%
-            filter(waterYear == reportYear) %>%
-            left_join(wq.units %>%
-                      dplyr:::select(Measure,Name.graphs.abbr)) %>%
-            left_join(wq.sites %>%
-                      dplyr:::select(MMP_SITE_NAME, Latitude)) %>% 
-            arrange(Latitude) %>%
-            mutate(Subregion=factor(Subregion, levels=unique(Subregion)),
-                   MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=unique(MMP_SITE_NAME))) %>%
-            suppressMessages() %>%
-            suppressWarnings()
-
-        GL <- wq.old.qaqc %>%
-            dplyr::select(Name.graphs.abbr,Subregion,MMP_SITE_NAME,GL) %>%
-            distinct() %>%
-            mutate(lower=GL/2, upper=GL*2,lower1=GL/4, upper1=GL*4)
-
-        p <- ggplot(wq.old.qaqc, aes(x=Value,y=MMP_SITE_NAME)) +
-            geom_blank(aes(color=Season)) +
-            geom_segment(dat=GL, aes(x=lower1,xend=upper1,
-                                     y=MMP_SITE_NAME, yend=MMP_SITE_NAME),
-                         size=5, color='purple', alpha=0.1) +
-            geom_segment(dat=GL, aes(x=lower,xend=upper,
-                                     y=MMP_SITE_NAME, yend=MMP_SITE_NAME),
-                         size=5, color='purple', alpha=0.3) +
-            geom_text(aes(x=GL), label='I', size=5,color='purple') +
-            geom_point(data=wq.historic.qaqc %>%
-                           filter(Source=='AIMS Niskin') %>%
-                           droplevels(),
-                       aes(color=Season, shape=Source, size=Source),
-                       position=position_jitter(height=0.0, width=0),
-                       show.legend=FALSE) +
-            geom_point(data = wq.historic.qaqc %>%
-                           filter(Source=='AIMS FLNTU') %>%
-                           droplevels(),
-                       aes(color=Season,shape=Source,size=Source),
-                       position=position_jitter(height=0.4, width=0),
-                       show.legend=FALSE) +
-            facet_grid(Subregion~Name.graphs.abbr, scales='free', space='free_y',
-                       labeller = QAQC_labeller,as.table=FALSE) +
-            scale_x_log10('Depth weighted averages',breaks=c(0.1,0.5,1,5,10,50,100)) +
-            scale_y_discrete('') +
-            scale_fill_manual('Season', values=c('red','blue')) +
-            scale_color_manual('Season', values=c('red','blue')) +
-            scale_shape_manual('Source', values=c(16,16)) +
-            scale_size_manual('Source', values=c(0.1,1)) +
-            theme_mmp_qaqc 
+        p <- mmp__qaqc(wq.old.qaqc, level = 1, type = 2,
+                       wq.units = wq.units,
+                       wq.sites = wq.sites
+                       )
 
         pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_old_qaqc.pdf'),
             width = 159.2/25.4, height = 159.2/25.4, pointsize = 10)
@@ -212,7 +164,12 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.old.idx.RData")
         dev.off()
 
         png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_old_qaqc.png'),
-            width = 159.2, height = 159.2, units = 'mm',res = 300, pointsize = 10)
+            width = 180, height = 180, units = 'mm',res = 100, pointsize = 10)
+        print(p)
+        dev.off()
+
+        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_old_qaqc_large.png'),
+            width = 180, height = 180, units = 'mm',res = 600, pointsize = 10)
         print(p)
         dev.off()
 

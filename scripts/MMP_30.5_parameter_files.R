@@ -89,8 +89,8 @@ save(wq.guidelines, file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')
 ## ---- PARAMS old.wq.guidelines
 CURRENT_ITEM <<- 'old.wq.guidelines'
 old.wq.guidelines <- read.csv(paste0(PARAMS_PATH, '/old.wq.guidelines.csv'), strip.white=TRUE)
-old.wq.guidelines <- old.wq.guidelines %>%
-    mutate(SHORT_NAME = str_replace_all(MMP_SITE_NAME, ',', ', '))
+## old.wq.guidelines <- old.wq.guidelines %>%
+##     mutate(SHORT_NAME = str_replace_all(MMP_SITE_NAME, ',', ', '))
 MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                        SUBSECTION_OLDWQGUIDELINES = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
                                               parent = 'TABSET'),
@@ -100,14 +100,14 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                                                    parent = 'SUBSECTION_OLDWQGUIDELINES')
                               )
 ## MMP_get_report_list(CURRENT_STAGE, 'ParamFiles')
-old.wq.guidelines <- old.wq.guidelines %>%
-    separate_rows(SHORT_NAME, sep=', ') %>%
-    full_join(wq.sites) %>%
-    left_join(names_lookup %>%
-              dplyr::select(SHORT_NAME, MMP_SITE_NAME) %>%
-              distinct()) %>%
-    suppressMessages() %>%
-    suppressWarnings()
+## old.wq.guidelines <- old.wq.guidelines %>%
+##     separate_rows(SHORT_NAME, sep=', ') %>%
+##     full_join(wq.sites) %>%
+##     left_join(names_lookup %>%
+##               dplyr::select(SHORT_NAME, MMP_SITE_NAME) %>%
+##               distinct()) %>%
+##     suppressMessages() %>%
+##     suppressWarnings()
 save(old.wq.guidelines, file=paste0(DATA_PATH, '/primary/other/old.wq.guidelines.RData'))
 ## ----end
 

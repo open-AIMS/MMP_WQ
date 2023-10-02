@@ -39,7 +39,7 @@ RUN gdebi --non-interactive quarto-linux-amd64.deb
 
 ## Install R package versions from MRAN (based on a date - YYYY-MM-DD)
 RUN R -e "options(repos = \
-    list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
   install.packages('tidyverse'); \
   install.packages('sf'); \
   install.packages('sp'); \
@@ -68,6 +68,8 @@ RUN R -e "options(repos = \
   install.packages('R.utils'); \
   install.packages('quarto'); \
   install.packages('ggh4x'); \
+  install.packages('furrr'); \
+  install.packages(c('kableExtra')); \
 "
 #############################################################################
 ## NOTE: we could opt for installing specific versions of packages
@@ -81,11 +83,6 @@ RUN  wget https://inla.r-inla-download.org/R/stable/src/contrib/INLA_21.02.23.ta
   && rm INLA_21.02.23.tar.gz
 
 ## Install quarto
-
-RUN apt-get update \
-   && apt-get install -y --no-install-recommends \
-    gdebi-core \
-  && rm -rf /var/lib/apt/lists/*
     
 ARG QUARTO_VERSION="1.2.269"
 RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb

@@ -10,6 +10,16 @@ if (MMP_isParent()) {
 assign("CURRENT_STAGE", 5, env = globalenv())
 CURRENT_ITEM <- "calculate indices"
 
+MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                       SECTION = paste0("# ", str_to_title(CURRENT_ITEM), "\n\n"),
+                       TABSET = paste0("::: panel-tabset \n\n"),
+                       TABSET_END = paste0("::: \n\n")
+                       )
+
+##| Index type   | Year      | Seasonal GL |
+##|--------------|-----------|-------------|
+##| historic (0) | waterYear | No          |
+
 #######################################################################################################
 ## 2018 Notes                                                                                        ##
 ## 1. Renee has indicated that we need to exclude all JCU PN and PP data from the index calculations ##
@@ -86,12 +96,6 @@ CURRENT_ITEM <- "calculate indices"
 ##    - indices based on wet/dry guidelines - aggregate wet and dry
 ##    into annual index
 
-MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                       SECTION = paste0("# ", str_to_title(CURRENT_ITEM), "\n\n"),
-                       TABSET = paste0("::: panel-tabset \n\n"),
-                       TABSET_END = paste0("::: \n\n")
-                       )
-
 source("MMP_51_indices_0.R")
 
 source("MMP_52_indices_1.R")
@@ -105,5 +109,7 @@ source("MMP_55_indices_4.R")
 source("MMP_56_indices_5.R")
 
 source("MMP_57_indices_6.R")
+
+source("MMP_58_indices_comp.R")
 
 source("MMP_35_processedData_report.R")

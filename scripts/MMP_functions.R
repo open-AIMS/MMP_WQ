@@ -110,10 +110,25 @@ MMP_initialise_status <- function() {
                       status = c("pending", "pending", "pending", "pending")
                       ),
         STAGE5 = list(title = "Stage 5 - calculate indices",
-                      items = c("Type0", "Type1"),
-                      names = c("Type 0", "Type 1"),
-                      status = c("pending", "pending")
-                      )
+                      items = c("Type0", "Type1", "Type2", "Type3",
+                                "Type4", "Type5", "Type6", "Comp"),
+                      names = c("Type 0", "Type 1", "Type 2", "Type 3",
+                                "Type 4", "Type 5", "Type 6", "Comparisons"),
+                      status = c("pending", "pending", "pending", "pending",
+                                 "pending", "pending", "pending", "pending")
+                      ),
+        STAGE6 = list(title = "Stage 6 - compilations",
+                      items = c("GAMS", "GAMPages"),
+                      names = c("GAMS", "GAM Pages"),
+                      status = c("pending", "pending")),
+        STAGE7 = list(title = "Stage 7 - transect plots",
+                      items = c("Transects"),
+                      names = c("Transects"),
+                      status = c("pending")),
+        STAGE8 = list(title = "Stage 8 - excel exports",
+                      items = c("excel"),
+                      names = c("excel exports"),
+                      status = c("pending"))
         
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -236,7 +251,7 @@ MMP_loadPackages <- function(log = TRUE) {
     options(tidyverse.quiet = TRUE)
     pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
               'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x',
-              'furrr'
+              'furrr','reportcards', 'emmeans'
               )
 
     for (p in pkgs) {
@@ -751,6 +766,7 @@ my_html_document <- function(template = "", ...) {
 
 MMP_add_to_report_list <- function(stage, item, ...) {
     values <- list2(...)
+    if (length(values) ==1) values <- values[[1]]  # if ... is already wrapped in a list
     ## values <- c(..., use.names = TRUE)
     stage <- paste0("STAGE", stage)
     list.filename <- paste(stage, item, ".RData", sep = "_")
@@ -904,4 +920,158 @@ base_breaks <- function(n = 10){
     function(x) {
         axisTicks(log10(range(x, na.rm = TRUE)), log = TRUE, n = n)
     }
+}
+
+
+MMP__figure_export_dev <- function(FIGURE_OUTPUT_PATH, fig_name_suffix,
+                                        Plot,
+                                        fig.width, fig.height, units, pt.size = 10) {
+    ## Output the figures 
+    pdf(file = paste0(FIGURE_OUTPUT_PATH, fig_name_suffix, '.pdf'),
+        width = fig.width, height = fig.height, pointsize = pt.size)
+    print(Plot)
+    dev.off()
+    png(file = paste0(FIGURE_OUTPUT_PATH, fig_name_suffix, '.png'),
+        width = fig.width, height = fig.height, units = units, pointsize = pt.size, res = 100)
+    print(Plot)
+    dev.off()
+    png(file = paste0(FIGURE_OUTPUT_PATH, fig_name_suffix, '_large.png'),
+        width = fig.width, height = fig.height, units = units, pointsize = pt.size, res = 600)
+    print(Plot)
+    dev.off()
+    
+}
+
+MMP__comp_figure_export <- function(FIGURE_OUTPUT_PATH, Subregion, fig_name_suffix,
+                                    Plot,
+                                    fig.width, fig.height, pt.size = 10) {
+    ## Output the figures 
+    ggsave(filename = paste0(FIGURE_OUTPUT_PATH, "gamm_", gsub(" ","_", Subregion),
+                             fig_name_suffix, ".pdf"),
+           Plot, 
+           width = fig.width, height = fig.height, pointsize = pt.size
+           ) 
+    ggsave(filename = paste0(FIGURE_OUTPUT_PATH, "gamm_", gsub(" ","_", Subregion),
+                             fig_name_suffix, ".png"),
+           Plot, 
+           width = fig.width, height = fig.height, units = "in", dpi = 100, pointsize = pt.size
+           ) 
+    ggsave(filename = paste0(FIGURE_OUTPUT_PATH, "gamm_", gsub(" ","_", Subregion),
+                             fig_name_suffix, "_large.png"),
+           Plot, 
+           width = fig.width, height = fig.height, units = "in", dpi = 600, pointsize = pt.size 
+           ) 
+}
+
+MMP__figure_quarto <- function(CURRENT_STAGE, CURRENT_ITEM, FIGURE_OUTPUT_PATH,
+                               Section, fig_name_suffix,
+                               label_suffix, tabset_parent,
+                               fig.caption) {
+    ## Make the quarto list
+    SUFFIX <- label_suffix 
+    suffix <- gsub("_", "-", SUFFIX) 
+
+    a <- list()
+    a[[paste0("SUBSECTION",SUFFIX)]] <-
+        structure(paste0("### ", Section, "\n"), parent = tabset_parent)
+    a[[paste0("FIG_REF",SUFFIX)]] <-
+        structure(paste0("\n::::: {#fig",suffix,"}\n"),
+                  parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("FIG",SUFFIX)]] <-
+        structure(paste0("![](",FIGURE_OUTPUT_PATH,
+                         fig_name_suffix, ".png)\n"),
+                  parent = paste0("FIG_REF",SUFFIX))
+    a[[paste0("FIG_CAP", SUFFIX)]] <-
+        structure(fig.caption,
+                  parent = paste0('FIG_REF', SUFFIX))
+    a[[paste0("FIG_REF",SUFFIX,"END")]] <-
+        structure(paste0("\n::::: \n"), parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("FIG_NAME",SUFFIX)]] <-
+        structure(paste0("\n**[", FIGURE_OUTPUT_PATH, fig_name_suffix, ".png]**\n"),
+                  parent = paste0("SUBSECTION", SUFFIX))
+    MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM, a)
+}
+MMP__comp_figure_quarto <- function(FIGURE_OUTPUT_PATH, Subregion, fig_name_suffix,
+                                    label_suffix, Cnt, tabset_parent,
+                                    fig.caption) {
+    ## Make the quarto list
+    SUFFIX <- paste0(label_suffix, Cnt) 
+    suffix <- gsub("_", "-", SUFFIX) 
+
+    a <- list()
+    a[[paste0("SUBSECTION",SUFFIX)]] <-
+        structure(paste0("### ", Subregion, "\n"), parent = tabset_parent)
+    a[[paste0("FIG_REF",SUFFIX)]] <-
+        structure(paste0("\n::::: {#fig",suffix,"}\n"),
+                  parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("FIG",SUFFIX)]] <-
+        structure(paste0("![](",FIGURE_OUTPUT_PATH,"gamm_",
+                         gsub(" ", "_", Subregion), fig_name_suffix, ".png)\n"),
+                  parent = paste0("FIG_REF",SUFFIX))
+    a[[paste0("FIG_CAP", SUFFIX)]] <-
+        structure(fig.caption,
+                  parent = paste0('FIG_REF', SUFFIX))
+    a[[paste0("FIG_REF",SUFFIX,"END")]] <-
+        structure(paste0("\n::::: \n"), parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("FIG_NAME",SUFFIX)]] <-
+        structure(paste0("\n**[", FIGURE_OUTPUT_PATH, "gamm_",
+                         gsub(" ", "_", Subregion), fig_name_suffix, ".png]**\n"),
+                  parent = paste0("SUBSECTION", SUFFIX))
+    
+    MMP_add_to_report_list(CURRENT_STAGE, "compilations", a)
+}
+
+MMP__transect_figure_quarto <- function(CURRENT_STAGE, CURRENT_ITEM, FIGURE_OUTPUT_PATH,
+                               Section, fig_name_suffix,
+                               label_suffix, tabset_parent,
+                               fig.caption) {
+    ## Make the quarto list
+    SUFFIX <- gsub(" ", "", label_suffix) 
+    suffix <- gsub("_", "-", SUFFIX) 
+
+    a <- list()
+    a[[paste0("SUBSECTION",SUFFIX)]] <-
+        structure(paste0("## ", Section, "\n"), parent = tabset_parent)
+    a[[paste0("FIG_REF",SUFFIX)]] <-
+        structure(paste0("\n:::: {#fig",suffix,"}\n"),
+                  parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("FIG",SUFFIX)]] <-
+        structure(paste0("![](",FIGURE_OUTPUT_PATH,
+                         fig_name_suffix, ".png)\n"),
+                  parent = paste0("FIG_REF",SUFFIX))
+    a[[paste0("FIG_CAP", SUFFIX)]] <-
+        structure(fig.caption,
+                  parent = paste0('FIG_REF', SUFFIX))
+    a[[paste0("FIG_REF",SUFFIX,"END")]] <-
+        structure(paste0("\n:::: \n"), parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("FIG_NAME",SUFFIX)]] <-
+        structure(paste0("\n**[", FIGURE_OUTPUT_PATH, fig_name_suffix, ".png]**\n"),
+                  parent = paste0("SUBSECTION", SUFFIX))
+    MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM, a)
+}
+
+MMP__gam_table_quarto <- function(CURRENT_STAGE, Subregion,label_suffix,
+                                  gam.tbl, Cnt, tabset_parent,
+                                  tbl.caption) {
+    ## Make the quarto list
+    SUFFIX <- paste0(label_suffix, Cnt) 
+    suffix <- gsub("_", "-", SUFFIX) 
+
+    a <- list()
+    a[[paste0("SUBSECTION",SUFFIX)]] <-
+        structure(paste0("### ", Subregion, "\n"), parent = tabset_parent)
+    ## a[[paste0("TBL_REF",SUFFIX)]] <-
+    ##     structure(paste0("\n::::: {#tbl",suffix,"}\n"),
+    ##               parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("TBL",SUFFIX)]] <-
+        structure(mmp__add_table(gam.tbl),
+                  ## parent = paste0("TBL_REF",SUFFIX))
+                  parent = paste0('SUBSECTION',SUFFIX)) 
+    a[[paste0("TBL_CAP", SUFFIX)]] <-
+        structure(paste0(tbl.caption," {#tbl",suffix,"}\n\n"),
+                  parent = paste0('TBL', SUFFIX))
+    ## a[[paste0("TBL_REF",SUFFIX,"END")]] <-
+    ##     structure(paste0("\n::::: \n"), parent = paste0('SUBSECTION',SUFFIX)) 
+    
+    MMP_add_to_report_list(CURRENT_STAGE, "compilations", a)
 }

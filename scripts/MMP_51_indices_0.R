@@ -24,6 +24,7 @@ CURRENT_ITEM <- "Type0"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
+
 if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.historic.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, '/old.wq.guidelines.RData')) &
@@ -195,39 +196,19 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     MMP_tryCatch(
     {
         ##QAQC figure
-        p <- mmp__qaqc(wq.historic.qaqc, level = 1, type = 1,
+        p <- mmp__qaqc(wq.historic.qaqc, level = 1, type = '0',
                        wq.units = wq.units,
                        wq.sites = wq.sites
                        )
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_qaqc",
+                                    Plot = p, units = "in",
+                                    fig.width = 180/25.4, fig.height = 180/25.4, pt.size = 10)
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc.pdf'),
-            width = 159.2/25.4, height = 159.2/25.4, pointsize = 10)
-        print(p)
-        dev.off()
-
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc.png'),
-            width = 180, height = 180, units = 'mm',res = 100, pointsize = 10)
-        print(p)
-        dev.off()
-
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc_large.png'),
-            width = 180, height = 180, units = 'mm',res = 600, pointsize = 10)
-        print(p)
-        dev.off()
-
-        MMP_add_to_report_list(CURRENT_STAGE, "calculate indices",
-                               SUBSECTION_0_qaqc = structure(paste0("### QAQC\n"),
-                                                             parent = 'TABSET_0'),
-                               FIG_REF_0_qaqc = structure(paste0("\n::::: {#fig-0-qaqc}\n"),
-                                                   parent = 'SUBSECTION_0_qaqc'),
-                               FIG_0_qaqc = structure(paste0("![](",FIGURE_OUTPUT_PATH,"wq_historic_qaqc.png)\n"),
-                                               parent = "FIG_REF_0_qaqc"),
-                               FIG_CAP_0_qaqc = structure(paste0("\nObserved ",as.numeric(reportYear),"/",as.numeric(reportYear)," water quality data associated with the historic (formulation 0) indices. Red and blue symbols represent dry and wet season samples. The purple band defines half and twice the annual guideline values.\n"),
-                                                   parent = 'FIG_REF_0_qaqc'),
-                               FIG_REF_END = structure(paste0("\n::::: \n"),
-                                                       parent = 'SUBSECTION_0_qaqc')
-                               )
-        
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "QAQC", fig_name_suffix = "wq_historic_qaqc",
+                           label_suffix = "_0_qaqc", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nObserved ",as.numeric(reportYear),"/",as.numeric(reportYear)," water quality data associated with the historic (formulation 0) indices. Red and blue symbols represent dry and wet season samples. The purple band defines half and twice the annual guideline values.\n")) 
+    
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Generate QAQC plot 1.', return=TRUE)
     ## ----end
@@ -237,69 +218,20 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     MMP_tryCatch(
     {
         ##QAQC figure 1
-        wq.historic.qaqc1 <- wq.historic.qaqc1 %>%
-            filter(Measure %in% c('DRIFTCHL_UGPERL.wm','TSS_MGPERL.wm',
-                                  'SECCHI_DEPTH.wm','PP.wm','PN.wm','NOx.wm', 'NTU')) %>% 
-            ungroup() %>%
-            mutate(Subregion = gsub(' ','~',Subregion),
-                   Subregion = factor(Subregion, levels = unique(Subregion))) %>%
-            filter(Year == reportYear) %>%
-            left_join(wq.units %>%
-                      dplyr:::select(Measure,Name.graphs.abbr)) %>%
-            left_join(wq.sites %>%
-                      dplyr:::select(MMP_SITE_NAME, Latitude)) %>% 
-            mutate(Season='Annual') %>%
-            arrange(Latitude) %>%
-            mutate(Subregion=factor(Subregion, levels=unique(Subregion)),
-                   MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=unique(MMP_SITE_NAME))) %>%
-            suppressMessages() %>%
-            suppressWarnings()
+        p <- mmp__qaqc(wq.historic.qaqc1, level = 2, type = '0',
+                       wq.units = wq.units,
+                       wq.sites = wq.sites
+                       )
 
-        GL <- wq.historic.qaqc1 %>%
-            dplyr::select(Name.graphs.abbr,Subregion,MMP_SITE_NAME,GL) %>%
-            distinct()%>%
-            mutate(lower=GL/2, upper=GL*2,lower1=GL/4, upper1=GL*4)
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_qaqc1",
+                                    Plot = p, units = "in",
+                                    fig.width = 180/25.4, fig.height = 180/25.4, pt.size = 10)
 
-        p <- ggplot(wq.historic.qaqc1,aes(x=Value,y=MMP_SITE_NAME)) +
-            geom_blank(aes(color=Season)) +
-            geom_segment(dat=GL,aes(x=lower1,xend=upper1,
-                                    y=MMP_SITE_NAME, yend=MMP_SITE_NAME),
-                         size=5, color='purple', alpha=0.1) +
-            geom_segment(dat=GL,aes(x=lower,xend=upper,y=MMP_SITE_NAME,
-                                    yend=MMP_SITE_NAME),
-                         size=5, color='purple', alpha=0.3) +
-            geom_text(aes(x=GL), label='I', size=5,color='purple') +
-            geom_point(aes(fill=Season,color=Season),shape=21,show.legend = FALSE,size=2) +
-            facet_grid(Subregion~Name.graphs.abbr, scales='free', space='free_y',
-                       labeller = QAQC_labeller,as.table=FALSE) +
-            scale_x_log10('Four year running means', breaks=c(0.1,0.5,1,5,10,50,100)) +
-            scale_y_discrete('') +
-            scale_fill_manual('Season', values=c('white','blue'),guide=FALSE) +
-            scale_color_manual('Season', values=c('black','blue'),guide=FALSE) +
-            theme_mmp_qaqc
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "QAQC 1", fig_name_suffix = "wq_historic_qaqc1",
+                           label_suffix = "_0_qaqc1", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nSeasonal or annual ",as.numeric(reportYear),"/",as.numeric(reportYear)," water quality averages associated with the historic (formulation 0) indices. Red and blue symbols represent dry and wet season samples. The purple band defines half and twice the annual guideline values.\n")) 
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc1.pdf'),
-            width=159.2/25.4, height=159.2/25.4,pointsize=12)
-        print(p)
-        dev.off()
-
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc1.png'),
-            width=159.2, height=159.2,units='mm',res=300,pointsize=12)
-        print(p)
-        dev.off()
-
-        MMP_add_to_report_list(CURRENT_STAGE, "calculate indices",
-                               SUBSECTION_0_qaqc1 = structure(paste0("### QAQC 1\n"),
-                                                             parent = 'TABSET_0'),
-                               FIG_REF_0_qaqc1 = structure(paste0("\n::::: {#fig-0-qaqc1}\n"),
-                                                   parent = 'SUBSECTION_0_qaqc1'),
-                               FIG_0_qaqc1 = structure(paste0("![](",FIGURE_OUTPUT_PATH,"wq_historic_qaqc1.png)\n"),
-                                               parent = "FIG_REF_0_qaqc1"),
-                               FIG_CAP_0_qaqc1 = structure(paste0("\nSeasonal or annual ",as.numeric(reportYear),"/",as.numeric(reportYear)," water quality averages associated with the historic (formulation 0) indices. Red and blue symbols represent dry and wet season samples. The purple band defines half and twice the annual guideline values.\n"),
-                                                   parent = 'FIG_REF_0_qaqc1'),
-                               FIG_REF_0_qaqc1_END = structure(paste0("\n::::: \n"),
-                                                       parent = 'SUBSECTION_0_qaqc1')
-                               )
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Generate QAQC plot 2.', return=TRUE)
     ## ----end
@@ -309,58 +241,20 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     MMP_tryCatch(
     {
         ##QAQC figure idx
-        wq.historic.qaqc2 <- wq.historic.qaqc2 %>%
-            filter(Measure %in% c('DRIFTCHL_UGPERL.wm','TSS_MGPERL.wm',
-                                  'SECCHI_DEPTH.wm','PP.wm','PN.wm','NOx.wm','NTU')) %>%
-            ungroup() %>%
-            mutate(Subregion=gsub(' ','~',Subregion),
-                   Subregion=factor(Subregion, levels=unique(Subregion))) %>%
-            filter(Year == reportYear) %>%
-            left_join(wq.units %>%
-                      dplyr:::select(Measure,Name.graphs.abbr)) %>%
-            left_join(wq.sites %>%
-                      dplyr:::select(MMP_SITE_NAME, Latitude)) %>% 
-            mutate(Season='Annual') %>%
-            arrange(Latitude) %>%
-            mutate(Subregion=factor(Subregion, levels=unique(Subregion)),
-                   MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=unique(MMP_SITE_NAME)))
+        p <- mmp__qaqc(wq.historic.qaqc2, level = 3, type = '0',
+                       wq.units = wq.units,
+                       wq.sites = wq.sites
+                       )
 
-        GL <- wq.historic.qaqc2 %>%
-            dplyr:::select(Name.graphs.abbr,Subregion,MMP_SITE_NAME,GL) %>%
-            distinct()%>%
-            mutate(lower=GL/2, upper=GL*2,lower1=GL/4, upper1=GL*4)
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_qaqc2",
+                                    Plot = p, units = "in",
+                                    fig.width = 180/25.4, fig.height = 180/25.4, pt.size = 10)
 
-        p <- ggplot(wq.historic.qaqc2,aes(x=Index,y=MMP_SITE_NAME)) +
-            geom_blank(aes(color=Season)) +
-            annotate(geom='rect',xmin=-1,xmax=-2/3,ymin=-Inf, ymax=Inf,
-                     fill=trafficLightPalette[1],color=NA)+
-            annotate(geom='rect',xmin=-2/3,xmax=-1/3,ymin=-Inf, ymax=Inf,
-                     fill=trafficLightPalette[2],color=NA)+
-            annotate(geom='rect',xmin=-1/3,xmax=0,ymin=-Inf, ymax=Inf,
-                     fill=trafficLightPalette[3],color=NA)+
-            annotate(geom='rect',xmin=0,xmax=0.5,ymin=-Inf, ymax=Inf,
-                     fill=trafficLightPalette[4],color=NA)+
-            annotate(geom='rect',xmin=0.5,xmax=1,ymin=-Inf, ymax=Inf,
-                     fill=trafficLightPalette[5],color=NA)+
-            geom_point(aes(fill=Season,color=Season),shape=21,show.legend=FALSE, size=2) +
-            facet_grid(Subregion~Name.graphs.abbr, scales='free', space='free_y',
-                       labeller = QAQC_labeller,as.table = FALSE) +
-            scale_x_continuous('Index (Modified Amplitude)', expand=c(0.07,0)) +
-            scale_y_discrete('') +
-            scale_fill_manual('Season', values=c('white'), guide=FALSE) +
-            scale_color_manual('Season', values=c('black'),guide=FALSE) +
-            theme_mmp_qaqc
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "QAQC 2", fig_name_suffix = "wq_historic_qaqc2",
+                           label_suffix = "_0_qaqc2", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nSeasonal or annual ",as.numeric(reportYear),"/",as.numeric(reportYear)," water quality averages associated with the historic (formulation 0) indices. Red and blue symbols represent dry and wet season samples. The purple band defines half and twice the annual guideline values.\n")) 
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc2.pdf'),
-            width=159.2/25.4, height=159.2/25.4, pointsize=10)
-        print(p)
-        dev.off()
-
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_qaqc2.png'),
-            width=159.2, height=159.2,units='mm', res=300, pointsize=10)
-        print(p)
-        dev.off()
-        
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Generate QAQC plot 3.', return=TRUE)
     ## ----end
@@ -370,53 +264,32 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     MMP_tryCatch(
     {
         ## Regional Worms
-        wq.historic.idx.region <- wq.historic.idx.region %>%
-            ungroup() %>%
-            left_join(wq.sites %>%
-                      dplyr::select(Region, Latitude, Region) %>%
-                      group_by(Region) %>%
-                      summarize_all(funs(mean(., na.rm=TRUE)))) %>% 
-            arrange(desc(Latitude)) %>%
-            mutate(Region=factor(Region, levels=unique(Region))) %>%
-            mutate(Grade=MMP_generateOldGrades(Index))
+        p <- mmp__indicator_trends(wq.historic.idx.region, level = 1, type = '0',
+                       wq.units = wq.units,
+                       wq.sites = wq.sites
+                       )
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_idx_region",
+                               Plot = p + facet_grid(~Region,as.table=FALSE),
+                               units = "in",
+                               fig.width = 180/25.4, fig.height = 180*(2/7)/25.4, pt.size = 10)
 
-        wq.historic.idx.region.g1 <- ggplot(wq.historic.idx.region %>%
-                                            filter(Year>2007),
-                                            aes(y=Index, x=reportCardYear)) +
-            geom_hline(yintercept=0, linetype='dashed') +
-            geom_line() +
-            geom_point(aes(fill=Grade),shape=21, size=3, show.legend = TRUE) +
-            scale_y_continuous('Water Quality Index',limits=c(-1,1)) +
-            scale_x_date('', limits=c(as.Date('2006-01-01'),
-                                      as.Date(paste0(reportYear,'-01-01')))) +
-            scale_fill_manual('',breaks=c('A','B','C','D','E'),
-                              values=rev(trafficLightPalette),
-                              limits=c('A','B','C','D','E'),
-                              labels=c('Very Good','Good','Moderate','Poor','Very Poor')) +
-            theme_mmp +
-            theme(strip.background=element_blank(),
-                  panel.margin.x=unit(1,'line'))
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index", fig_name_suffix = "wq_historic_idx_region",
+                           label_suffix = "_0_idx1", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nTemporal trends in the water quality index conditional on Region for the historic (formulation 0) indices.\n")) 
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_region.pdf'),
-            width=(159.2)/25.4, height=(159.2*(2/7))/25.4)
-        print(wq.historic.idx.region.g1 + facet_grid(~Region,as.table=FALSE))
-        dev.off()
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_idx_region1",
+                               Plot = p + facet_wrap(~Region,as.table=FALSE,nrow=1,scales='free_y'),
+                               units = "in",
+                               fig.width = 8, fig.height = 2, pt.size = 10)
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_region1.pdf'),
-            width=7, height=2)
-        print(wq.historic.idx.region.g1 + facet_wrap(~Region,as.table=FALSE,nrow=1,scales='free_y'))
-        dev.off()
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index alt.", fig_name_suffix = "wq_historic_idx_region1",
+                           label_suffix = "_0_idx1a", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nTemporal trends in the water quality index conditional on Region for the historic (formulation 0) indices.\n")) 
 
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_region.png'),
-            width=(159.2), height=(159.2*(2/7)),units='mm',res=300, pointsize=10)
-        print(wq.historic.idx.region.g1 + facet_grid(~Region,as.table=FALSE))
-        dev.off()
-
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_region1.png'),
-            width=7, height=2,units='in',res=300)
-        print(wq.historic.idx.region.g1 + facet_wrap(~Region,as.table=FALSE,nrow=1,scales='free_y'))
-        dev.off()
-
+        wq.historic.idx.region <- p$data
+        
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Generate QAQC plot 4.', return=TRUE)
     ## ----end
@@ -426,55 +299,34 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     MMP_tryCatch(
     {
         ## Subregion Worms
-        wq.historic.idx.subregion <- wq.historic.idx.subregion %>%
-            ungroup() %>%
-            left_join(wq.sites %>%
-                      dplyr::select(Subregion, Latitude, Subregion) %>%
-                      group_by(Subregion) %>%
-                      summarize_all(funs(mean(., na.rm=TRUE)))) %>% 
-            arrange(desc(Latitude)) %>%
-            mutate(Subregion=factor(Subregion, levels=unique(Subregion))) %>%
-            mutate(Grade=MMP_generateOldGrades(Index))
+        p <- mmp__indicator_trends(wq.historic.idx.subregion, level = 2, type = '0',
+                       wq.units = wq.units,
+                       wq.sites = wq.sites
+                       )
 
-        wq.historic.idx.subregion.g1 <- ggplot(wq.historic.idx.subregion %>%
-                                               filter(Year>2007),
-                                               aes(y=Index, x=reportCardYear)) +
-            geom_hline(yintercept=0, linetype='dashed') +
-            geom_line() +
-            geom_point(aes(fill=Grade),shape=21, size=3, show.legend = TRUE) +
-            scale_y_continuous('Water Quality Index',limits=c(-1,1)) +
-            scale_x_date('', limits=c(as.Date('2006-01-01'),
-                                      as.Date(paste0(reportYear,'-01-01')))) +
-            scale_fill_manual('',breaks=c('A','B','C','D','E'),
-                              values=rev(trafficLightPalette),
-                              limits=c('A','B','C','D','E'),
-                              labels=c('Very Good','Good','Moderate','Poor','Very Poor')) +
-            theme_mmp +
-            theme(strip.background=element_blank(),
-                  panel.margin.x=unit(1,'line'))
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_idx_subregion",
+                               Plot = p + facet_grid(~Subregion,as.table=FALSE),
+                               units = "in",
+                               fig.width = 2*180/25.4, fig.height = 2*180*(2/10)/25.4, pt.size = 10)
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_subregion.pdf'),
-            width=2*(159.2)/25.4, height=2*(159.2*(2/10))/25.4, pointsize=10)
-        print(wq.historic.idx.subregion.g1 + facet_grid(~Subregion,as.table=FALSE))
-        dev.off()
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Subregion Index", fig_name_suffix = "wq_historic_idx_subregion",
+                           label_suffix = "_0_idx2", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nTemporal trends in the water quality index conditional on Subregion for the historic (formulation 0) indices.\n")) 
 
-        pdf(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_subregion1.pdf'),
-            width=2*(159.2)/25.4, height=2*(159.2*(4/7))/25.4, pointsize=10)
-        print(wq.historic.idx.subregion.g1 +
-              facet_wrap(~Subregion,as.table=TRUE,nrow=2,scales='free'))                       
-        dev.off()
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_historic_idx_subregion1",
+                               Plot = p + facet_wrap(~Subregion,as.table=TRUE,nrow=2,scales='free'),
+                               units = "in",
+                               fig.width = 2*(180)/25.4, fig.height = 2*(159.2*(4/7))/25.4,
+                               pt.size = 10)
 
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_subregion.png'),
-            width=2*(159.2), height=2*(159.2*(2/10)), pointsize=10, units='mm', res=300)
-        print(wq.historic.idx.subregion.g1 + facet_grid(~Subregion,as.table=FALSE))
-        dev.off()
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Subregional Index alt.", fig_name_suffix = "wq_historic_idx_subregion1",
+                           label_suffix = "_0_idx2a", tabset_parent = "TABSET_0",
+                           fig.caption = paste0("\nTemporal trends in the water quality index conditional on Subregion for the historic (formulation 0) indices.\n")) 
 
-        png(file = paste0(FIGURE_OUTPUT_PATH, 'wq_historic_idx_subregion1.png'),
-            width=2*(159.2), height=2*(159.2*(4/7)), pointsize=10,units='mm',res=300)
-        print(wq.historic.idx.subregion.g1 +
-              facet_wrap(~Subregion,as.table=TRUE,nrow=2,scales='free'))                       
-        dev.off()
-
+        wq.historic.idx.subregion <- p$data
+        
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Generate QAQC plot 5.', return=TRUE)
     ## ----end
@@ -487,10 +339,14 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
              file = paste0(INDICES_OUTPUT_PATH, 'wq.historic.idx.RData'))
         save(wq.historic.idx.region,
              file = paste0(INDICES_OUTPUT_PATH, 'wq.historic.idx.region.RData'))
+        save(wq.historic.idx.region,
+             file = paste0(DATA_PATH, '/final/wq.historic.idx.region.RData'))
+        save(wq.historic.idx.subregion,
+             file = paste0(DATA_PATH, '/final/wq.historic.idx.subregion.RData'))
         save(wq.historic.idx.subregion,
              file = paste0(INDICES_OUTPUT_PATH, 'wq.historic.idx.subregion.RData'))
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Save indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Save historic indices', return=TRUE)
     ## ----end
 
     

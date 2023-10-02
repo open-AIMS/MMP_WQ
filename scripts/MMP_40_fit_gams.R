@@ -105,6 +105,10 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
                                    resid <- ..2
                                    chemPlot(dat,resid, Source='AIMS Niskin')
                                   }))
+        wq.gams <- wq.gams %>%
+            mutate(Change = map(.x = model,
+                                .f = ~ MMP_GAMchange(.x, refYear = 2015)))
+        
         save(wq.gams, file = paste0(DATA_PATH, "/models/wq.gams.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GAMMS:', msg='Fit AIMS niskin GAMMS.', return=TRUE)
@@ -211,6 +215,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.gams.RData
                                    resid <- ..2
                                    chemPlot(dat,resid, Source='AIMS/JCU Niskin', color.source = FALSE)
                                   }))
+
+        wq.aims.jcu.gams <- wq.aims.jcu.gams %>%
+            mutate(Change = map(.x = model,
+                                .f = ~ MMP_GAMchange(.x, refYear = 2015)))
+        
         save(wq.aims.jcu.gams, file = paste0(DATA_PATH, "/models/wq.aims.jcu.gams.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GAMMS:', msg='Fit AIMS/JCU niskin GAMMS.', return=TRUE)
@@ -320,6 +329,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo.gams.R
                                    resid <- ..2
                                    chemPlot(dat,resid, Source='AIMS/JCU OMO Niskin', color.source = FALSE)
                                   }))
+
+        wq.aims.jcu.omo.gams <- wq.aims.jcu.omo.gams %>%
+            mutate(Change = map(.x = model,
+                                .f = ~ MMP_GAMchange(.x, refYear = 2015)))
+        
         save(wq.aims.jcu.omo.gams, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo.gams.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GAMMS:', msg='Fit AIMS/JCU OMO niskin GAMMS.', return=TRUE)

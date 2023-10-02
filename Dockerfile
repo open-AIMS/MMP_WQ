@@ -105,6 +105,17 @@ RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
   install.packages(c('kableExtra'))"  
 
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  install.packages(c('remotes')); \
+  remotes::install_github('AIMS/reportcards')"  
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  install.packages(c('emmeans')); \
+  install.packages(c('openxlsx')); \
+  install.packages(c('cowplot'))"  
+
 ## Create project directory in docker image
 RUN mkdir ~/MMP
 

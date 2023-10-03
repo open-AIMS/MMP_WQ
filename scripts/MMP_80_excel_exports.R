@@ -10,8 +10,7 @@ if (MMP_isParent()) {
 
 NISKIN_INPUT_PATH <- paste0(DATA_PATH, "/processed/niskin/")
 PARAMS_INPUT_PATH <- paste0(DATA_PATH, "/primary/other/")
-GAM_OUTPUT_PATH <- paste0(DATA_PATH, "/modelled/GAMMS/")
-FIG_OUTPUT_PATH <- paste0(OUTPUT_PATH, "/figures/models/")
+XLS_OUTPUT_FILE <- paste0(OUTPUT_PATH, "/mmp.xlsx")
 
 assign("CURRENT_STAGE", 8, env = globalenv())
 
@@ -19,6 +18,12 @@ assign("CURRENT_STAGE", 8, env = globalenv())
 CURRENT_ITEM <- "excel"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
+
+MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                       SECTION = paste0("# ", str_to_title(CURRENT_ITEM), "\n\n"),
+                       TABSET = paste0("::: panel-tabset \n\n"),
+                       TABSET_END = paste0("::: \n\n")
+                       )
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.all.reef.RData')) &
@@ -491,7 +496,70 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export FLNTU', return=TRUE)
     ## ----end
 
-    saveWorkbook(wb, paste0(OUTPUT_PATH, "/mmp.xlsx"), overwrite = TRUE)
+    saveWorkbook(wb, XLS_OUTPUT_FILE, overwrite = TRUE)
+
+    ## 17. quarto - excel
+    ## ---- quarto - excel 
+    MMP_tryCatch(
+    {
+        h <- paste0("data:", mime::guess_type(XLS_OUTPUT_FILE), ";base64,",
+                    base64_encode(XLS_OUTPUT_FILE))
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_1 = structure(paste0("## Excel\n"),
+                                                        parent = 'TABSET'),
+                            TEXT_1 = structure(paste0("\n<p>An excel workbook containing the following sheets can be directly downloaded via the clicking the button below. \n
+<ul>\n
+<li>sampling station info</li>\n
+<li>guideline values</li>\n
+<li>niskin summaries</li>\n
+<li>indices - historical</li>\n
+<li>indices - version 0.1</li>\n
+<li>indices - version 0.2</li>\n
+<li>indices - version 0.3</li>\n
+<li>indices - version 0.4</li>\n
+<li>indices - version 6.1</li>\n
+<li>indices - version 6.2</li>\n
+<li>indices - version 6.3</li>\n
+<li>indices - version 6.4</li>\n
+<li>indices - version 6.5</li>\n
+<li>FLNTU</li>\n
+</ul>\n
+</p>\n"), 
+                                                  parent = 'SUBSECTION_1'),
+                               HTML_1 = structure(paste0("\n\n<a href = '",h,"' class = 'btn'>Download excel workbook</a>\n\n"), 
+                                                  parent = 'SUBSECTION_1')
+                               )
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='embed in quarto', return=TRUE)
+    ## ----end
+
+    ## 18. quarto - zip
+    ## ---- quarto - zip 
+    MMP_tryCatch(
+    {
+##         ZIP_FILE <- paste0(OUTPUT_PATH, "/figures/Plots4Renee.zip")
+##         h <- paste0("data:", mime::guess_type(ZIP_FILE), ";base64,",
+##                     base64_encode(ZIP_FILE))
+##         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+##                                SUBSECTION_2 = structure(paste0("## Figures\n"),
+##                                                         parent = 'TABSET'),
+##                             TEXT_2 = structure(paste0("\n<p>An zip file containing the following figures can be directly downloaded via the clicking the button below. \n
+## <ul>\n
+## <li>sampling station info</li>\n
+## <li>guideline values</li>\n
+## <li>niskin summaries</li>\n
+## <li>indices - historical</li>\n
+## </ul>\n
+## </p>\n"), 
+##                                                   parent = 'SUBSECTION_2'),
+##                                HTML_2 = structure(paste0("\n\n<a href = '",h,"' class = 'btn'>Download zip file</a>\n\n"), 
+##                                                   parent = 'SUBSECTION_2')
+##                                )
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Zip:', msg='embed zip in quarto', return=TRUE)
+    ## ----end
     
     source("MMP_35_processedData_report.R")
 

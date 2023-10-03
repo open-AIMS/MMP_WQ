@@ -126,9 +126,9 @@ MMP_initialise_status <- function() {
                       names = c("Transects"),
                       status = c("pending")),
         STAGE8 = list(title = "Stage 8 - excel exports",
-                      items = c("excel"),
-                      names = c("excel exports"),
-                      status = c("pending"))
+                      items = c("excel", "embed"),
+                      names = c("excel exports", "embed in quarto"),
+                      status = c("pending", "pending"))
         
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -251,7 +251,7 @@ MMP_loadPackages <- function(log = TRUE) {
     options(tidyverse.quiet = TRUE)
     pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
               'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x',
-              'furrr','reportcards', 'emmeans'
+              'furrr','reportcards', 'emmeans', 'openxlsx', 'xfun'
               )
 
     for (p in pkgs) {

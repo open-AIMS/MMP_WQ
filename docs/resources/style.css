@@ -224,3 +224,11 @@ table>caption {
 pre>code {
     height: 200px;
 }
+
+.btn {
+    border: 1px solid black;
+    padding: 5px;
+    background-color: #62ABFE;
+    color: black;
+    border-radius: 3px;
+}

@@ -700,8 +700,8 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
     
     g <- wsa %>%
         ggplot(aes(x = Date)) +
-        geom_line(aes(y = Temperature), colour = '#D55E00') +
-        geom_line(aes(y = sSalinity), colour = '#56b4e9') +
+        geom_line(aes(y = Temperature), colour = '#56b4e9') +
+        geom_line(aes(y = sSalinity), colour = '#D55E00') +
         facet_grid(MMP_SITE_NAME + Subregion~.,
                    labeller = label_bquote(rows=.(str_wrap(Subregion,15)), cols="")) +
         scale_x_date('', expand = c(0.01,0)) + 
@@ -761,8 +761,8 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                        .f = function(x) {
                            x %>%
                                ggplot(aes(x = Date)) +
-                               geom_line(aes(y = Temperature), colour = '#D55E00') +
-                               geom_line(aes(y = sSalinity), colour = '#56b4e9') +
+                               geom_line(aes(y = Temperature), colour = '#56b4e9') +
+                               geom_line(aes(y = sSalinity), colour = '#D55E00') +
                                scale_x_date('', expand = c(0.01,0)) + 
                                scale_y_continuous(expression(Temperature~(C*degree)),
                                                   limits = range(wsa.limits,40),

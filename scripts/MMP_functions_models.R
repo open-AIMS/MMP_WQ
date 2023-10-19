@@ -631,6 +631,32 @@ MMP__worm_historic <- function(hist.idx, minDate, MAXDATE) {
         g <- ggplot(data = NULL) + theme_nothing()
     }
 }
+MMP__worm_hist_2 <- function(hist.idx, subregion.worm, minDate, MAXDATE) {
+    if (nrow(hist.idx) > 0) {
+        g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
+            geom_hline(yintercept = 0, linetype = 'dashed') +
+            geom_line(data = subregion.worm,
+                      aes(color = Measure), show.legend = TRUE) +
+            geom_line(show.legend=FALSE) +
+            geom_point(aes(fill = Grade), shape = 21,
+                       size = 3, show.legend = FALSE)  +
+            scale_y_continuous(expression(atop(Water~Quality, Index)),
+                               limits = c(-1,1)) +
+            scale_x_date('', limits = c(minDate, MAXDATE)) +
+            scale_fill_manual('', breaks = c('A','B','C','D','E'),
+                              values = rev(trafficLightPalette),
+                              limits = c('A','B','C','D','E')) +
+            theme_mmp +
+            theme(strip.background = element_blank(),
+                  panel.margin.x = unit(1,'line'),
+                  axis.title.y = element_text(size = rel(1.25))) +
+            annotate(geom = 'text', x = as.Date(minDate),
+                     y=Inf, label = 'a)', vjust = 1) +
+            guides(fill = "none")
+    } else {
+        g <- ggplot(data = NULL) + theme_nothing()
+    }
+}
 
 MMP__worm_alt <- function(alt.idx, subregion.worm, minDate, MAXDATE) {
     ggplot(data = alt.idx, aes(y = Index, x = reportCardYear)) +
@@ -893,6 +919,137 @@ MMP__gam_plot4 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
             patchwork::plot_layout(ncol = 2)
     }
 }
+
+
+MMP__gam_plot2023 <- function(subr, chl_plot, ntu_plot, wq.gams) {
+    cnt <- 0
+    if (subr != "Barron Daintree") {
+        patchwork::wrap_plots(
+                       chl_plot +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "SECCHI_DEPTH.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "TSS_MGPERL.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       ntu_plot + annotate(geom = 'text',
+                                           x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                           y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "NOx.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "PO4.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "PN.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "PP.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "POC.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "DOC.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+                   ) +
+            patchwork::plot_layout(ncol = 2)
+    } else {
+        patchwork::wrap_plots(
+                       chl_plot +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "SECCHI_DEPTH.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "TSS_MGPERL.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "NOx.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "PO4.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "PN.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "PP.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "POC.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+                       wq.gams %>% MMP__gam_extract(subregion = subr,
+                                                    measure = "DOC.wm", field = "plot") +
+                       annotate(geom = 'text',
+                                x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                                y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+                   ) +
+            patchwork::plot_layout(ncol = 2)
+    }
+}
+
+MMP__worm_alt_2023 <- function(alt.idx, subregion.worm, minDate, MAXDATE) {
+    ggplot(data = alt.idx, aes(y = Index, x = reportCardYear)) +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_line(data = subregion.worm,
+                  aes(color = Subindicator), show.legend = TRUE) +
+        geom_linerange(data = alt.idx, aes(ymin = Lower, ymax = Upper)) +
+        geom_line(data= alt.idx) +
+        geom_point(aes(fill = Grade), shape = 23, size = 3, show.legend = FALSE) +
+        scale_y_continuous(expression(atop(Water~Quality,Index)), limits = c(-1,1)) +
+        scale_x_date('', limits = c(minDate, MAXDATE)) +
+        scale_fill_manual('', breaks = c('A','B','C','D','E'),
+                          values = rev(trafficLightPalette),
+                          limits = c('A','B','C','D','E')) +
+        theme_mmp +
+        theme(strip.background = element_blank(),
+              panel.margin.x = unit(1,'line'),
+              axis.title.y = element_text(size = rel(1.25))) +
+        annotate(geom = 'text', x = as.Date(minDate),
+                 y = Inf, label = 'b)', vjust = 1) +
+        guides(fill = "none")
+}
+
+
 geom_rugRect <- function(mapping = NULL, data = NULL,
                          stat = "identity", position = "identity",
                          ...,

@@ -914,14 +914,14 @@ mmp__timeseries_plot <- function(flntu, tides, temperature, weather, discharge, 
           cex=1)
 
     ## Temperature
-    if (!all(is.na(temperature$Temp))) {
-        maxy <- max(temperature$Temp, na.rm=TRUE)
-        miny <- min(temperature$Temp, na.rm=TRUE)
-        lines(scales::rescale(Temp,from=c(20,maxy),to=c(0.20,0.35))~Date, temperature, col="grey60")
-        axis(4, las=1, at=scales::rescale(pretty(seq(20,maxy,l=100),n=3), to=c(0.20,0.35)), 
-             lab=pretty(seq(20,maxy,l=100),n=3), cex.axis=1, tcl=-0.2, mgp=c(0,0.3,0))
-        mtext(expression(paste(atop("Daily Temp.",(degree~C)))),4, line=4.5, at=scales::rescale(mean(maxy,0), to=c(0.2,0.35)), cex=1)
-    }
+    ## if (!all(is.na(temperature$Temp))) {
+    ##     maxy <- max(temperature$Temp, na.rm=TRUE)
+    ##     miny <- min(temperature$Temp, na.rm=TRUE)
+    ##     lines(scales::rescale(Temp,from=c(20,maxy),to=c(0.20,0.35))~Date, temperature, col="grey60")
+    ##     axis(4, las=1, at=scales::rescale(pretty(seq(20,maxy,l=100),n=3), to=c(0.20,0.35)), 
+    ##          lab=pretty(seq(20,maxy,l=100),n=3), cex.axis=1, tcl=-0.2, mgp=c(0,0.3,0))
+    ##     mtext(expression(paste(atop("Daily Temp.",(degree~C)))),4, line=4.5, at=scales::rescale(mean(maxy,0), to=c(0.2,0.35)), cex=1)
+    ## }
 
     ##Windspeed
     weather <- weather %>% mutate(Dt = as.numeric(Date))

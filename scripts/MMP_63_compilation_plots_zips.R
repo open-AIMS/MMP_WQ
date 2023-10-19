@@ -67,6 +67,7 @@ MMP_tryCatch(
 {
     if(file.exists(paste0(OUTPUT_PATH, "/figures/Plots4Renee.zip")))
         file.remove(paste0(OUTPUT_PATH, "/figures/Plots4Renee.zip"))
+    ## BOM weather
     files <- c(
         '../outputs/figures/processed/bom.pdf', 
         '../outputs/figures/processed/bom.png', 
@@ -75,6 +76,98 @@ MMP_tryCatch(
         '../outputs/figures/processed/bom1.png', 
         '../outputs/figures/processed/bom1_large.png'
         )
+    ## Time series
+    tfiles <- list.files(path = paste0("../outputs/figures/processed"),
+                         pattern = "timeseries.*", full.names = TRUE)
+    tfiles <- paste0("'", tfiles, "'")
+    files <- c(files, tfiles)
+    ## Water temperature and salinity
+    tfiles <- list.files(path = paste0("../outputs/figures/processed"),
+                         pattern = "waterTempSalinity.*|tempSalinity.*", full.names = TRUE)
+    tfiles <- paste0("'", tfiles, "'")
+    files <- c(files, tfiles)
+    ## Dischargey
+    tfiles <- list.files(path = paste0("../outputs/figures/processed"),
+                         pattern = "discharge.*", full.names = TRUE)
+    tfiles <- paste0("'", tfiles, "'")
+    files <- c(files, tfiles)
+    ## GAMS
+    tfiles <- list.files(path = paste0("../outputs/figures/models"),
+                         pattern = "gamm.*AIMS_JCU.*summary.*large.*", full.names = TRUE)
+    files <- c(files, tfiles)
+    ## Indicators
+    files <- c(files, paste0("../outputs/figures/indices/",
+                    c(
+                        'wq_historic_idx_region.pdf',
+                        'wq_historic_idx_region_large.png',
+                        'wq_historic_idx_region1.pdf',
+                        'wq_historic_idx_region1_large.png',
+                        'wq_historic_idx_subregion.pdf',
+                        'wq_historic_idx_subregion_large.png',
+                        'wq_historic_idx_subregion1.pdf',
+                        'wq_historic_idx_subregion1_large.png',
+                        'wq_old_idx_region.pdf',
+                        'wq_old_idx_region_large.png',
+                        'wq_old_idx_region1.pdf',
+                        'wq_old_idx_region1_large.png',
+                        'wq_old_idx_subregion.pdf',
+                        'wq_old_idx_subregion_large.png',
+                        'wq_old_idx_subregion1.pdf',
+                        'wq_old_idx_subregion1_large.png',
+                        'wq_alt5_qaqc.pdf',
+                        'wq_alt5_qaqc_large.png',
+                        'wq_alt5_qaqc1.pdf',
+                        'wq_alt5_qaqc1_large.png',
+                        'wq_alt5_qaqc2.pdf',
+                        'wq_alt5_qaqc2_large.png',
+                        'wq_alt5_idx_region.pdf',
+                        'wq_alt5_idx_region_large.png',
+                        'wq_alt5_idx_region1.pdf',
+                        'wq_alt5_idx_region1_large.png',
+                        'wq_alt5_idx_subregion.pdf',
+                        'wq_alt5_idx_subregion_large.png',
+                        'wq_alt5_idx_subregion1.pdf',
+                        'wq_alt5_idx_subregion1_large.png',
+                        'wq_alt6_qaqc.pdf',
+                        'wq_alt6_qaqc_large.png',
+                        'wq_alt6_qaqc1.pdf',
+                        'wq_alt6_qaqc1_large.png',
+                        'wq_alt6_qaqc2.pdf',
+                        'wq_alt6_qaqc2_large.png',
+                        'wq_alt6_idx_site_measure.pdf',
+                        'wq_alt6_idx_site_measure_large.png',
+                        'wq_alt6_idx_subregion_measure.pdf',
+                        'wq_alt6_idx_subregion_measure_large.png',
+                        'wq_alt6_idx_subregion_measure_CI.pdf',
+                        'wq_alt6_idx_subregion_measure_CI_large.png',
+                        'wq_alt6_idx_region_measure.pdf',
+                        'wq_alt6_idx_region_measure_large.png',
+                        'wq_alt6_idx_region_measure_CI.pdf',
+                        'wq_alt6_idx_region_measure_CI_large.png',
+                        'wq_alt6_idx_subregion_subindicator.pdf',
+                        'wq_alt6_idx_subregion_subindicator_large.png',
+                        'wq_alt6_idx_subregion_subindicator_CI.pdf',
+                        'wq_alt6_idx_subregion_subindicator_CI_large.png',
+                        'wq_alt6_idx_subregion_indicator.pdf',
+                        'wq_alt6_idx_subregion_indicator_large.png',
+                        'wq_alt6_idx_subregion_indicator_CI.pdf',
+                        'wq_alt6_idx_subregion_indicator_CI_large.png',
+                        'wq_alt6_idx_region_indicator.pdf',
+                        'wq_alt6_idx_region_indicator_large.png',
+                        'wq_alt6_idx_region_indicator_CI.pdf',
+                        'wq_alt6_idx_region_indicator_CI_large.png',
+                        "wq_worms_comb_region_NoFitzroy.pdf",
+                        "wq_worms_comb_region_NoFitzroy_large.png"
+                    )
+                    )
+               )
+    ## Transects
+    tfiles <- list.files(path = paste0("../outputs/figures/models"),
+                         pattern = "transect.*", full.names = TRUE)
+    tfiles <- paste0("'", tfiles, "'")
+    files <- c(files, tfiles)
+    
+    
     files <- paste(files, collapse =' ')
     system(paste0("zip -FSrj -o '", OUTPUT_PATH, "/figures/Plots4Renee.zip' ",files))
 

@@ -40,6 +40,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
         load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.gams.RData'))
         load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo.gams.RData'))
         load(file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
+        
+        load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt1.idx.subregion.subindicator.RData'))
         reneeYear.subregion.subindicator.worm <- wq.alt6.idx.subregion.subindicator
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Reading in data.', return=TRUE)
@@ -931,6 +933,110 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
     ## ----end
 
+    ## 14. 2023 Renee would like the historical and recent worms presented in a single top and bottom
+    ## figure
+    ## ---- Hist vs Alt6 2023
+    MMP_tryCatch(
+    {
+        gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
+            mutate(Alt1.subregion.subindicator = map(.x = Subregion,
+                                                      .f = ~ wq.alt1.idx.subregion.subindicator %>%
+                                                          filter(Subregion == .x) %>%
+                                                          mutate(Measure = factor(ifelse(Measure == 'DRIFTCHL_UGPERL.wm', 'Chl-a',
+                                                                                 ifelse(Measure == 'NOx.wm', 'NOx',
+                                                                                 ifelse(Measure == 'NTU', 'NTU',
+                                                                                 ifelse(Measure == 'PN.wm', 'PN',
+                                                                                 ifelse(Measure == 'PP.wm', 'PP',
+                                                                                 ifelse(Measure == 'CombinedTurb', 'Water Clarity', '')))))))) %>%
+                                                         group_by(Subregion, reportCardYear, Measure) %>%
+                                                         summarise(Index=mean(Index))
+                                                     )
+                   ) %>%
+            mutate(Index_hist_plot2 = map2(.x = Historic.idx.subregion,
+                                           .y = Alt1.subregion.subindicator,
+                                           .f = ~ MMP__worm_hist_2(hist.idx = .x,
+                                                                   subregion.worm = .y,
+                                                                   minDate = minDate,
+                                                                   MAXDATE = MAXDATE))
+                   ) %>%
+            mutate(Index_alt_Plot2 = map2(.x = alt6.idx.subregion,
+                                        .y = ReneeYear.subregion.subindicator.worm,
+                                        .f = ~MMP__worm_alt_2023(alt.idx = .x,
+                                                            subregion.worm = .y,
+                                                            minDate = minDate, MAXDATE = MAXDATE))
+                   ) %>%
+            mutate(Index_plots = map2(.x = Index_hist_plot2,
+                                      .y = Index_alt_Plot2,
+                                      .f = ~ .x/.y))
+        
+        MMP_add_to_report_list(CURRENT_STAGE, "compilations",
+                               SUBSECTION_13 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 1)\n"),
+                                                        parent = 'TABSET'),
+                               TABSET_13 = structure(paste0("\n:::: panel-tabset\n"),
+                                                    parent = 'SUBSECTION_13'),
+                               TABSET_13_END = structure(paste0("\n:::: \n"),
+                                                        parent = 'SUBSECTION_13')
+                               )
+        pwalk(list(Subregion = gam.aims.jcu.omo.tbl$Subregion,
+                   IndexPlots.AIMS.JCU.OMO.2023.part1 = gam.aims.jcu.omo.tbl$Index_plots,
+                   Cnt = 1:length(gam.aims.jcu.omo.tbl$Subregion)),
+              .f = function(Subregion, IndexPlots.AIMS.JCU.OMO.2023.part1, Cnt) { 
+                  MMP__comp_figure_export(FIGURE_OUTPUT_PATH, Subregion,
+                                          fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part1",
+                                          Plot = IndexPlots.AIMS.JCU.OMO.2023.part1,
+                                          fig.width=6, fig.height=6,
+                                          pt.size = 12) 
+                  MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
+                                          fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part1",
+                                          label_suffix="_Hist_Alt6_6_1",
+                                          Cnt, tabset_parent = "TABSET_13",
+                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offset only) and hierarchical formulation (diamond symbols).\n")) 
+              }
+              )          
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    ## ----end
+        
+    ## 15. 2023 Renee would like the historical and recent worms presented in a single top and bottom
+    ## figure
+    ## ---- Hist vs Alt6 2023 part 2
+    MMP_tryCatch(
+    {
+        gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
+            mutate(GAM_plots_2023 = pmap(.l = list(Subregion,
+                                                   AIMS_CHL_Plot.AIMS.JCU.OMO,
+                                                   AIMS_NTU_Plot),
+                                      .f = ~ MMP__gam_plot2023(..1, ..2, ..3, wq.aims.jcu.omo.gams)))
+        
+        MMP_add_to_report_list(CURRENT_STAGE, "compilations",
+                               SUBSECTION_14 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 2)\n"),
+                                                        parent = 'TABSET'),
+                               TABSET_14 = structure(paste0("\n:::: panel-tabset\n"),
+                                                    parent = 'SUBSECTION_14'),
+                               TABSET_14_END = structure(paste0("\n:::: \n"),
+                                                        parent = 'SUBSECTION_14')
+                               )
+        pwalk(list(Subregion = gam.aims.jcu.omo.tbl$Subregion,
+                   IndexPlots.AIMS.JCU.OMO.2023.part2 = gam.aims.jcu.omo.tbl$GAM_plots_2023,
+                   Cnt = 1:length(gam.aims.jcu.omo.tbl$Subregion)),
+              .f = function(Subregion, IndexPlots.AIMS.JCU.OMO.2023.part2, Cnt) { 
+                  MMP__comp_figure_export(FIGURE_OUTPUT_PATH, Subregion,
+                                          fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part2",
+                                          Plot = IndexPlots.AIMS.JCU.OMO.2023.part2,
+                                          fig.width=7, fig.height=9,
+                                          pt.size = 10) 
+                  MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
+                                          fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part2",
+                                          label_suffix="_Hist_Alt6_6_2",
+                                          Cnt, tabset_parent = "TABSET_14",
+                                          fig.caption = paste0("\nTemporal trends in a-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
+              }
+              )          
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    ## ----end
     ## save(gam.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.tbl.RData"))
     ## save(gam.aims.jcu.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.aims.jcu.tbl.RData"))
     ## save(gam.aims.jcu.omo.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.aims.jcu.omo.tbl.RData"))

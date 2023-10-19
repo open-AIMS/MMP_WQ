@@ -7,6 +7,10 @@
 build:
 	docker build . --tag mmp
 
+build_singularity:
+	docker save mmp -o mmp.tar 
+	singularity build mmp.sif docker-archive://mmp.tar
+
 # Run interactive R session in docker container
 R_container:
 	docker run --rm -it -v "$(shell pwd)":/home/Project mmp R

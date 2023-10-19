@@ -33,4 +33,7 @@ if (7 %in% runStage) {
 if (8 %in% runStage) {
     source("MMP_80_excel_exports.R")
 }
+if (9 %in% runStage) {
+    source("MMP_81_word_exports.R")
+}
 ## MMP_test()

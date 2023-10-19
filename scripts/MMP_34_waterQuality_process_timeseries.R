@@ -12,6 +12,7 @@ MAXDATE=as.Date(paste0(reportYear,'-09-30'))
 MINDATE=MAXDATE-years(1)+days(1)
 
 START_DATE <<- as.Date("2014-09-30")
+START_DATE <<- MAXDATE - years(5)
 
 ## ---- timeseries plots 
 CURRENT_ITEM <- "timeseries"
@@ -52,17 +53,17 @@ if (alwaysExtract &
                                                     START_DATE)
                if (length(data)>1) {
 
-               wch <- which(unique(flntu.all.daily$MMP_SITE_NAME) == S)
-               png(filename = paste0(OUTPUT_PATH, '/figures/processed/timeseries_', S, '.png'),
-                   res=300, width=6.299, height=2.756,units='in', pointsize=6
-                   )
-               mmp__timeseries_plot(flntu = data$flntu,
-                                    tides = data$tides,
-                                    temperature = data$waterTemp,
-                                    weather = data$wind,
-                                    discharge = data$discharge,
-                                    GL.chl = data$GL.chl, GL.ntu = data$GL.ntu,
-                                    subtitle = paste0(letters[wch], ") ", S))
+                   wch <- which(unique(flntu.all.daily$MMP_SITE_NAME) == S)
+                   png(filename = paste0(OUTPUT_PATH, '/figures/processed/timeseries_', S, '.png'),
+                       res=300, width=6.299, height=2.756,units='in', pointsize=6
+                       )
+                   mmp__timeseries_plot(flntu = data$flntu,
+                                        tides = data$tides,
+                                        temperature = data$waterTemp,
+                                        weather = data$wind,
+                                        discharge = data$discharge,
+                                        GL.chl = data$GL.chl, GL.ntu = data$GL.ntu,
+                                        subtitle = paste0(letters[wch], ") ", S))
                    dev.off()
                }
            }

@@ -427,6 +427,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
                     ) %>%
             mutate(NTU_N=sprintf('%1.0f',NTU_N))
 
+        save(flntu.all.sum, file = paste0(DATA_PATH, "/processed/loggers/flntu.all.sum.RData"))
+
         headers <- tribble(
             ~Header1, ~Header2,
             "Subregion", "Subregion",
@@ -560,6 +562,9 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Zip:', msg='embed zip in quarto', return=TRUE)
     ## ----end
+
+
+
     
     source("MMP_35_processedData_report.R")
 

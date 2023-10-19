@@ -650,7 +650,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                                     filter(Year>2007, Region != 'Fitzroy') %>%
                                     droplevels() %>%
                                     mutate(Region = factor(Region,
-                                                           levels = levels(wq.alt6.idx.region_noCY$Region))),
+                                                           ## levels = levels(wq.alt6.idx.region_noCY$Region))),
+                                                           levels = levels(wq.alt6.idx.region_noF$Region))),
                                     aes(y = Index, x = reportCardYear)) +
             geom_hline(yintercept = 0, linetype = 'dashed') +
             geom_line() +

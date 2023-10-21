@@ -30,7 +30,7 @@ MMP_openning_banner()
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"Plots4Angus"))) &
     file.exists(paste0(GAM_OUTPUT_PATH, 'wq.gams.RData')) &
     file.exists(paste0(DATA_PATH, '/indices/wq.alt6.idx.subregion.subindicator.RData')) &
-    file.exists(paste0(PARAMS_DATA_PATH, 'names_lookup.RData')) 
+    file.exists(paste0(PARAMS_INPUT_PATH, 'names_lookup.RData')) 
     ) {
 
     ## MMP_add_to_report_list(CURRENT_STAGE, "GAMS",

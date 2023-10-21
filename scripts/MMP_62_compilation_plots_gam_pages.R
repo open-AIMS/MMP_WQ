@@ -14,6 +14,7 @@ minDate <- as.Date("2005-09-01")
 GAM_OUTPUT_PATH <- paste0(DATA_PATH, "/models/")
 FIGURE_OUTPUT_PATH <- paste0(OUTPUT_PATH, "/figures/models/")
 PARAMS_INPUT_PATH <- paste0(DATA_PATH, "/primary/other/")
+INDICES_OUTPUT_PATH <- paste0(DATA_PATH, "/indices/")
 
 ## Type 0 index (Full old, historic spatial and temporal formulation) - wq.alt1
 ## ---- Type 0

@@ -95,8 +95,10 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
                               ),
                    Data = map(.x = Data,
                               .f = ~ .x %>%
+                                  mutate(Season = as.character(Season)) %>%
                                   mutate(Season = ifelse(Source == "JCU Niskin Event",
                                                          'Event', Season)) %>%
+                                  mutate(Season = factor(Season, levels = c("Dry", "Wet", "Event"))) %>%
                                   mutate(Value = ifelse(Value == 0, Value[Value>0]/2, Value)) 
                               ),
                    wq.subs.sum = map(.x = Data,
@@ -183,10 +185,10 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
                                     geom_line(data=..3,aes(color=factor(Season),
                                                            y=Value, x=Distance),
                                               show.legend = FALSE) +
-                                    scale_color_manual('', breaks=c('1', '2', 'Event'),
+                                    scale_color_manual('', breaks=c('Dry', 'Wet', 'Event'),
                                                        values=c('#fc8d62', '#8da0cb', '#66c2a5'),
                                                        labels=c('Ambient Dry', 'Ambient Wet', 'Event'),
-                                                       limits=c('1', '2', 'Event'))+
+                                                       limits=c('Dry', 'Wet', 'Event'))+
                                         #geom_smooth(method='custom.smooth', se=FALSE) +
                                     labs(y=parse(text=as.character(unique(..1$Name.graphs.abbr))),
                                          x=paste0(paste0('Distance from mouth (km)'))) +
@@ -203,12 +205,15 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
             droplevels() %>% 
             arrange(-Latitude) %>%
             mutate(Subregion = factor(Subregion, levels=unique(Subregion))) %>%
-            mutate(Season = ifelse(Source == 'JCU Niskin Event', 'Event', Season))
+            mutate(Season = as.character(Season)) %>%
+            mutate(Season = ifelse(Source == "JCU Niskin Event",
+                                   'Event', Season)) %>%
+            mutate(Season = factor(Season, levels = c("Dry", "Wet", "Event"))) 
         g1 <-ggplot(wq.sub,
                     aes(y = Value, x = Distance, color = factor(Season))) +
             geom_point() +
             geom_smooth(se=FALSE) +
-            scale_color_manual('', breaks=c('1', '2', 'Event'),
+            scale_color_manual('', breaks=c('Dry', 'Wet', 'Event'),
                                values=c('#fc8d62', '#8da0cb', '#66c2a5'),
                                labels=c('Ambient Dry', 'Ambient Wet', 'Event'))+
             theme_classic() +

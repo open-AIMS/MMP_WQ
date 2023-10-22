@@ -13,11 +13,11 @@ MMP_isParent <- function() {
    ifelse(sys.nframe()==1, TRUE, FALSE) 
 }
 
-MMP_fakeArgs <- function(stage = 1) {
+MMP_fakeArgs <- function(stage = 1, always_extract = FALSE) {
     MMP_startMatter(args = c('','','','','',
                              '--reportYear=2023',
                              paste0('--runStage=', paste0(stage)),
-                             '--alwaysExtract=TRUE'))
+                             paste0('--alwaysExtract=', always_extract)))
 }
 
 #########################################################################

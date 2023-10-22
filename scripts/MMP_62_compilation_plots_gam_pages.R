@@ -1,5 +1,6 @@
 source("MMP_functions.R")
 source("MMP_functions_models.R")
+source("MMP_functions_indices.R")
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
@@ -43,6 +44,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
         load(file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
         
         load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt1.idx.subregion.subindicator.RData'))
+        load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt6.idx.subregion.subindicator.RData'))
         reneeYear.subregion.subindicator.worm <- wq.alt6.idx.subregion.subindicator
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Reading in data.', return=TRUE)
@@ -939,6 +941,10 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     ## ---- Hist vs Alt6 2023
     MMP_tryCatch(
     {
+        wq.alt1.idx.subregion.subindicator <- wq.alt1.idx.subregion.subindicator %>%
+            mutate(Index = ifelse(Subregion == "Fitzroy" &
+                                  reportCardYear == as.Date("2016-01-01") &
+                                  Measure == "CombinedTurb", NA, Index))
         gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
             mutate(Alt1.subregion.subindicator = map(.x = Subregion,
                                                       .f = ~ wq.alt1.idx.subregion.subindicator %>%

@@ -166,7 +166,7 @@ mmp__qaqc_2 <- function(wq.qaqc, type, ...) {
            "4" = mmp__qaqc_2_4(wq.qaqc, GL),
            ## "5" = mmp__qaqc_2_4(wq.qaqc, GL),
            "5" = mmp__qaqc_2_5(wq.qaqc, GL),
-           "6" = mmp__qaqc_2_6(wq.qaqc, GL)
+           "6" = mmp__qaqc_2_5(wq.qaqc, GL)
            )
 }
 

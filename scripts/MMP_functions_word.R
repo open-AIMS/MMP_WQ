@@ -1,3 +1,22 @@
+countExceeds <- function(value,GL,DOF) {
+    v=value
+    value = v[!is.na(v) & !is.na(GL)]
+    GL=GL[!is.na(v) & !is.na(GL)]
+    if (length(value)==0 | all(is.nan(v)) | any(is.na(DOF))) {
+        return(NA)
+    } else {
+        if (unique(DOF)=='H') cnt=100*length(value[value>GL])/length(value)
+        else cnt=100*length(value[value<GL])/length(value)
+        cnt
+    }
+}
+
+
+SE <- function(x) {
+    sd(x,na.rm=TRUE)/sqrt(length(x))
+}
+
+
 MMP__docx_table <- function(dat, docx.tab.count) {
     m1=grep('NTU_m',colnames(dat))
     m2=grep('NTU_GL_m',colnames(dat))

@@ -26,7 +26,7 @@ MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
 
 
 if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
-    file.exists(paste0(FLNTU_INPUT_PATH, 'flntu.all.sum.RData')) 
+    file.exists(paste0(FLNTU_INPUT_PATH, 'flntu.all.daily.RData')) 
     ) {
 
 
@@ -43,7 +43,44 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
     {
         library(flextable)
         library(officer)
-        load(file = paste0(FLNTU_INPUT_PATH, "flntu.all.sum.RData"))
+
+        load(file=paste0(FLNTU_INPUT_PATH, 'flntu.all.daily.RData'))
+
+        
+        flntu.all.sum <- flntu.all.daily %>%
+            rename(NTU=NTU_QA_AVG, DRIFTCHL_UGPERL.wm=CHL_QA_AVG) %>%
+            gather(key=Measure, value=Value, NTU,DRIFTCHL_UGPERL.wm) %>%
+            left_join(wq.guidelines %>%
+                      dplyr:::filter(GL.Season=='Annual') %>%
+                      left_join(names_lookup) %>%
+                      dplyr:::select(MMP_SITE_NAME,Measure,GL,Latitude,Location,DirectionOfFailure) %>%
+                      distinct %>%
+                      spread(Location,GL)
+                      ) %>%
+            mutate(GL=rowSums(cbind(Mean,Median), na.rm=TRUE),cwaterYear=MMP_categoricalWaterYear(Date)) %>%
+            group_by(Region,Subregion,MMP_SITE_NAME,Latitude,cwaterYear,Measure) %>%
+            summarize(
+                N=n(),
+                mean=mean(Value, na.rm=TRUE),
+                se=SE(Value),
+                median=median(Value, na.rm=TRUE),
+                GL_mean=mean(Mean,na.rm=TRUE),
+                GL_median=mean(Median,na.rm=TRUE),
+                GT=ifelse(!is.na(GL_mean),countExceeds(Value,Mean,DirectionOfFailure),countExceeds(Value,Median,DirectionOfFailure)),
+                GT5=countExceeds(Value,rep(5,length(Mean)),DirectionOfFailure)
+            ) %>% ungroup %>%
+            gather(key=Temp, value=Value, N,mean,se,median,GL_mean, GL_median,GT,GT5) %>%
+            unite(Temp,Measure,Temp) %>%
+            spread(key=Temp, value=Value) %>%
+            arrange(desc(Latitude),cwaterYear) %>%
+            dplyr:::select(#Region,
+                        Subregion,Site=MMP_SITE_NAME,Year=cwaterYear,
+                        NTU_N, NTU_mean, NTU_se,NTU_median, NTU_GL_mean,NTU_GL_median,NTU_GT,NTU_GT5,
+                        DRIFTCHL_UGPERL.wm_N,
+                        DRIFTCHL_UGPERL.wm_mean, DRIFTCHL_UGPERL.wm_median, DRIFTCHL_UGPERL.wm_GL_mean,DRIFTCHL_UGPERL.wm_GL_median,DRIFTCHL_UGPERL.wm_GT
+                    ) %>%
+            mutate(NTU_N=sprintf('%1.0f',NTU_N))
+        
 
         ## Get the list of years
         Years <- flntu.all.sum %>% pull(Year) %>% unique()
@@ -61,6 +98,7 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
                                   filter(Year %in% Years[.x:max(c(1,(.x-2)))]) %>%
                                   pivot_wider(id_cols = everything(),
                                               names_from =  Year,
+                                              names_vary = "slowest",
                                               values_from = starts_with("NTU"))
                               ),
                    tab = map2(.x = data,
@@ -84,7 +122,7 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
             type = "continuous",
             page_margins = page_mar()
         )
-        save_as_docx(values = flntu.tbl$tab, path = DOCx_OUTPUT_FILE, pr_section = sect_properties)
+        save_as_docx(values = flntu.tbl$tab, path = DOCX_OUTPUT_FILE, pr_section = sect_properties)
         
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Word:', msg='Create the docx tables', return=TRUE)

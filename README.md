@@ -107,7 +107,7 @@ project.
 
 ```console
 module load singularity
-singularity exec - B .:/home/Project ../mmp.sif Rscript MMP_00_main.R 
+singularity exec - B .:/home/Project ../mmp.sif Rscript MMP_00_main.R --final_year=2023 --fresh_start=true --runStage=1 --rerun_baselines=true
 ```
 
 **4.5. Run an interactive R session from singularity (local or HPC)**
@@ -211,6 +211,7 @@ y
   - tides
   - BOM data
   - report
+  - package data
 - Stage 4
   - report
 

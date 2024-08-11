@@ -46,3 +46,6 @@ source("MMP_36_processedData_gam_data.R")
 
 ## Produce report
 source("MMP_35_processedData_report.R")
+
+## Package up all the data that go into analyses
+source("MMP_38_package_up_data.R")

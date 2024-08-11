@@ -276,7 +276,7 @@ current_label <- "BOM weather 2"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
-if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom", ".csv"))) {
+if (alwaysExtract | !file.exists(paste0(OTHER_PATH, "bom2", ".csv"))) {
     writeLines("select station_number, station_name, TO_CHAR(sample_day,'YYYY-MM-DD') as SAMPLE_DAY_ISO,
   to_char(sample_day, 'YYYY') as YEAR, parameter, avg_value
  from bom_climate.mv_daily_data_generic

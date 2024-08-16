@@ -107,7 +107,14 @@ project.
 
 ```console
 module load singularity
-singularity exec - B .:/home/Project ../mmp.sif Rscript MMP_00_main.R --final_year=2023 --fresh_start=true --runStage=1 --rerun_baselines=true
+singularity exec -B .:/home/Project ../mmp.sif Rscript MMP_00_main.R --final_year=2023 --fresh_start=true --runStage=1 --rerun_baselines=true
+```
+
+As of 2024, we need to also mount a NFS of the logger data
+
+```console
+module load singularity
+singularity exec -B .:/home/Project -B /net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data:/home/logger_data ../mmp.sif Rscript MMP_00_main.R --final_year=2023 --fresh_start=true --runStage=1 --rerun_baselines=true
 ```
 
 **4.5. Run an interactive R session from singularity (local or HPC)**
@@ -118,10 +125,16 @@ singularity exec - B .:/home/Project ../mmp.sif Rscript MMP_00_main.R --final_ye
 - navigate to `scripts` folder
 - run the following
 ```console
-singularity exec - B .:/home/Project ../mmp.sif R 
+singularity exec -B .:/home/Project ../mmp.sif R 
 ```
 - `M-x ess-remote`
 - open the R script and start sending code (if necessary switch process)
+
+As of 2024, we need to also mount a NFS of the logger data
+
+```console
+singularity exec -B .:/home/Project -B /net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data:/home/logger_data ../mmp.sif R 
+```
 
 
 **5. Clean up (remove all docker containers, images, and cache).**

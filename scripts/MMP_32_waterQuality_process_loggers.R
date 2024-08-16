@@ -44,6 +44,19 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
                                )
 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_NC = structure(paste0("## netCDF extraction\n"),
+                                                         parent = 'TABSET'),
+                               TAB = structure(
+                                 paste0(
+                                   "\n```\n",
+                                   paste0(
+                                   str_replace_all(knitr::read_chunk("MMP_22_waterQuality_load_loggers.R")$`Get data FLNTU 2024`, "#.*", ""), collapse = "\n"),
+                                   "\n```\n"
+                                 ),
+                                 parent = 'SUBSECTION_NC')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
                                                               parent = 'TABSET'),
                                TAB = structure(mmp__add_table(mmp__glimpse_like(flntu)),
@@ -259,25 +272,29 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
         wq.sites <- read.csv(paste0(PARAMS_PATH, '/wq.sites.csv'), strip.white=TRUE)
         save(waterTempW, file=paste0(LOGGER_OUTPUT_PATH, 'waterTempW.RData'))
         unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                                    item = CURRENT_ITEM),"\n\n"),
-                               TABSET = paste0("::: panel-tabset \n\n"),
-                               TABSET_END = paste0("::: \n\n"),
-                               SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
-                                                          parent = 'TABSET'),
-                               SQL = structure(mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterTempW.sql')),
-                                               parent = 'SUBSECTION_SQL')
-                               )
+        include_waterTemp <- FALSE
+        if (include_waterTemp) {
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                      item = CURRENT_ITEM),"\n\n"),
+                                 TABSET = paste0("::: panel-tabset \n\n"),
+                                 TABSET_END = paste0("::: \n\n"),
+                                 SUBSECTION_SQL = structure(paste0("## SQL syntax\n"),
+                                                            parent = 'TABSET'),
+                                 SQL = structure(mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterTempW.sql')),
+                                                 parent = 'SUBSECTION_SQL')
+                                 )
 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
-                                                              parent = 'TABSET'),
-                               TAB = structure(mmp__add_table(mmp__glimpse_like(waterTempW)),
-                                               parent = 'SUBSECTION_GLIMPSE'),
-                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the water temperature data. {#tbl-sql-waterTempW}\n\n"),
-                                                   parent = 'SUBSECTION_GLIMPSE')
-                              )
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SUBSECTION_GLIMPSE = structure(paste0("## Data glimpse\n"),
+                                                                parent = 'TABSET'),
+                                 TAB = structure(mmp__add_table(mmp__glimpse_like(waterTempW)),
+                                                 parent = 'SUBSECTION_GLIMPSE'),
+                                 TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the water temperature data. {#tbl-sql-waterTempW}\n\n"),
+                                                     parent = 'SUBSECTION_GLIMPSE')
+                                 )
+          
+        }
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing:', msg='Reading in Water Temperature data', return=TRUE)
     ## ----end
@@ -395,18 +412,20 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
                p,
                width=12, height=10, dpi = 100)
 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
-                                                             parent = 'TABSET'),
-                               FIG_REF = structure(paste0("\n::: {#fig-sql-waterTempW}\n"),
-                                                   parent = 'SUBSECTION_DESIGN'),
-                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll.png)\n"),
-                                               parent = "FIG_REF"),
-                               FIG_CAP = structure(paste0("\nTemporal distribution of AIMS water temperature water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                                                   parent = 'FIG_REF'),
-                               FIG_REF_END = structure(paste0("\n::: \n"),
-                                                       parent = 'SUBSECTION_DESIGN')
-                              )
+        if (include_waterTemp) {
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
+                                                               parent = 'TABSET'),
+                                 FIG_REF = structure(paste0("\n::: {#fig-sql-waterTempW}\n"),
+                                                     parent = 'SUBSECTION_DESIGN'),
+                                 FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll.png)\n"),
+                                                 parent = "FIG_REF"),
+                                 FIG_CAP = structure(paste0("\nTemporal distribution of AIMS water temperature water quality samples. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                     parent = 'FIG_REF'),
+                                 FIG_REF_END = structure(paste0("\n::: \n"),
+                                                         parent = 'SUBSECTION_DESIGN')
+                                 )
+        }
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
@@ -417,19 +436,20 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
                                  limits = TRIMDATE, expand = c(0,0)),
                width=12, height=10, dpi = 100)
 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_DESIGN2 = structure(paste0("## Sampling design < 5yrs\n"),
-                                                             parent = 'TABSET'),
-                               FIG_REF2 = structure(paste0("\n::: {#fig-sql-waterTempW5}\n"),
-                                                   parent = 'SUBSECTION_DESIGN2'),
-                               FIG2 = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll_5.png)\n"),
-                                               parent = "FIG_REF2"),
-                               FIG_CAP2 = structure(paste0("\nTemporal distribution of AIMS water temperature water quality samples within 5yrs of the end of the ",as.numeric(reportYear) - 1,"/",as.numeric(reportYear)," water year. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                                                   parent = 'FIG_REF2'),
-                               FIG_REF_END2 = structure(paste0("\n::: \n"),
-                                                       parent = 'SUBSECTION_DESIGN2')
-                              )
-        
+        if (include_waterTemp) {
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SUBSECTION_DESIGN2 = structure(paste0("## Sampling design < 5yrs\n"),
+                                                                parent = 'TABSET'),
+                                 FIG_REF2 = structure(paste0("\n::: {#fig-sql-waterTempW5}\n"),
+                                                      parent = 'SUBSECTION_DESIGN2'),
+                                 FIG2 = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/waterTempWAll_5.png)\n"),
+                                                  parent = "FIG_REF2"),
+                                 FIG_CAP2 = structure(paste0("\nTemporal distribution of AIMS water temperature water quality samples within 5yrs of the end of the ",as.numeric(reportYear) - 1,"/",as.numeric(reportYear)," water year. Red and blue symbols signify Dry and Wet season samples respectively. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                      parent = 'FIG_REF2'),
+                                 FIG_REF_END2 = structure(paste0("\n::: \n"),
+                                                          parent = 'SUBSECTION_DESIGN2')
+                                 )
+        } 
         
     }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
 
@@ -474,6 +494,19 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                                                           parent = 'TABSET'),
                                SQL = structure(mmp__sql(paste0(LOGGER_INPUT_PATH, 'waterSalinity.sql')),
                                                parent = 'SUBSECTION_SQL')
+                               )
+
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_NC = structure(paste0("## netCDF extraction\n"),
+                                                         parent = 'TABSET'),
+                               TAB = structure(
+                                 paste0(
+                                   "\n```\n",
+                                   paste0(
+                                   str_replace_all(knitr::read_chunk("MMP_22_waterQuality_load_loggers.R")$`Get data Salinity 2024`, "#.*", ""), collapse = "\n"),
+                                   "\n```\n"
+                                 ),
+                                 parent = 'SUBSECTION_NC')
                                )
 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,

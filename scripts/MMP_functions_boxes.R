@@ -1,7 +1,7 @@
 
 mmp__logBox <- function(box.width, box.margins) {
     log <- system(paste0("tail -n 5 ", LOG_FILE), intern = TRUE)
-    pos <- max(stringr::str_locate(log, "\\|[^| ]*:\ ")[,"end"])
+    pos <- max(10, max(stringr::str_locate(log, "\\|[^| ]*:\ ")[,"end"], na.rm = TRUE))
     log <- cli::ansi_strwrap(log,width = 80, exdent = pos)
     log.text <- paste0(
         cli::ansi_align(

@@ -28,25 +28,29 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
             suppressMessages()
         save(disturbance_mmp, file=paste0(OTHER_OUTPUT_PATH, 'disturbance_mmp.RData'))
         unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
-                                                                    item = CURRENT_ITEM),"\n\n"),
-                               TABSET = paste0("::: panel-tabset \n\n"),
-                               TABSET_END = paste0("::: \n\n"),
-                               SUBSECTION_SQL_MMP = structure(paste0("## SQL syntax (MMP)\n"),
-                                                          parent = 'TABSET'),
-                               SQL_MMP = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'disturbance_mmp.sql')),
-                                               parent = 'SUBSECTION_SQL_MMP')
-                               )
 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_GLIMPSE_MMP = structure(paste0("## Data glimpse (MMP)\n"),
-                                                              parent = 'TABSET'),
-                               TAB_MMP = structure(mmp__add_table(mmp__glimpse_like(disturbance_mmp)),
-                                               parent = 'SUBSECTION_GLIMPSE_MMP'),
-                               TAB.CAP_MMP = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (MMP) data. {#tbl-sql-disturbance_mmp}\n\n"),
-                                                   parent = 'SUBSECTION_GLIMPSE_MMP')
-                              )
+        include_disturbance <- FALSE
+        if (include_disturbance) {
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
+                                                                      item = CURRENT_ITEM),"\n\n"),
+                                 TABSET = paste0("::: panel-tabset \n\n"),
+                                 TABSET_END = paste0("::: \n\n"),
+                                 SUBSECTION_SQL_MMP = structure(paste0("## SQL syntax (MMP)\n"),
+                                                                parent = 'TABSET'),
+                                 SQL_MMP = structure(mmp__sql(paste0(OTHER_INPUT_PATH, 'disturbance_mmp.sql')),
+                                                     parent = 'SUBSECTION_SQL_MMP')
+                                 )
+
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SUBSECTION_GLIMPSE_MMP = structure(paste0("## Data glimpse (MMP)\n"),
+                                                                    parent = 'TABSET'),
+                                 TAB_MMP = structure(mmp__add_table(mmp__glimpse_like(disturbance_mmp)),
+                                                     parent = 'SUBSECTION_GLIMPSE_MMP'),
+                                 TAB.CAP_MMP = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (MMP) data. {#tbl-sql-disturbance_mmp}\n\n"),
+                                                         parent = 'SUBSECTION_GLIMPSE_MMP')
+                                 )
+        }
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (MMP) data', return=TRUE)
     ## ----end
@@ -57,6 +61,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
         disturbance_ltmp <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbance_ltmp.csv')) %>%
             suppressMessages()
         save(disturbance_ltmp, file=paste0(OTHER_OUTPUT_PATH, 'disturbance_ltmp.RData'))
+        if (include_disturbance) {
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SUBSECTION_SQL_LTMP = structure(paste0("## SQL syntax (LTMP)\n"),
                                                           parent = 'TABSET'),
@@ -69,6 +74,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
                                TAB.CAP_LTMP = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (LTMP) data. {#tbl-sql-disturbance_ltmp}\n\n"),
                                                    parent = 'SUBSECTION_GLIMPSE_LTMP')
                               )
+        }
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (LTMP) data', return=TRUE)
     ## ----end
@@ -79,6 +85,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
         cyclones <- read_csv(paste0(OTHER_INPUT_PATH, 'cyclones.csv')) %>%
             suppressMessages()
         save(cyclones, file=paste0(OTHER_OUTPUT_PATH, 'cyclones.RData'))
+        if (include_disturbance) {
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SUBSECTION_SQL_CYCLONES = structure(paste0("## SQL syntax (Cyclones)\n"),
                                                           parent = 'TABSET'),
@@ -91,6 +98,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
                                TAB.CAP_CYCLONES = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (Cyclones) data. {#tbl-sql-cyclones}\n\n"),
                                                    parent = 'SUBSECTION_GLIMPSE_CYCLONES')
                               )
+        }
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (Cyclones) data', return=TRUE)
     ## ----end
@@ -101,6 +109,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
         disturbanceForPlots <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbanceForPlots.csv')) %>%
             suppressMessages()
         save(disturbanceForPlots, file=paste0(OTHER_OUTPUT_PATH, 'disturbanceForPlots.RData'))
+        
+        if (include_disturbance) {
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SUBSECTION_SQL_DIST4PLOTS = structure(paste0("## SQL syntax (Disturbances for Plots)\n"),
                                                           parent = 'TABSET'),
@@ -113,6 +123,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
                                TAB.CAP_DIST4PLOTS = structure(paste0("\n:Extraction of the first five records in each field from the disturbance (Disturbances for Plots) data. {#tbl-sql-disturbanceForPlots}\n\n"),
                                                    parent = 'SUBSECTION_GLIMPSE_DIST4PLOTS')
                               )
+        }
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Data processing', msg='Reading in disturbance (Disturbances for Plots) data', return=TRUE)
     ## ----end
@@ -261,18 +272,20 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
                p,
                width=12, height=10, dpi = 100)
 
-        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
-                               SUBSECTION_DESIGN = structure(paste0("## Disturbances recorded\n"),
-                                                             parent = 'TABSET'),
-                               FIG_REF = structure(paste0("\n::: {#fig-sql-disturbances}\n"),
-                                                   parent = 'SUBSECTION_DESIGN'),
-                               FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/disturbance.reef.png)\n"),
-                                               parent = "FIG_REF"),
-                               FIG_CAP = structure(paste0("\nTemporal distribution of recorded disturbances coloured according to disturbance type. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
-                                                   parent = 'FIG_REF'),
-                               FIG_REF_END = structure(paste0("\n::: \n"),
-                                                       parent = 'SUBSECTION_DESIGN')
-                              )
+        if (include_disturbance) {
+          MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                                 SUBSECTION_DESIGN = structure(paste0("## Disturbances recorded\n"),
+                                                               parent = 'TABSET'),
+                                 FIG_REF = structure(paste0("\n::: {#fig-sql-disturbances}\n"),
+                                                     parent = 'SUBSECTION_DESIGN'),
+                                 FIG = structure(paste0("![](",OUTPUT_PATH,"/figures/processed/disturbance.reef.png)\n"),
+                                                 parent = "FIG_REF"),
+                                 FIG_CAP = structure(paste0("\nTemporal distribution of recorded disturbances coloured according to disturbance type. Dark vertical band represents the ",as.numeric(reportYear),"/",as.numeric(reportYear)," reporting domain.\n"),
+                                                     parent = 'FIG_REF'),
+                                 FIG_REF_END = structure(paste0("\n::: \n"),
+                                                         parent = 'SUBSECTION_DESIGN')
+                                 )
+        }
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')

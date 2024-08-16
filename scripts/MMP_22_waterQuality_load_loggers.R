@@ -86,3 +86,65 @@ for (item in logger_items) {
     MMP_openning_banner()
 }
 ## ----end
+
+## FLNTU data is currently being moved from the AIMS oracle database
+## to an external threds server. However, for the 2024 report, these
+## data are housed on pearl. Geoff has kindly made these available on
+## the HPC as an NFS share mounted at:
+## /net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data/FLNTU_QAQCd/NetCDF/
+## In order to access this location within the singularity image, we
+## will need to bind it to a mount point within the image.
+
+## Unfortunately, the new netcdf files do not contain as much context
+## (site names) as the database extracts did. Hence, in order to
+## standardise all the fields, it is necessary to bring in additional
+## fields from some of the lookup tables
+
+## ---- Get data FLNTU 2024
+## flntu_path <- "/net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data/FLNTU_QAQCd/NetCDF/"
+flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
+            suppressMessages()
+flntu_path <- "/home/logger_data/FLNTU_QAQCd/NetCDF"
+flntu_files <- list.files(path = flntu_path, pattern = ".*nc", full.names = TRUE)
+flntu_2 <- do.call("rbind", lapply(flntu_files, MMP_read_flntu_nc))
+flntu <- bind_rows(flntu, flntu_2)
+
+data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
+write_csv(flntu, data_file)
+## ----
+
+## ---- Get data Salinity 2024
+waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
+            suppressMessages()
+salinity_path <- "/home/logger_data/SBE37_QAQCd/NetCDF"
+salinity_files <- list.files(path = salinity_path, pattern = ".*nc", full.names = TRUE)
+salinity_files <- str_subset(salinity_files, "CSTZ")
+salinity_2 <- do.call("rbind", lapply(salinity_files, MMP_read_salinity_nc))
+waterSalinity <- bind_rows(waterSalinity, salinity_2)
+# **The following is only needed because there are some new entries in the database that
+# should not be there and this is the easiest place to filter them out at this stage**
+waterSalinity <- waterSalinity %>%
+  filter(str_detect(STATION_NAME, "test_file", negate = TRUE))
+# exclude duplicate STATION_NAME/SAMPLE_DAY/PARAMETER values
+waterSalinity <-
+  waterSalinity %>%
+  group_by(STATION_NAME, SAMPLE_DAY, PARAMETER) %>%
+  mutate(n = 1:n()) %>%
+  filter(n == 1) %>%
+  dplyr::select(-n) %>%
+  ungroup()
+
+data_file <- paste0(LOGGER_PATH, "waterSalinity", ".csv") # save data here
+write_csv(waterSalinity, data_file)
+## ----
+
+## ---- Get data Water Temperature 2024
+## flntu_path <- "/net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data/FLNTU_QAQCd/NetCDF/"
+## waterTempW <- read_csv(paste0(LOGGER_PATH, 'waterTempW.csv')) %>%
+##             suppressMessages()
+## ## temperature data obtained from the Salinity loggers above
+## waterSalinity <- bind_rows(waterSalinity, salinity_2)
+
+## data_file <- paste0(LOGGER_PATH, "waterSalinity", ".csv") # save data here
+## write_csv(waterSalinity, data_file)
+## ----

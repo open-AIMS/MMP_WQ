@@ -13,9 +13,9 @@ MMP_isParent <- function() {
    ifelse(sys.nframe()==1, TRUE, FALSE) 
 }
 
-MMP_fakeArgs <- function(stage = 1, always_extract = FALSE) {
+MMP_fakeArgs <- function(stage = 1, always_extract = FALSE, reportYear = NULL) {
     MMP_startMatter(args = c('','','','','',
-                             '--reportYear=2023',
+                             paste0('--reportYear=', reportYear),
                              paste0('--runStage=', paste0(stage)),
                              paste0('--alwaysExtract=', always_extract)))
 }
@@ -251,7 +251,8 @@ MMP_loadPackages <- function(log = TRUE) {
     options(tidyverse.quiet = TRUE)
     pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
               'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x',
-              'furrr','reportcards', 'emmeans', 'openxlsx', 'xfun'
+              'furrr','reportcards', 'emmeans', 'openxlsx', 'xfun', 'ncdf4',
+              'kableExtra'
               )
 
     for (p in pkgs) {
@@ -1074,4 +1075,198 @@ MMP__gam_table_quarto <- function(CURRENT_STAGE, Subregion,label_suffix,
     ##     structure(paste0("\n::::: \n"), parent = paste0('SUBSECTION',SUFFIX)) 
     
     MMP_add_to_report_list(CURRENT_STAGE, "compilations", a)
+}
+
+
+#########################################################################
+## The following function reads in a netcdf file and standardises the  ##
+## fields so that they are compatible with the previous database       ##
+## structures.                                                         ##
+## Parameters:                                                         ##
+##    nc_file: a string representation of the full path of the file    ##
+## Return:                                                             ##
+##    tibble: a tibble representing the data.                          ##
+#########################################################################
+MMP_read_flntu_nc <- function(nc_file) {
+  lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
+  names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
+
+  dat <- ncdf4::nc_open(nc_file)
+  ## print(dat) 
+  ## names(dat$dim)
+
+  ## get the site_code
+  site_code <- ncdf4::ncatt_get(dat, 0, "site_code")$value
+  region <- lookup %>% filter(SHORT_NAME == site_code) %>% pull(Region)
+  ## extract the time dimension
+  time <- ncdf4::ncvar_get(dat, "TIME")
+  ## determine the units of time
+  tunits <- ncdf4::ncatt_get(dat, "TIME", "units")
+  ## convert Gregorian time into Date 
+  datetime <- MMP_convert_fractional_days_to_datetime(time)
+  sample_day <- as.Date(format(datetime, "%Y-%m-%d"))
+
+  ## get the names of the variables
+  ## names(dat$var)
+  
+  ## get longitude
+  lon <- ncdf4::ncvar_get(dat, "LONGITUDE")
+  lat <- ncdf4::ncvar_get(dat, "LATITUDE")
+  depth <- ncdf4::ncvar_get(dat, "NOMINAL_DEPTH")
+  chla <- ncdf4::ncvar_get(dat, "CPHL")
+  chla_quality_control <- ncdf4::ncvar_get(dat, "CPHL_quality_control")
+  turb <- ncdf4::ncvar_get(dat, "TURB")
+  turb_quality_control <- ncdf4::ncvar_get(dat, "TURB_quality_control")
+  
+  ## construct a tibble with the above variables
+  df <- tibble(
+    STATION_ID = site_code,
+    NRM_REGION = region,
+    DEPLOY_DATE = format(datetime, "%d-%b-%Y %H:%M:%S"),
+    SAMPLE_DAY = sample_day,
+    lon = lon,
+    lat = lat,
+    depth = depth,
+    chla = chla,
+    chla_quality_control = chla_quality_control,
+    turb = turb,
+    turb_quality_control = turb_quality_control
+  ) 
+  ## daily aggregate
+  df <- df %>%
+    group_by(STATION_ID, NRM_REGION, SAMPLE_DAY) %>%
+    summarise(CHL_QA_AVG = mean(chla[chla_quality_control == 1]),
+              NTU_QA_AVG = mean(turb[turb_quality_control == 1])
+              ) %>%
+    mutate(SHORT_NAME = site_code) %>%
+    left_join(names_lookup %>%
+              dplyr::select(SHORT_NAME, MMP_SITE_NAME), by = "SHORT_NAME") %>% 
+    suppressWarnings() %>%
+    suppressMessages()
+  df
+}
+
+#########################################################################
+## The following function reads in a netcdf file and standardises the  ##
+## fields so that they are compatible with the previous database       ##
+## structures.                                                         ##
+## Parameters:                                                         ##
+##    nc_file: a string representation of the full path of the file    ##
+## Return:                                                             ##
+##    tibble: a tibble representing the data.                          ##
+#########################################################################
+MMP_read_salinity_nc <- function(nc_file) {
+  lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
+  names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
+
+  ## print(nc_file)
+  dat <- ncdf4::nc_open(nc_file)
+  ## print(dat) 
+  ## names(dat$dim)
+
+  ## get the site_code
+  site_code <- ncdf4::ncatt_get(dat, 0, "site_code")$value
+  region <- lookup %>% filter(SHORT_NAME == site_code) %>% pull(Region)
+  ## extract the time dimension
+  time <- ncdf4::ncvar_get(dat, "TIME")
+  ## determine the units of time
+  tunits <- ncdf4::ncatt_get(dat, "TIME", "units")
+  ## convert Gregorian time into Date 
+  datetime <- MMP_convert_fractional_days_to_datetime(time)
+  sample_day <- as.Date(format(datetime, "%Y-%m-%d"))
+
+  ## get the names of the variables
+  avail_vars <- names(dat$var)
+  
+  ## get longitude
+  lon <- ncdf4::ncvar_get(dat, "LONGITUDE")
+  lat <- ncdf4::ncvar_get(dat, "LATITUDE")
+  depth <- ncdf4::ncvar_get(dat, "NOMINAL_DEPTH")
+  ## construct a tibble with the above variables
+  df <- tibble(STATION_NAME = paste0(site_code,"_REC_", format(datetime, "%Y%m%d")),
+    NRM_REGION = region,
+    DEPLOY_DATE = format(datetime, "%d-%b-%Y %H:%M:%S"),
+    SAMPLE_DAY = sample_day,
+    lon = lon,
+    lat = lat,
+    depth = depth
+    )
+  if ("TEMP" %in% avail_vars) {
+    temp <- ncdf4::ncvar_get(dat, "TEMP") * 1.00024
+    temp_quality_control <- ncdf4::ncvar_get(dat, "TEMP_quality_control")
+    df <- df %>% mutate(
+                   temp = temp,
+                   temp_quality_control = temp_quality_control,
+                   temp = ifelse(temp_quality_control == 1, temp, NA)) %>%
+      dplyr::rename("temperature" = temp)
+  }
+  if ("PSAL" %in% avail_vars) {
+    psal <- ncdf4::ncvar_get(dat, "PSAL")
+    psal_quality_control <- ncdf4::ncvar_get(dat, "PSAL_quality_control")
+    df <- df %>% mutate(
+                   psal = psal,
+                   psal_quality_control = psal_quality_control,
+                   psal = ifelse(psal_quality_control == 1, psal, NA)
+                 )  %>%
+      ## dplyr::rename("condOS/m: Conductivity [S/m]" = psal)
+      dplyr::rename("salinity" = psal)
+  }
+  if ("CNDC" %in% avail_vars) {
+    cndc <- ncdf4::ncvar_get(dat, "CNDC")
+    cndc_quality_control <- ncdf4::ncvar_get(dat, "CNDC_quality_control")
+    df <- df %>% mutate(
+                   cndc = cndc,
+                   cndc_quality_control = cndc_quality_control,
+                   cndc = ifelse(cndc_quality_control == 1, cndc, NA)
+                 )  %>%
+      dplyr::rename("conductivity" = cndc)
+  }
+  if ("PRES_REL" %in% avail_vars) {
+    pres <- ncdf4::ncvar_get(dat, "PRES_REL")
+    pres_quality_control <- ncdf4::ncvar_get(dat, "PRES_REL_quality_control")
+    df <- df %>% mutate(
+                   pres = pres,
+                   pres_quality_control = pres_quality_control,
+                   pres = ifelse(pres_quality_control == 1, pres, NA)
+                   )  %>%
+      dplyr::rename("pres_rel" = pres)
+  }
+  
+  ## daily aggregate
+  df <- df %>%
+    ## remove any missing values - this may address issues caused by nc files that
+    ## have dates that appear in other nc files, yet have non-one qaqc values thereby
+    ## resulting in NA values
+    filter(across(any_of(c("pres_rel", "conductivity", "salinity", "temperature")),
+                  function(x) !is.na(x))) %>% 
+    dplyr::select(-NRM_REGION, -lon, -lat, -depth, -DEPLOY_DATE, -ends_with("quality_control")) %>% 
+    group_by(STATION_NAME, SAMPLE_DAY) %>%
+    summarise(
+      ## across(any_of(c("temp", "psal", "cndc", "pres")), ~mean(.x, na.rm = TRUE)
+      across(-any_of(c("STATION_NAME", "SAMPLE_DAY")), ~mean(.x, na.rm = TRUE))) %>% 
+    pivot_longer(cols = c(-"STATION_NAME", -"SAMPLE_DAY"), names_to = "PARAMETER",
+                 values_to = "AVG_VALUE_QAQC") %>% 
+    suppressWarnings() %>%
+    suppressMessages()
+  df
+}
+
+#########################################################################
+## The following function converts fractional days (relative to        ##
+## 1950-01-01 10:00) as provided in the netcdf files into an actual    ##
+## datetime vector.                                                    ##
+## Parameters:                                                         ##
+##    time:    a fractional number of days since 1950-01-01 10:00      ##
+## Return:                                                             ##
+##    POSIXct: a date time representation of the sample date           ##
+#########################################################################
+MMP_convert_fractional_days_to_datetime <- function(time) {
+  origin <- as.POSIXct("1950-01-01 10:00")
+  int_days <- as.integer(time)
+  fractional_days <- time - int_days 
+  dt <- origin + lubridate::ddays(int_days)
+  hours <- as.integer(fractional_days * 24)
+  minutes <- as.integer((fractional_days * 24 - hours) * 60)
+  seconds <- as.integer((((fractional_days * 24 - hours) * 60 - minutes) * 60)) 
+  dt + dhours(hours) + dminutes(minutes) + dseconds(seconds)
 }

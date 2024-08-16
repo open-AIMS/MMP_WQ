@@ -1,4 +1,3 @@
-
 #########################################################################
 ## The following function expresses takes the date and returns the     ##
 ## water year.  Unlike a calendar year (which spans from Jan 01 to Dec ##

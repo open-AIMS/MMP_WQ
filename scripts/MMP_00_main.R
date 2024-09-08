@@ -38,9 +38,10 @@ if (5 %in% runStage) {
 
 if (6 %in% runStage) {
     source("MMP_60_compilation_plots.R")
-    source("MMP_61_compilation_plots_gams.R")
-    source("MMP_62_compilation_plots_gam_pages.R")
-    source("MMP_63_compilation_plots_zips.R")
+    ## Dont need the following, they are called from MMP_60_compilation_plots.R
+    ## source("MMP_61_compilation_plots_gams.R")
+    ## source("MMP_62_compilation_plots_gam_pages.R")
+    ## source("MMP_63_compilation_plots_zips.R")
 }
 
 if (7 %in% runStage) {

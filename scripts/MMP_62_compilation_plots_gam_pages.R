@@ -282,7 +282,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 1 (separate worms).', return=TRUE)
     ## ----end
 
     ## 5. 2020 Renee would like the historical and recent worms presented in two separate figures
@@ -322,7 +322,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 2020 Part1 (separate worms).', return=TRUE)
     ## ----end
 
 
@@ -415,7 +415,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6.', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (AIMS & JCU).', return=TRUE)
     ## ----end
 
     ## 6b. GAM table 
@@ -516,7 +516,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               )          
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms, 2020).', return=TRUE)
     ## ----end
 
     ## 8. 2019 Renee would prefer two separate pages of plots 
@@ -583,7 +583,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 2 (separate worms).', return=TRUE)
     ## ----end
 
     ## 9. 2020 Renee would like the historical and recent worms presented in two separate figuresi
@@ -623,7 +623,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part1 (separate worms, 2020).', return=TRUE)
     ## ----end
     
     ## 10. Hist vs Alt6 (AIMS and JCU OMO GAMS)
@@ -715,7 +715,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6.', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (AIMS & JCU, OMO)', return=TRUE)
     ## ----end
 
     ## 10b. GAM table 
@@ -824,7 +824,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms, AIMS & JCU, OMO 2020).', return=TRUE)
     ## ----end
     
     ## 12. 2019 Renee would prefer two separate pages of plots 
@@ -892,7 +892,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 2 (separate worms, AIMS & JCU, OMO).', return=TRUE)
     ## ----end
 
     ## 13. 2020 Renee would like the historical and recent worms presented in two separate figuresi
@@ -927,13 +927,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_summary_2020_part1",
                                           label_suffix="_Hist_Alt6_9",
-                                          Cnt, tabset_parent = "TABSET_13",
+                                          Cnt, tabset_parent = "TABSET_14",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 1 (separate worms, AIMS & JCU, OMO 2020).', return=TRUE)
     ## ----end
 
     ## 14. 2023 Renee would like the historical and recent worms presented in a single top and bottom
@@ -977,13 +977,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                       .f = ~ .x/.y))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_13 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 1)\n"),
+                               SUBSECTION_15 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 1)\n"),
                                                         parent = 'TABSET'),
-                               TABSET_13 = structure(paste0("\n:::: panel-tabset\n"),
-                                                    parent = 'SUBSECTION_13'),
-                               TABSET_13_END = structure(paste0("\n:::: \n"),
-                                                        parent = 'SUBSECTION_13')
+                               TABSET_15 = structure(paste0("\n:::: panel-tabset\n"),
+                                                    parent = 'SUBSECTION_15'),
+                               TABSET_15_END = structure(paste0("\n:::: \n"),
+                                                        parent = 'SUBSECTION_15')
                                )
+
         pwalk(list(Subregion = gam.aims.jcu.omo.tbl$Subregion,
                    IndexPlots.AIMS.JCU.OMO.2023.part1 = gam.aims.jcu.omo.tbl$Index_plots,
                    Cnt = 1:length(gam.aims.jcu.omo.tbl$Subregion)),
@@ -996,13 +997,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part1",
                                           label_suffix="_Hist_Alt6_6_1",
-                                          Cnt, tabset_parent = "TABSET_13",
+                                          Cnt, tabset_parent = "TABSET_15",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offset only) and hierarchical formulation (diamond symbols).\n")) 
               }
               )          
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms, AIMS & JCU, OMO 2023).', return=TRUE)
     ## ----end
         
     ## 15. 2023 Renee would like the historical and recent worms presented in a single top and bottom
@@ -1017,12 +1018,12 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                       .f = ~ MMP__gam_plot2023(..1, ..2, ..3, wq.aims.jcu.omo.gams)))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_14 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 2)\n"),
+                               SUBSECTION_16 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 2)\n"),
                                                         parent = 'TABSET'),
-                               TABSET_14 = structure(paste0("\n:::: panel-tabset\n"),
-                                                    parent = 'SUBSECTION_14'),
-                               TABSET_14_END = structure(paste0("\n:::: \n"),
-                                                        parent = 'SUBSECTION_14')
+                               TABSET_16 = structure(paste0("\n:::: panel-tabset\n"),
+                                                    parent = 'SUBSECTION_16'),
+                               TABSET_16_END = structure(paste0("\n:::: \n"),
+                                                        parent = 'SUBSECTION_16')
                                )
         pwalk(list(Subregion = gam.aims.jcu.omo.tbl$Subregion,
                    IndexPlots.AIMS.JCU.OMO.2023.part2 = gam.aims.jcu.omo.tbl$GAM_plots_2023,
@@ -1036,7 +1037,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part2",
                                           label_suffix="_Hist_Alt6_6_2",
-                                          Cnt, tabset_parent = "TABSET_14",
+                                          Cnt, tabset_parent = "TABSET_16",
                                           fig.caption = paste0("\nTemporal trends in a-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
@@ -1044,7 +1045,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
     ## ----end
-    ## save(gam.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.tbl.RData"))
+    save(gam.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.tbl.RData"))
     ## save(gam.aims.jcu.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.aims.jcu.tbl.RData"))
     ## save(gam.aims.jcu.omo.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.aims.jcu.omo.tbl.RData"))
 

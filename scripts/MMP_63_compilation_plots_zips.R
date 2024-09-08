@@ -172,7 +172,7 @@ MMP_tryCatch(
     system(paste0("zip -FSrj -o '", OUTPUT_PATH, "/figures/Plots4Renee.zip' ",files))
 
 },
-LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations:', msg='zips for Angus', return=TRUE)
+LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations:', msg='zips for Renee', return=TRUE)
 ## ----end
 
 

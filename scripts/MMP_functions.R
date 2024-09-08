@@ -35,7 +35,7 @@ MMP_startMatter <- function(args = commandArgs()) {
         MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH'))      
         ## clear DOCS_PATH files
         unlink(paste0(DOCS_PATH, paste0("/MMP_processData_report", c(".qmd", ".html"))))
-        MMP_prepare_paths()    ## prepare file structure
+        MMP_prepare_paths()    ## prepare file strjucture
     }
     MMP_openning_banner()
 }
@@ -72,7 +72,7 @@ MMP_initialise_status <- function() {
                       names = c("AIMS niskin data","Cairns transect data","JCU niskin data","JCY CY niskin data",
                                 "JCU Event niskin data","JCU CY Event niskin data",
                                 "AIMS FLNTU loggers",
-                                "Water temperature loggers","Salinity loggers",
+                                "Water temperaturej loggers","Salinity loggers",
                                 "Degree heating weeks","Disturbance table", "Harmonic tides","BOM weather", "River discharge",
                                 "Data report"),
                       status = c("pending","pending","pending","pending","pending",
@@ -128,7 +128,11 @@ MMP_initialise_status <- function() {
         STAGE8 = list(title = "Stage 8 - excel exports",
                       items = c("excel", "embed"),
                       names = c("excel exports", "embed in quarto"),
-                      status = c("pending", "pending"))
+                      status = c("pending", "pending")),
+        STAGE9 = list(title = "Stage 9 - word exports",
+                      items = c("word"),
+                      names = c("word exports"),
+                      status = c("pending"))
         
     )
     assign("STATUS", STATUS, env = globalenv())
@@ -151,15 +155,18 @@ MMP_initialise_status <- function() {
 MMP_parseCLA <- function(args) {
     runStage <<- 1   ## this is a temp incase it is not specified on the command line - it is required for the openning banner
     CURRENT_STAGE <<- 1
+
     # Check all neccessary CLAs are present and no extra CLAs entered
     if(length(args) < 7) {
-        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        MMP_log(status = "FAILURE", logFilej = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
         stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers> --alwaysExtract=<TRUE>'),
              call. = FALSE)
     }
     ## args <- commandArgs()
+
+    ## report_year ==========================================================
     # Check report year is present, is numeric integer, has exactly four digits, ?<= current year + 1?
     report_year <- grep('--reportYear=.*', args) # index of reportYear in args
     if(length(report_year) == 0) {  # if index wasn't returned, reportYear is missing
@@ -179,6 +186,7 @@ MMP_parseCLA <- function(args) {
     assign("reportYear", reportYear, env = globalenv()) # assign to global variable
     mmp__add_status(stage = "SETTINGS", item = "reportYear", name = "Report year", status = "success") # update status
 
+    ## runStage ============================================================
     # Check if run stage is present, is numeric vector, ?all elements unique and in [1, maxStage]?
     runStage <- grep('--runStage=.*', args)   # return index of runStage in args
     if(length(runStage) == 0) { # if index wasn't returned, runStage is missing
@@ -209,6 +217,7 @@ MMP_parseCLA <- function(args) {
     mmp__add_status(stage = "SETTINGS", item = "runStage", name = "Run stages", status = "success") # update status
     mmp__add_status(stage = "SETTINGS", item = "CURRENT_STAGE", name = "Current stage", status = "success")
 
+    ## alwaysExtract =======================================================
     alwaysExtract <- grep('--alwaysExtract.*', args) # see if always extract was specified
     if (length(alwaysExtract) == 0) {# ... if not, default to TRUE
         alwaysExtract <- TRUE
@@ -1087,7 +1096,94 @@ MMP__gam_table_quarto <- function(CURRENT_STAGE, Subregion,label_suffix,
 ## Return:                                                             ##
 ##    tibble: a tibble representing the data.                          ##
 #########################################################################
-MMP_read_flntu_nc <- function(nc_file) {
+mmp__read_flntu_nc <- function(nc_file) {
+  lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
+  names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
+
+  dat <- ncdf4::nc_open(nc_file)
+  ## print(dat) 
+  ## names(dat$dim)
+
+  ## get the site_code
+  site_code <- ncdf4::ncatt_get(dat, 0, "site_code")$value
+  region <- lookup %>% filter(SHORT_NAME == site_code) %>% pull(Region)
+  ## extract the time dimension
+  time <- ncdf4::ncvar_get(dat, "TIME")
+  ## determine the units of time
+  tunits <- ncdf4::ncatt_get(dat, "TIME", "units")
+  ## convert Gregorian time into Date 
+  datetime <- MMP_convert_fractional_days_to_datetime(time)
+  sample_day <- as.Date(format(datetime, "%Y-%m-%d"))
+
+  ## get the names of the variables
+  avail_vars <- names(dat$var)
+  
+  ## get longitude
+  lon <- ncdf4::ncvar_get(dat, "LONGITUDE")
+  lat <- ncdf4::ncvar_get(dat, "LATITUDE")
+  depth <- ncdf4::ncvar_get(dat, "NOMINAL_DEPTH")
+
+  ## construct a tibble with the above variables
+  df <- tibble(
+    STATION_ID = site_code,
+    NRM_REGION = region,
+    DEPLOY_DATE = format(datetime, "%d-%b-%Y %H:%M:%S"),
+    SAMPLE_DAY = sample_day,
+    lon = lon,
+    lat = lat,
+    depth = depth,
+    )
+  ## Handle each of the different measurements.
+  ## Should probably just write a single function that takes a name
+  ## but the following is easier (although more verbose)
+
+  df_1 <- NULL
+  if ("CPHL" %in% avail_vars) {
+    chla <- ncdf4::ncvar_get(dat, "CPHL")
+    chla_quality_control <- ncdf4::ncvar_get(dat, "CPHL_quality_control")
+    df_tmp <- df %>%
+      mutate(
+        chla = chla,
+        chla_quality_control = chla_quality_control) %>% 
+      filter(chla_quality_control == 1) %>% 
+      pivot_longer(cols = c(chla, chla_quality_control),
+                   names_to = "PARAMETER", values_to = "Values")
+    df_1 <- df_1 %>% rbind(df_tmp)
+  }
+  if ("TURB" %in% avail_vars) {
+    turb <- ncdf4::ncvar_get(dat, "TURB")
+    turb_quality_control <- ncdf4::ncvar_get(dat, "TURB_quality_control")
+    df_tmp <- df %>%
+      mutate(
+        turb = turb,
+        turb_quality_control = turb_quality_control) %>% 
+      filter(turb_quality_control == 1) %>% 
+      pivot_longer(cols = c(turb, turb_quality_control),
+                   names_to = "PARAMETER", values_to = "Values")
+    df_1 <- df_1 %>% rbind(df_tmp)
+  }
+  df_1 |>
+    mutate(SHORT_NAME = STATION_ID) %>%
+    left_join(names_lookup %>%
+              dplyr::select(SHORT_NAME, MMP_SITE_NAME), by = "SHORT_NAME") |>
+    pivot_wider(names_from = "PARAMETER", values_from = "Values")
+}
+
+MMP_read_flntu_nc <- function(flntu_files) {
+  df <- do.call('rbind', lapply(flntu_files, mmp__read_flntu_nc))
+
+  df <- df %>%
+    dplyr::filter(!is.na(chla)) %>% 
+    group_by(STATION_ID, SHORT_NAME, MMP_SITE_NAME, SAMPLE_DAY) %>%
+    summarise(
+      CHL_QA_AVG = mean(chla),
+      NTU_QA_AVG = mean(turb)) %>% 
+    suppressWarnings() %>%
+    suppressMessages()
+  df
+}
+
+MMP_read_flntu_nc_old <- function(nc_file) {
   lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
   names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
 
@@ -1155,7 +1251,116 @@ MMP_read_flntu_nc <- function(nc_file) {
 ## Return:                                                             ##
 ##    tibble: a tibble representing the data.                          ##
 #########################################################################
-MMP_read_salinity_nc <- function(nc_file) {
+mmp__read_salinity_nc <- function(nc_file) {
+  lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
+  names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
+
+  ## print(nc_file)
+  dat <- ncdf4::nc_open(nc_file)
+  ## print(dat) 
+  ## names(dat$dim)
+
+  ## get the site_code
+  site_code <- ncdf4::ncatt_get(dat, 0, "site_code")$value
+  region <- lookup %>% filter(SHORT_NAME == site_code) %>% pull(Region)
+  ## extract the time dimension
+  time <- ncdf4::ncvar_get(dat, "TIME")
+  ## determine the units of time
+  tunits <- ncdf4::ncatt_get(dat, "TIME", "units")
+  ## convert Gregorian time into Date 
+  datetime <- MMP_convert_fractional_days_to_datetime(time)
+  sample_day <- as.Date(format(datetime, "%Y-%m-%d"))
+
+  ## get the names of the variables
+  avail_vars <- names(dat$var)
+  
+  ## get longitude
+  lon <- ncdf4::ncvar_get(dat, "LONGITUDE")
+  lat <- ncdf4::ncvar_get(dat, "LATITUDE")
+  depth <- ncdf4::ncvar_get(dat, "NOMINAL_DEPTH")
+  ## construct a tibble with the above variables
+  df <- tibble(STATION_NAME = paste0(site_code,"_REC_", format(datetime, "%Y%m%d")),
+    NRM_REGION = region,
+    DEPLOY_DATE = format(datetime, "%d-%b-%Y %H:%M:%S"),
+    SAMPLE_DAY = sample_day,
+    lon = lon,
+    lat = lat,
+    depth = depth
+    )
+  ## Handle each of the different measurements.
+  ## Should probably just write a single function that takes a name
+  ## but the following is easier (although more verbose)
+  df_1 <- NULL
+  if ("TEMP" %in% avail_vars) {
+    temp <- ncdf4::ncvar_get(dat, "TEMP") * 1.00024
+    temp_quality_control <- ncdf4::ncvar_get(dat, "TEMP_quality_control")
+    df_tmp <- df %>%
+      mutate(
+        temp = temp,
+        temp_quality_control = temp_quality_control) %>% 
+      dplyr::rename("temperature" = temp) %>%
+      filter(temp_quality_control == 1) %>% 
+      pivot_longer(cols = c(temperature, temp_quality_control),
+                   names_to = "PARAMETER", values_to = "Values")
+    df_1 <- df_1 %>% rbind(df_tmp)
+  }
+  if ("PSAL" %in% avail_vars) {
+    psal <- ncdf4::ncvar_get(dat, "PSAL")
+    psal_quality_control <- ncdf4::ncvar_get(dat, "PSAL_quality_control")
+    df_tmp <- df %>%
+      mutate(
+        psal = psal,
+        psal_quality_control = psal_quality_control) %>% 
+      dplyr::rename("salinity" = psal) %>%
+      filter(psal_quality_control == 1) %>% 
+      pivot_longer(cols = c(salinity, psal_quality_control),
+                   names_to = "PARAMETER", values_to = "Values")
+    df_1 <- df_1 %>% rbind(df_tmp)
+  }
+  if ("CNDC" %in% avail_vars) {
+    cndc <- ncdf4::ncvar_get(dat, "CNDC")
+    cndc_quality_control <- ncdf4::ncvar_get(dat, "CNDC_quality_control")
+    df_tmp <- df %>%
+      mutate(
+        cndc = cndc,
+        cndc_quality_control = cndc_quality_control) %>% 
+      dplyr::rename("conductivity" = cndc) %>%
+      filter(cndc_quality_control == 1) %>% 
+      pivot_longer(cols = c(conductivity, cndc_quality_control),
+                   names_to = "PARAMETER", values_to = "Values")
+    df_1 <- df_1 %>% rbind(df_tmp)
+  }
+  if ("PRES_REL" %in% avail_vars) {
+    pres <- ncdf4::ncvar_get(dat, "PRES_REL")
+    pres_quality_control <- ncdf4::ncvar_get(dat, "PRES_REL_quality_control")
+    df_tmp <- df %>%
+      mutate(
+        pres = pres,
+        pres_quality_control = pres_quality_control) %>% 
+      dplyr::rename("pres_rel" = pres) %>%
+      filter(pres_quality_control == 1) %>% 
+      pivot_longer(cols = c(pres_rel, pres_quality_control),
+                   names_to = "PARAMETER", values_to = "Values")
+    df_1 <- df_1 %>% rbind(df_tmp)
+  }
+  df_1
+}
+
+MMP_read_salinity_nc <- function(salinity_files) {
+  df <- do.call('rbind', lapply(salinity_files, mmp__read_salinity_nc))
+
+  df <- df %>%
+    dplyr::filter(!str_detect(PARAMETER, "quality_control")) %>% 
+    group_by(STATION_NAME, SAMPLE_DAY, PARAMETER) %>%
+    summarise(
+      AVG_VALUE_QAQC = mean(Values)) %>% 
+    suppressWarnings() %>%
+    suppressMessages()
+  df
+}
+
+
+MMP_read_salinity_nc_old <- function(nc_file) {
   lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
   names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
 

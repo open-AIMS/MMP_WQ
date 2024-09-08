@@ -106,7 +106,8 @@ flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
             suppressMessages()
 flntu_path <- "/home/logger_data/FLNTU_QAQCd/NetCDF"
 flntu_files <- list.files(path = flntu_path, pattern = ".*nc", full.names = TRUE)
-flntu_2 <- do.call("rbind", lapply(flntu_files, MMP_read_flntu_nc))
+## flntu_2 <- do.call("rbind", lapply(flntu_files, MMP_read_flntu_nc))
+flntu_2 <- MMP_read_flntu_nc(flntu_files)
 flntu <- bind_rows(flntu, flntu_2)
 
 data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
@@ -119,20 +120,21 @@ waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
 salinity_path <- "/home/logger_data/SBE37_QAQCd/NetCDF"
 salinity_files <- list.files(path = salinity_path, pattern = ".*nc", full.names = TRUE)
 salinity_files <- str_subset(salinity_files, "CSTZ")
-salinity_2 <- do.call("rbind", lapply(salinity_files, MMP_read_salinity_nc))
+salinity_2 <- MMP_read_salinity_nc(salinity_files)
+## salinity_2 <- do.call("rbind", lapply(salinity_files, MMP_read_salinity_nc))
 waterSalinity <- bind_rows(waterSalinity, salinity_2)
-# **The following is only needed because there are some new entries in the database that
-# should not be there and this is the easiest place to filter them out at this stage**
-waterSalinity <- waterSalinity %>%
-  filter(str_detect(STATION_NAME, "test_file", negate = TRUE))
-# exclude duplicate STATION_NAME/SAMPLE_DAY/PARAMETER values
-waterSalinity <-
-  waterSalinity %>%
-  group_by(STATION_NAME, SAMPLE_DAY, PARAMETER) %>%
-  mutate(n = 1:n()) %>%
-  filter(n == 1) %>%
-  dplyr::select(-n) %>%
-  ungroup()
+## # **The following is only needed because there are some new entries in the database that
+## # should not be there and this is the easiest place to filter them out at this stage**
+## waterSalinity <- waterSalinity %>%
+##   filter(str_detect(STATION_NAME, "test_file", negate = TRUE))
+## # exclude duplicate STATION_NAME/SAMPLE_DAY/PARAMETER values
+## waterSalinity <-
+##   waterSalinity %>%
+##   group_by(STATION_NAME, SAMPLE_DAY, PARAMETER) %>%
+##   mutate(n = 1:n()) %>%
+##   filter(n == 1) %>%
+##   dplyr::select(-n) %>%
+##   ungroup()
 
 data_file <- paste0(LOGGER_PATH, "waterSalinity", ".csv") # save data here
 write_csv(waterSalinity, data_file)

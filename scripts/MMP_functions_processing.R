@@ -640,6 +640,7 @@ MMP_bomStations <- function(bom) {
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14198", "Jabiru Airport",bom$LOCATION)       #Darwin
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14274", "McCluer Island",bom$LOCATION)       #Darwin
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14508", "Gove Airport",bom$LOCATION)         #NT
+    bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14412", "Gove Airport",bom$LOCATION)         #NT
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14518", "Groote Eylandt Airport",bom$LOCATION)#NT
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="14948", "Port Keats Airport",bom$LOCATION)   #NT
     bom$LOCATION <- ifelse(bom$STATION_NUMBER=="27058", "Horn Island",bom$LOCATION)          #QLD

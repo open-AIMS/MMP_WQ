@@ -476,6 +476,8 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.old.idx.RData")
     {
         save(wq.old.idx,
              file = paste0(INDICES_OUTPUT_PATH, 'wq.old.idx.RData'))
+        save(wq.old.qaqc1,
+             file = paste0(INDICES_OUTPUT_PATH, 'wq.old.qaqc1.RData'))
         save(wq.old.idx.region,
              file = paste0(INDICES_OUTPUT_PATH, 'wq.old.idx.region.RData'))
         save(wq.old.idx.region,

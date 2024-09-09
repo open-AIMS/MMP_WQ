@@ -25,7 +25,7 @@ MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                        TABSET_END = paste0("::: \n\n")
                        )
 
-if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
+if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.all.reef.RData')) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'niskin.jcu.event.reef.av1.RData')) & 
     file.exists(paste0(PARAMS_INPUT_PATH, 'wq.sites.RData')) 

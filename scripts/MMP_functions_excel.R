@@ -222,6 +222,7 @@ MMP_prepare_table_niskin_summaries <- function() {
 
 MMP_prepare_table_indicators <- function() {
     load(file = paste0(DATA_PATH, '/indices/wq.old.idx.RData'))
+    load(file = paste0(DATA_PATH, '/indices/wq.old.qaqc1.RData'))
     wq.old.idx_calc <- wq.old.idx %>%
         mutate(Total = rowSums(cbind(DRIFTCHL_UGPERL.wm, CombinedTurb, PN.wm, PP.wm, NOx.wm))) %>%
         dplyr::rename(DRIFTCHL_UGPERL.idx = DRIFTCHL_UGPERL.wm,

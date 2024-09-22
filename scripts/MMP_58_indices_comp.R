@@ -375,8 +375,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (for Angus).', return=TRUE)
     ## ----end
 
-    ## 3. No Fitzroy 
-    ## ---- No Fitzroy
+    ## 3. Regional Index 
+    ## ---- Regional Index
     MMP_tryCatch(
     {
         load(file=paste0(DATA_PATH, '/indices/wq.historic.idx.RData'))
@@ -397,14 +397,17 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
             geom_point(aes(fill = Grade,shape = '0'),
                        size = 2,
                        show.legend = FALSE) +
-            geom_line(data = wq.alt6.idx.region %>%
-                          filter(Region != 'Cape York')) +
-            geom_point(data = wq.alt6.idx.region %>%
-                           filter(Region != 'Cape York'),
+            geom_line(data = wq.alt6.idx.region##  %>%
+                          ## filter(Region != 'Cape York')
+                      ) +
+            geom_point(data = wq.alt6.idx.region##  %>%
+                           ## filter(Region != 'Cape York')
+                      ,
                        aes(fill = Grade, shape = '6'), size = 1.5,
                        show.legend = FALSE) +
-            geom_linerange(data = wq.alt6.idx.region %>%
-                               filter(Region != 'Cape York'),
+            geom_linerange(data = wq.alt6.idx.region##  %>%
+                               ## filter(Region != 'Cape York')
+                          ,
                            aes(ymin = Lower, ymax = Upper, fill = Grade,
                                shape = '6'),
                            show.legend = FALSE) + 
@@ -498,11 +501,11 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
         ##                                                parent = 'SUBSECTION_9_idx3')
         ##                        )
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (No Fitzroy).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index).', return=TRUE)
     ## ----end
     
-    ## 3. No Cape York or Fitzroy
-    ## ---- No Cape York or Fitzroy
+    ## 3. No Cape York
+    ## ---- No Cape York
     MMP_tryCatch(
     {
         load(file=paste0(DATA_PATH, '/indices/wq.historic.idx.RData'))
@@ -629,8 +632,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (No Cape York or Fitzroy).', return=TRUE)
     ## ----end
     
-    ## 4. No Cape York 
-    ## ---- No Cape York
+    ## 4. No Fitzroy 
+    ## ---- No Fitzroy
     ## 2021 - Barbara would like a version that does not have Fitzroy but does have Cape York
     MMP_tryCatch(
     {

@@ -128,7 +128,29 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Word:', msg='Create the docx tables', return=TRUE)
     ## ----end
 
+    ## ---- quarto - word 
+    MMP_tryCatch(
+    {
+        h <- paste0("data:", mime::guess_type(DOCX_OUTPUT_FILE), ";base64,",
+                    base64_encode(DOCX_OUTPUT_FILE))
+        MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
+                               SUBSECTION_1 = structure(paste0("## Word\n"),
+                                                        parent = 'TABSET'),
+                            TEXT_1 = structure(paste0("\n<p>An word document containing the following tables. \n
+<ul>\n
+<li>FLNTU</li>\n
+</ul>\n
+</p>\n"), 
+                                                  parent = 'SUBSECTION_1'),
+                               HTML_1 = structure(paste0("\n\n<a href = '",h,"' class = 'btn'>Download word document</a>\n\n"), 
+                                                  parent = 'SUBSECTION_1')
+                               )
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Word:', msg='embed in quarto', return=TRUE)
+    ## ----end
 
+    source("MMP_35_processedData_report.R")
     
     MMP_checkData(name = "mmp.docx",
                   stage = paste0("STAGE", CURRENT_STAGE),

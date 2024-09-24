@@ -127,6 +127,12 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
             mutate(
                 wb = map(.x = Data,
                          .f = ~ .x %>%
+                           ## There are some sites (such as TUL10) that are classified
+                           ## as "Lower estuarine waters". Since these are not one of the
+                           ## four listed above, for now, Dan suggested lumping them
+                           ## in with Enclosed Coastal waters
+                           mutate(GBRMPA_water_area = ifelse(GBRMPA_water_area == "Lower estuarine waters",
+                                            "Enclosed Coastal waters", GBRMPA_water_area)) %>% 
                              filter(GBRMPA_water_area %in% c('Enclosed Coastal waters',
                                                              'Open Coastal waters',
                                                              'Midshelf waters',

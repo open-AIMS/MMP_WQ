@@ -72,8 +72,9 @@ MMP__docx_table <- function(dat, docx.tab.count) {
                               rep(0.45,6), rep(0.45,6), rep(0.45,6))) %>%
         bg(j=c(4,6,10,12,16,18), bg=c1) %>% 
         fix_border_issues() %>%
-        set_caption(paste("Table ",docx.tab.count,". Summary statistics for all data from direct water sampling at 20 Great Barrier Reef inshore lagoon sites from ", paste(what.cols, collapse = ", "), ".
-N= number of sampling occasions. Data are in mg L⁻¹ for suspended solids (SS) and m for Secchi depth. All other parameters are in µgL⁻¹ (see main report for abbreviations). Long-term averages that exceed available water quality guidelines (DERM 2009, GBRMPA 2009) are shaded in red."))
+      set_caption(paste("Table ",docx.tab.count,". Summary of turbidity measurements from moored loggers (site locations in Section 5 and Figure D - 1 for the past three water years. N = number of daily means in the time-series; SE = standard error; ‘% d> Trigger’ refers to the percentage of days each year with mean or median values above the site-specific water quality guideline values (Table C - 9). Red shading indicates the annual means or medians that exceeded guideline values. ‘% d> 5 NTU’ refers to the percentage of days above 5 NTU, a threshold suggested by Cooper et al. (2007, 2008) above which hard corals are likely to experience photo-physiological stress."))
+##         set_caption(paste("Table ",docx.tab.count,". Summary statistics for all data from direct water sampling at 20 Great Barrier Reef inshore lagoon sites from ", paste(what.cols, collapse = ", "), ".
+## N= number of sampling occasions. Data are in mg L⁻¹ for suspended solids (SS) and m for Secchi depth. All other parameters are in µgL⁻¹ (see main report for abbreviations). Long-term averages that exceed available water quality guidelines (DERM 2009, GBRMPA 2009) are shaded in red."))
 
     tab
     

@@ -258,7 +258,7 @@ MMP_parseCLA <- function(args) {
 MMP_loadPackages <- function(log = TRUE) {           
     missing <- ''
     options(tidyverse.quiet = TRUE)
-    pkgs <- c('tidyverse','testthat','cli','rlang','crayon',
+    pkgs <- c('tidyverse', 'mgcv', 'testthat','cli','rlang','crayon',
               'assertthat', 'lubridate', 'rmarkdown','bookdown', 'ggh4x',
               'furrr','reportcards', 'emmeans', 'openxlsx', 'xfun', 'ncdf4',
               'kableExtra'

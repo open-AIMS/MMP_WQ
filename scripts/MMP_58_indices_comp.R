@@ -387,6 +387,10 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
         load(file=paste0(DATA_PATH, '/final/wq.alt5.idx.region.RData'))
         load(file=paste0(DATA_PATH, '/final/wq.alt6.idx.region.RData'))
 
+        wq.alt6.idx.region_restrictedCY <- wq.alt6.idx.region %>%
+            filter(!(Region == 'Cape York' & reportCardYear < as.Date("2021-01-01"))) %>%
+            droplevels()
+
         wq.comb.region.g1 <- ggplot(wq.historic.idx.region %>%
                                     filter(Year>2007) %>%
                                     mutate(Region = factor(Region,
@@ -397,15 +401,15 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
             geom_point(aes(fill = Grade,shape = '0'),
                        size = 2,
                        show.legend = FALSE) +
-            geom_line(data = wq.alt6.idx.region##  %>%
+            geom_line(data = wq.alt6.idx.region_restrictedCY##  %>%
                           ## filter(Region != 'Cape York')
                       ) +
-            geom_point(data = wq.alt6.idx.region##  %>%
+            geom_point(data = wq.alt6.idx.region_restrictedCY##  %>%
                            ## filter(Region != 'Cape York')
                       ,
                        aes(fill = Grade, shape = '6'), size = 1.5,
                        show.legend = FALSE) +
-            geom_linerange(data = wq.alt6.idx.region##  %>%
+            geom_linerange(data = wq.alt6.idx.region_restrictedCY##  %>%
                                ## filter(Region != 'Cape York')
                           ,
                            aes(ymin = Lower, ymax = Upper, fill = Grade,

@@ -158,7 +158,7 @@ MMP_parseCLA <- function(args) {
 
     # Check all neccessary CLAs are present and no extra CLAs entered
     if(length(args) < 7) {
-        MMP_log(status = "FAILURE", logFilej = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+        MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
         stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers> --alwaysExtract=<TRUE>'),

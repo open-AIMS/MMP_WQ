@@ -380,6 +380,65 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.6 indices', return=TRUE)
     ## ----end
 
+  ## 15. gam change tables
+  ## ---- gam changes
+    MMP_tryCatch(
+    {
+      GAM_OUTPUT_PATH <- paste0(DATA_PATH, "/models/")
+        load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo.gams.RData'))
+        wq.aims.jcu.omo.gams <- wq.aims.jcu.omo.gams %>%
+            mutate(Subregion = factor(Subregion, levels = c("Pascoe",
+                                                            "Stewart",
+                                                            "Normanby",
+                                                            "Endeavour",
+                                                            "Barron Daintree",
+                                                            "Johnstone Russell Mulgrave",
+                                                            "Tully Herbert",
+                                                            "Burdekin",
+                                                            "Mackay Whitsunday",
+                                                            "Fitzroy"))) %>%
+          dplyr::select(Subregion, Measure, Change) %>%
+          unnest(Change) %>% 
+          left_join(wq.units %>%
+                    dplyr::select(Measure, Name.tab.abbr) %>%
+                    distinct() %>%
+                    mutate(Order = 1:n())) %>%
+          dplyr::select(-Measure) %>%
+          arrange(Subregion, Order) %>%
+          dplyr::select(-Order) %>%
+          dplyr::select(Subregion, Measure = Name.tab.abbr, everything()) %>%
+          filter(!is.na(Measure)) %>%
+          suppressMessages() %>%
+          suppressWarnings()
+      headers <- rbind(c('Sub-region','Measure','Date Range',
+                         colnames(wq.aims.jcu.omo.gams)[4],
+                         colnames(wq.aims.jcu.omo.gams)[5],
+                         'Ratio','Lower','Upper'))
+      nRows <- nrow(headers)
+      nCols <- ncol(headers)
+      sheet <- paste0("GAM (AIMS & JCU OMO)")
+      ## wb <- createWorkbook()
+      addWorksheet(wb, sheet)
+      writeData(wb, sheet, headers, startRow = 1, colNames = FALSE, borderColour = 'black') 
+      writeData(wb, sheet, wq.aims.jcu.omo.gams, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 
+
+      setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
+      addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
+               style = createStyle(border = "TopBottomLeftRight",
+                                   fgFill = "lightblue",
+                                   halign = "center",
+                                   valign = "center",
+                                   borderColour = openxlsx_getOp("borderColour", "black"),
+                                   borderStyle = openxlsx_getOp("borderStyle", "thick")),
+               gridExpand = TRUE)
+      addFilter(wb, sheet, rows = nRows, cols = 1:nCols)
+      freezePane(wb, sheet, firstActiveRow = nRows + 1, firstActiveCol = 1)
+      ## saveWorkbook(wb, "test.xlsx", overwrite = TRUE)
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export GAM change tables', return=TRUE)
+    ## ----end
+
+    saveWorkbook(wb, XLS_OUTPUT_FILE, overwrite = TRUE)
 
     ## 16. excel - FLNTU
     ## ---- excel - FLNTU 

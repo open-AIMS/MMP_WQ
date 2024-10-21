@@ -326,7 +326,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     ## ----end
 
 
-    ## 6. Hist vs Alt6 (AIMS and JCU GAMS)
+  ## 6. Hist vs Alt6 (AIMS and JCU GAMS)
     ## ---- Hist vs Alt6
     MMP_tryCatch(
     {
@@ -966,12 +966,19 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                                                    minDate = minDate,
                                                                    MAXDATE = MAXDATE))
                    ) %>%
-            mutate(Index_alt_Plot2 = map2(.x = alt6.idx.subregion,
-                                        .y = ReneeYear.subregion.subindicator.worm,
-                                        .f = ~MMP__worm_alt_2023(alt.idx = .x,
-                                                            subregion.worm = .y,
-                                                            minDate = minDate, MAXDATE = MAXDATE))
-                   ) %>%
+          mutate(Index_alt_Plot2 =
+                   map2(.x = alt6.idx.subregion,
+                        .y = ReneeYear.subregion.subindicator.worm,
+                        .f = ~MMP__worm_alt_2023(
+                              alt.idx = .x %>%
+                                filter(!(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour") &
+                                      reportCardYear < as.Date("2021-01-01"))) %>%
+                                droplevels(),
+                              subregion.worm = .y %>%
+                                filter(!(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour") &                                      reportCardYear < as.Date("2021-01-01"))) %>%
+                                droplevels(),
+                              minDate = minDate, MAXDATE = MAXDATE))
+                 ) %>%
             mutate(Index_plots = map2(.x = Index_hist_plot2,
                                       .y = Index_alt_Plot2,
                                       .f = ~ .x/.y))

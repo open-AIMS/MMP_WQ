@@ -400,7 +400,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
             geom_line() +
             geom_point(aes(fill = Grade,shape = '0'),
                        size = 2,
-                       show.legend = FALSE) +
+                       show.legend = TRUE) +
             geom_line(data = wq.alt6.idx.region_restrictedCY##  %>%
                           ## filter(Region != 'Cape York')
                       ) +
@@ -408,7 +408,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                            ## filter(Region != 'Cape York')
                       ,
                        aes(fill = Grade, shape = '6'), size = 1.5,
-                       show.legend = FALSE) +
+                       show.legend = TRUE) +
             geom_linerange(data = wq.alt6.idx.region_restrictedCY##  %>%
                                ## filter(Region != 'Cape York')
                           ,
@@ -423,16 +423,28 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                               values = rev(trafficLightPalette),
                               limits = c('A','B','C','D','E'),
                               labels = c('Very Good','Good','Moderate','Poor','Very Poor'),
-                              guide = FALSE) +
-            scale_shape_manual('Option', values = c(21,22,23,24,25)) +
+                              guide = "coloursteps") +
+          scale_shape_manual('', values = c(21,22,23,24,25),
+                             labels = c('Long-term trend', 'Annual condition', '3', '4', '5', 'Annual condition')) +
             theme_mmp +
             theme(strip.background = element_blank(),
-                  panel.margin.x = unit(1,'line'))
+                  panel.margin.x = unit(1,'line'),
+                  axis.title.x = element_blank(),
+                  legend.position = "bottom",
+                  legend.direction = "horizontal") +
+            guides(shape = guide_legend(keyheight = 0.75,
+                                        keywidth=0.5,
+                                        override.aes = list(stroke=0.25)),
+                   fill = guide_legend(override.aes = list(shape=21,
+                                                           linewidth=1,
+                                                           stroke=0.25),
+                                       keywidth=0.5, keyheight=0.75))
+
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region",
                                Plot = wq.comb.region.g1 + facet_grid(~Region,as.table=FALSE),
                                units = "in",
-                               fig.width = 7, fig.height = 2, pt.size = 10)
+                               fig.width = 7, fig.height = 2.25, pt.size = 10)
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index", fig_name_suffix = "wq_worms_comb_region",
@@ -442,7 +454,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1",
                                Plot = wq.comb.region.g1 + facet_wrap(~Region,as.table=TRUE,nrow=1,scales='free_y'),
                                units = "in",
-                               fig.width = 7, fig.height = 2, pt.size = 10)
+                               fig.width = 7, fig.height = 2.25, pt.size = 10)
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt.", fig_name_suffix = "wq_worms_comb_region1",
@@ -1092,6 +1104,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                            'wq_alt6_idx_region_indicator_large.png',
                            'wq_alt6_idx_region_indicator_CI.pdf',
                            'wq_alt6_idx_region_indicator_CI_large.png',
+                           "wq_worms_comb_region.pdf",
+                           "wq_worms_comb_region_large.png",
                            "wq_worms_comb_region_NoFitzroy.pdf",
                            "wq_worms_comb_region_NoFitzroy_large.png"
                        )

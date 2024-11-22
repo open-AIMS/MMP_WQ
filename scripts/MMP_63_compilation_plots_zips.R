@@ -157,7 +157,8 @@ MMP_tryCatch(
                         'wq_alt6_idx_region_indicator_CI.pdf',
                         'wq_alt6_idx_region_indicator_CI_large.png',
                         "wq_worms_comb_region_NoFitzroy.pdf",
-                        "wq_worms_comb_region_NoFitzroy_large.png"
+                        "wq_worms_comb_region_NoFitzroy_large.png",
+                        "wq_worms_comb_region_large.png"
                     )
                     )
                )

@@ -390,7 +390,6 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
         wq.alt6.idx.region_restrictedCY <- wq.alt6.idx.region %>%
             filter(!(Region == 'Cape York' & reportCardYear < as.Date("2021-01-01"))) %>%
             droplevels()
-
         wq.comb.region.g1 <- ggplot(wq.historic.idx.region %>%
                                     filter(Year>2007) %>%
                                     mutate(Region = factor(Region,

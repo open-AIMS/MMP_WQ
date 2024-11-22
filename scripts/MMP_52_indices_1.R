@@ -85,10 +85,10 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.old.idx.RData")
                       group_by(MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
                                GBRMPA_water_area,Region,Reg,Subregion,Subreg,Source,
                                Measure,GL,DirectionOfFailure) %>%
-                      arrange(MMP_SITE_NAME,Source,Measure,oldSamplingYear) %>%
+                      arrange(MMP_SITE_NAME,Source,Measure,reneeYear) %>%
                       filter(!is.na(MMP_SITE_NAME)) %>% 
-                      summarise(Year = unique(oldSamplingYear),
-                                Value = rollAv(Value, oldSamplingYear, location = 'Mean')
+                      summarise(Year = unique(reneeYear),
+                                Value = rollAv(Value, reneeYear, location = 'Mean')
                                 )
                  ) %>%
                  ungroup %>%

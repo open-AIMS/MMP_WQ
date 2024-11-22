@@ -85,10 +85,10 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
                       group_by(MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
                                GBRMPA_water_area,Region,Reg,Subregion,Subreg,Source,
                                Measure,GL,DirectionOfFailure) %>%
-                      arrange(MMP_SITE_NAME,Source,Measure,oldSamplingYear) %>%
+                      arrange(MMP_SITE_NAME,Source,Measure,reneeYear) %>%
                       filter(!is.na(MMP_SITE_NAME)) %>% 
-                      summarise(Year = unique(oldSamplingYear),
-                                Value = rollAv(Value, oldSamplingYear, location = 'Mean')
+                      summarise(Year = unique(reneeYear),
+                                Value = rollAv(Value, reneeYear, location = 'Mean')
                                 )
                  ) %>%
                  ungroup() %>%
@@ -102,6 +102,12 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
             suppressMessages() %>%
             suppressWarnings()
 
+        ## To ensure a gap in Fitzroy
+        wq.historic.idx <- wq.historic.idx |>
+          full_join(data.frame(Region = "Fitzroy", Subregion = "Fitzroy", Year = 2016,
+                                reportCardYear = as.Date("2016-01-01")),
+                     by = c("Region", "Subregion", "Year", "reportCardYear"))
+        
         wq.historic.idx.subregion <- wq.historic.idx %>%
             group_by(Subregion, Subreg, Year,reportCardYear) %>%
             summarize(Index = median(Index,na.rm = TRUE)) %>%
@@ -137,16 +143,16 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     ## ---- save data for excel spreadsheet
     MMP_tryCatch(
     {
-        measure.site.year <- wq.historic.idx
+        measure.site.year <- wq.historic.idx |> filter(!is.na(Index))
         save(measure.site.year,
              file = paste0(DATA_PATH, '/final/measure.site.year.RData'))
-        subindicator.subregion.year <- wq.historic.idx.subregion
+        subindicator.subregion.year <- wq.historic.idx.subregion |> filter(!is.na(Index))
         save(subindicator.subregion.year,
              file = paste0(DATA_PATH, '/final/subindicator.subregion.year.RData'))
-        indicator.subregion.year <- wq.historic.idx.subregion
+        indicator.subregion.year <- wq.historic.idx.subregion |> filter(!is.na(Index))
         save(indicator.subregion.year,
              file = paste0(DATA_PATH, '/final/indicator.subregion.year.RData'))
-        indicator.region.year <- wq.historic.idx.region
+        indicator.region.year <- wq.historic.idx.region |> filter(!is.na(Index))
         save(indicator.region.year,
              file = paste0(DATA_PATH, '/final/indicator.region.year.RData'))
     },

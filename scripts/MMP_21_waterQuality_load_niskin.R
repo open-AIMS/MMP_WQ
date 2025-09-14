@@ -149,7 +149,7 @@ item_properties <- list(
 for (item in niskin_items) {
     # Update status and banner
     mmp__change_status(load_stage, item, status = "progress")
-    MMP_openning_banner
+    MMP_openning_banner()
     # Get current item properties
     item_name <- item_properties[[item]]$name
     item_label <- item_properties[[item]]$label

@@ -50,7 +50,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
                                  paste0(
                                    "\n```\n",
                                    paste0(
-                                   str_replace_all(knitr::read_chunk("MMP_22_waterQuality_load_loggers.R")$`Get data FLNTU 2024`, "#.*", ""), collapse = "\n"),
+                                   str_replace_all(knitr::read_chunk("MMP_22_waterQuality_load_loggers.R")$`Get data FLNTU 2025`, "#.*", ""), collapse = "\n"),
                                    "\n```\n"
                                  ),
                                  parent = 'SUBSECTION_NC')
@@ -503,7 +503,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                                  paste0(
                                    "\n```\n",
                                    paste0(
-                                   str_replace_all(knitr::read_chunk("MMP_22_waterQuality_load_loggers.R")$`Get data Salinity 2024`, "#.*", ""), collapse = "\n"),
+                                   str_replace_all(knitr::read_chunk("MMP_22_waterQuality_load_loggers.R")$`Get data Salinity 2025`, "#.*", ""), collapse = "\n"),
                                    "\n```\n"
                                  ),
                                  parent = 'SUBSECTION_NC')

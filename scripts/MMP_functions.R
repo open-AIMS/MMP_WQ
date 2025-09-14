@@ -14,10 +14,17 @@ MMP_isParent <- function() {
 }
 
 MMP_fakeArgs <- function(stage = 1, always_extract = FALSE, reportYear = NULL) {
-    MMP_startMatter(args = c('','','','','',
-                             paste0('--reportYear=', reportYear),
-                             paste0('--runStage=', paste0(stage)),
-                             paste0('--alwaysExtract=', always_extract)))
+  if (length(stage) > 1) {
+    ## Collapse the vector into a literal range
+    stage_str <- paste0(stage[1], ":", stage[length(stage)])
+  } else {
+    ## Use the single value directly
+    stage_str <- as.character(stage)
+  }
+  MMP_startMatter(args = c('','','','','',
+                           paste0('--reportYear=', reportYear),
+                           paste0('--runStage=', paste0(stage_str)),
+                           paste0('--alwaysExtract=', always_extract)))
 }
 
 #########################################################################
@@ -727,6 +734,67 @@ MMP_checkData <- function(name = "niskin.csv",
         mmp__change_status(stage = stage, item = item, status = "failure")
     }
 }
+
+
+
+## Function to fetch and parse the catalog as HTML
+MMP_fetch_catalog_html <- function(catalog_url) {
+  response <- httr::GET(catalog_url)
+  catalog <- httr::content(response, as = "text")
+  return(xml2::read_html(catalog))  # Parse as HTML
+}
+## Function to extract subfolder URLs from the HTML catalog
+MMP_get_subfolder_urls <- function(catalog_url) {
+  catalog <- MMP_fetch_catalog_html(catalog_url)
+
+                                        # Extract subfolder links (e.g., 2023/, 2024/, 2025/)
+  subfolder_nodes <- xml2::xml_find_all(catalog, "//a[contains(@href, 'catalog.html')]")
+  subfolder_urls <- xml2::xml_attr(subfolder_nodes, "href")
+
+                                        # Construct full URLs
+  full_urls <- paste0(dirname(catalog_url), "/", subfolder_urls)
+  return(full_urls)
+}
+
+## Function to extract .nc file URLs from a folder catalog
+MMP_get_nc_urls <- function(folder_url) {
+  catalog <- MMP_fetch_catalog_html(folder_url)
+
+                                        # Extract .nc file links
+  nc_nodes <- xml2::xml_find_all(catalog, "//a[contains(@href, '.nc')]")
+  nc_files <- xml2::xml_attr(nc_nodes, "href")
+
+                                        # Construct full URLs
+  full_urls <- paste0(dirname(folder_url), "/", nc_files)
+  return(full_urls)
+}
+
+## Function to download .nc files
+MMP_download_nc_files <- function(nc_urls, download_dir = LOGGER_PATH) {
+  ## dir.create(download_dir, showWarnings = FALSE)
+  for (url in nc_urls) {
+    file_name <- basename(url)
+    download_path <- file.path(download_dir, file_name)
+    if (!file.exists(download_path)) {
+      cntnt <- httr::content(httr::GET(url), as = "text")
+      cntnt <- xml2::read_html(cntnt)
+      cntnt_node <- xml2::xml_find_all(cntnt, "//a[contains(@href, 'fileServer')]")
+      cntnt_url <- xml2::xml_attr(cntnt_node, "href")
+      ## full_url <- paste0(dirname(url), "/", cntnt_url)
+      ## Parse the URL
+      parsed_url <- httr::parse_url(url)
+      ## Construct the base URL
+      full_url <- paste0(parsed_url$scheme, "://", parsed_url$hostname, "/", cntnt_url)
+      ## print(full_url)
+      download.file(full_url, download_path, mode = "wb")
+      ##download.file(url, download_path, mode = "w")
+    }
+  }
+  return(list.files(download_dir, full.names = TRUE))
+}
+
+
+
 
 MMP_getTides <- function(ref, loc,path,file, t.start, t.end) {
     if(any(grepl(file,list.files(path)))) system(paste0("rm ",path,file))

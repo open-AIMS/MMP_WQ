@@ -330,19 +330,19 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     ## ---- Hist vs Alt6
     MMP_tryCatch(
     {
-
+        ## As of 2025, the following is no longer the case
         ## Renee does not wish to display PP for CY.  As a result, there are no
         ## GAMs for PP in CY.  We need to replace this item with a blank ggplot
-        subs <- c("Endeavour", "Pascoe", "Stewart", "Normanby")
-        wq.gams.tmp <- data.frame(Subregion = subs, Measure = "PP.wm") %>%
-            group_by(Subregion, Measure) %>%
-            nest() %>%
-            mutate(plot = map(.x = Subregion,
-                              .f = ~ggplot(data = NULL) + theme_nothing())) %>%
-            dplyr::select(-data)
-        wq.aims.jcu.gams <-
-            wq.aims.jcu.gams %>%
-            bind_rows(wq.gams.tmp)
+        ## subs <- c("Endeavour", "Pascoe", "Stewart", "Normanby")
+        ## wq.gams.tmp <- data.frame(Subregion = subs, Measure = "PP.wm") %>%
+        ##     group_by(Subregion, Measure) %>%
+        ##     nest() %>%
+        ##     mutate(plot = map(.x = Subregion,
+        ##                       .f = ~ggplot(data = NULL) + theme_nothing())) %>%
+        ##     dplyr::select(-data)
+        ## wq.aims.jcu.gams <-
+        ##     wq.aims.jcu.gams %>%
+        ##     bind_rows(wq.gams.tmp)
 
         wq.aims.jcu.gams <- wq.aims.jcu.gams %>%
             mutate(Subregion = factor(Subregion, levels = c("Pascoe",
@@ -979,9 +979,17 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 droplevels(),
                               minDate = minDate, MAXDATE = MAXDATE))
                  ) %>%
-            mutate(Index_plots = map2(.x = Index_hist_plot2,
+          mutate(Index_plots =
+                   ifelse(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour"),
+                          Index_alt_Plot2,
+                          map2(.x = Index_hist_plot2,
                                       .y = Index_alt_Plot2,
-                                      .f = ~ .x/.y))
+                               .f = ~ .x/.y)
+                          )
+                 )
+            ## mutate(Index_plots = map2(.x = Index_hist_plot2,
+            ##                           .y = Index_alt_Plot2,
+            ##                           .f = ~ .x/.y))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
                                SUBSECTION_15 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 1)\n"),
@@ -999,7 +1007,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                   MMP__comp_figure_export(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part1",
                                           Plot = IndexPlots.AIMS.JCU.OMO.2023.part1,
-                                          fig.width=6, fig.height=6,
+                                          fig.width=6,
+                                          fig.height=ifelse(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour"),3,6),
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part1",

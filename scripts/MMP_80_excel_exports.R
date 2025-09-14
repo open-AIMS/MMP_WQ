@@ -74,7 +74,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
         writeData(wb, sheet, headers, colNames = FALSE, withFilter = FALSE)
         writeData(wb, sheet, wq.sites, colNames = FALSE, withFilter = FALSE,
                   startRow = 3)
-        setColWidths(wb, sheet, cols = 4:8, widths = "auto")
+        ## setColWidths(wb, sheet, cols = 4:8, widths = "auto")
         mergeCells(wb, sheet, cols = 4:5, rows = 1)
         mergeCells(wb, sheet, cols = 6:8, rows = 1)
         addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
@@ -87,6 +87,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
         freezePane(wb, sheet, firstActiveRow = nRows + 1, firstActiveCol = 4)
         addFilter(wb, sheet, rows = nRows, cols = 1:nCols)
         
+      ## saveWorkbook(wb, "test.xlsx", overwrite = TRUE)
 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export stations', return=TRUE)
@@ -122,12 +123,14 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
                                      borderStyle = openxlsx_getOp("borderStyle", "thick")),
                  gridExpand = TRUE)
         addFilter(wb, sheet, rows = nRows, cols = 1:nCols)
-        setColWidths(wb, sheet, cols = 4:8, widths = "auto")
+        ## setColWidths(wb, sheet, cols = 4:8, widths = "auto")
         freezePane(wb, sheet, firstActiveRow = nRows + 1, firstActiveCol = 1)
 
+      ## saveWorkbook(wb, "test.xlsx", overwrite = TRUE)
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export guidelines', return=TRUE)
     ## ----end
+    ## saveWorkbook(wb, "test.xlsx", overwrite = TRUE)
 
     ## 4. Niskin summaries
     ## ---- niskin summaries
@@ -163,7 +166,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
                                      borderColour = openxlsx_getOp("borderColour", "black"),
                                      borderStyle = openxlsx_getOp("borderStyle", "thick")),
                  gridExpand = TRUE)
-        setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
+        ## setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
         writeData(wb, sheet, data.summary1) 
         freezePane(wb, sheet, firstActiveRow = 1, firstActiveCol = 4)
 
@@ -200,7 +203,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
         writeData(wb, sheet, headers, colNames = FALSE, withFilter = FALSE)
         writeData(wb, sheet, wq.idx[,2:20], colNames = FALSE, withFilter = FALSE,
                   startRow = 3)
-        setColWidths(wb, sheet, cols = 2:19, widths = "auto")
+        ## setColWidths(wb, sheet, cols = 2:19, widths = "auto")
         mergeCells(wb, sheet, cols = 3:9, rows = 1)
         mergeCells(wb, sheet, cols = 10:16, rows = 1)
         addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
@@ -408,12 +411,14 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
           dplyr::select(-Order) %>%
           dplyr::select(Subregion, Measure = Name.tab.abbr, everything()) %>%
           filter(!is.na(Measure)) %>%
+          mutate(`Significant Trend` = ifelse(lower.CL > 1, "Increase",
+                                              ifelse(upper.CL < 1, "Decrease", ""))) %>% 
           suppressMessages() %>%
           suppressWarnings()
       headers <- rbind(c('Sub-region','Measure','Date Range',
                          colnames(wq.aims.jcu.omo.gams)[4],
                          colnames(wq.aims.jcu.omo.gams)[5],
-                         'Ratio','Lower','Upper'))
+                         'Ratio','Lower','Upper', 'Significant Trend'))
       nRows <- nrow(headers)
       nCols <- ncol(headers)
       sheet <- paste0("GAM (AIMS & JCU OMO)")
@@ -422,7 +427,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
       writeData(wb, sheet, headers, startRow = 1, colNames = FALSE, borderColour = 'black') 
       writeData(wb, sheet, wq.aims.jcu.omo.gams, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 
 
-      setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
+      ## setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
       addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
                style = createStyle(border = "TopBottomLeftRight",
                                    fgFill = "lightblue",
@@ -517,7 +522,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
             dplyr::select(!contains("_GL_")) 
         writeData(wb, sheet, dat, colNames = FALSE, withFilter = FALSE,
                   startRow = 3)
-        setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
+        ## setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
         mergeCells(wb, sheet, cols = 4:9, rows = 1)
         mergeCells(wb, sheet, cols = 10:13, rows = 1)
         for (cc in 1:3) mergeCells(wb, sheet, cols = cc, rows = 1:2)

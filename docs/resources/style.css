@@ -14,7 +14,7 @@ body {
 body .page-columns {
     display: grid;
     gap: 0;
-    grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(500px, calc(760px - 0em)) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end];
+    grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(500px, calc(1000px - 0em)) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end];
 }
 
 main {
@@ -22,7 +22,7 @@ main {
     padding-right: 25px !important;
     background-color: white;
     box-shadow: 0px 3px 20px #333;
-    width:760px;
+    width:1000px;
     text-align: justify;
     margin-top:0em;
 }
@@ -55,10 +55,11 @@ section:not(.unnumbered) > h2:before {
 header {
     position: relative;
     left: -25px;
-    width: 760px;
+    width: 1000px;
     height: 95px;
     /* background: url(ECM_1781874_v1_2022_Letterhead_Header.png) no-repeat; */
-    background: url(banner-top1.png) no-repeat;
+    /* background: url(banner-top1.png) no-repeat; */
+    background: url(AIMS_banner.png) no-repeat;
     display:inline-block;
 }
 
@@ -80,7 +81,7 @@ header {
     padding-right: 25px !important;
     background-color: white;
     box-shadow: 0px 3px 20px #333;
-    width:760px;
+    width:1000px;
     text-align: justify;
 }
 
@@ -193,7 +194,7 @@ table>caption {
 
 .table{
     display:block;
-    max-width:760px;
+    max-width:1000px;
     max-height:30em;
     overflow:auto;
 }

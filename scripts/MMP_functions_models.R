@@ -489,7 +489,8 @@ inc <- function(x) eval.parent(substitute(x <-x +1))
 
 MMP__gam_plot1 <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 1
-    if (subr != "Barron Daintree") {
+    ## if (subr != "Barron Daintree") {
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
         p.list <- list(
             index_plot,
             chl_plot +
@@ -681,7 +682,8 @@ MMP__worm_alt <- function(alt.idx, subregion.worm, minDate, MAXDATE) {
 
 MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 2
-    if (subr != "Barron Daintree") {
+    ## if (subr != "Barron Daintree") {
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
         p.list <- list(
             index_hist_plot,
             index_alt_plot,
@@ -790,7 +792,8 @@ MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
 
 MMP__gam_plot3a <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 1
-    if (subr != "Barron Daintree") {
+    ## if (subr != "Barron Daintree") {
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
     patchwork::wrap_plots(
                    index_plot,
                    ntu_plot + annotate(geom = 'text',
@@ -874,7 +877,8 @@ MMP__gam_plot3b <- function(subr, wq.gams) {
 
 MMP__gam_plot4 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 2
-    if (subr != "Barron Daintree") {
+    ## if (subr != "Barron Daintree") {
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
         patchwork::wrap_plots(
                        index_hist_plot,
                        index_alt_plot,
@@ -923,7 +927,8 @@ MMP__gam_plot4 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
 
 MMP__gam_plot2023 <- function(subr, chl_plot, ntu_plot, wq.gams) {
     cnt <- 0
-    if (subr != "Barron Daintree") {
+    ## if (subr != "Barron Daintree") {
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
         patchwork::wrap_plots(
                        chl_plot +
                        annotate(geom = 'text',
@@ -1028,25 +1033,27 @@ MMP__gam_plot2023 <- function(subr, chl_plot, ntu_plot, wq.gams) {
 }
 
 MMP__worm_alt_2023 <- function(alt.idx, subregion.worm, minDate, MAXDATE) {
-    ggplot(data = alt.idx, aes(y = Index, x = reportCardYear)) +
-        geom_hline(yintercept = 0, linetype = 'dashed') +
-        geom_line(data = subregion.worm,
-                  aes(color = Subindicator), show.legend = TRUE) +
-        geom_linerange(data = alt.idx, aes(ymin = Lower, ymax = Upper)) +
-        geom_line(data= alt.idx) +
-        geom_point(aes(fill = Grade), shape = 23, size = 3, show.legend = FALSE) +
-        scale_y_continuous(expression(atop(Water~Quality,Index)), limits = c(-1,1)) +
-        scale_x_date('', limits = c(minDate, MAXDATE)) +
-        scale_fill_manual('', breaks = c('A','B','C','D','E'),
-                          values = rev(trafficLightPalette),
-                          limits = c('A','B','C','D','E')) +
-        theme_mmp +
-        theme(strip.background = element_blank(),
-              panel.margin.x = unit(1,'line'),
-              axis.title.y = element_text(size = rel(1.25))) +
-        annotate(geom = 'text', x = as.Date(minDate),
-                 y = Inf, label = 'b)', vjust = 1) +
-        guides(fill = "none")
+  llab <- ifelse(unique(alt.idx$Subregion) %in% c("Pascoe", "Stewart", "Normanby", "Endeavour"),
+                 "a)", "b)")
+  ggplot(data = alt.idx, aes(y = Index, x = reportCardYear)) +
+    geom_hline(yintercept = 0, linetype = 'dashed') +
+    geom_line(data = subregion.worm,
+              aes(color = Subindicator), show.legend = TRUE) +
+    geom_linerange(data = alt.idx, aes(ymin = Lower, ymax = Upper)) +
+    geom_line(data= alt.idx) +
+    geom_point(aes(fill = Grade), shape = 23, size = 3, show.legend = FALSE) +
+    scale_y_continuous(expression(atop(Water~Quality,Index)), limits = c(-1,1)) +
+    scale_x_date('', limits = c(minDate, MAXDATE)) +
+    scale_fill_manual('', breaks = c('A','B','C','D','E'),
+                      values = rev(trafficLightPalette),
+                      limits = c('A','B','C','D','E')) +
+    theme_mmp +
+    theme(strip.background = element_blank(),
+          panel.margin.x = unit(1,'line'),
+          axis.title.y = element_text(size = rel(1.25))) +
+    annotate(geom = 'text', x = as.Date(minDate),
+             y = Inf, label = llab, vjust = 1) +
+    guides(fill = "none")
 }
 
 

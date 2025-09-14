@@ -128,6 +128,103 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Word:', msg='Create the docx tables', return=TRUE)
     ## ----end
 
+    ## 2. Create docx niskin tables
+    ## ---- create the niskin docx tables
+    MMP_tryCatch(
+    {
+        library(flextable)
+        library(officer)
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+
+        MMP_prepare_table_niskin_summaries() %>% list2env(env = globalenv()) %>%
+            suppressWarnings() %>%
+            suppressMessages()
+        data.summary1 <- data.summary1 %>%
+            mutate(across(everything(), ~replace(.x, is.nan(.x), NA))) %>% ## Remove any NaN values (replace with NA)
+          rename(DOF = DirectionOfFailure)
+
+        data.summary1 <-
+          data.summary1 %>%
+          left_join(lookup %>%
+                    mutate(Site = paste0(reef.alias, " (", SHORT_NAME, ")")) %>%
+                    dplyr::select(Site, Subregion) %>%
+                    distinct(),
+                    by = "Site") |>
+          dplyr::select(Region, Subregion, everything())
+
+        sect_properties <- prop_section(
+            page_size = page_size(
+                orient = "landscape",
+                width = 8.3, height = 11.7
+            ),
+            type = "continuous",
+            page_margins = page_mar()
+        )
+
+        tab <- MMP__docx_table_niskin(dat =  data.summary1, cols,
+                                      docx.tab.count = length(flntu.tbl$tab) + 1) 
+
+        save_as_docx(values = append(flntu.tbl$tab, list("niskin" = tab)),
+                     path = DOCX_OUTPUT_FILE,
+                     pr_section = sect_properties)
+        ## key_cols <- colnames(data.summary1)
+        ## typology1 <- data.frame(
+        ##   col_keys = key_cols,
+        ##   what = c("Region", "Subregion", "Site", "Measure", "N", "Mean", "Median",
+        ##            rep("Quantiles", 4), rep("Guideline Values", 5)
+        ##            ),
+        ##   measure = key_cols
+        ## )
+        
+        ## ii <- 1:100
+        ## a <- flextable(data = data.summary1[ii,]) %>%
+        ##   set_header_df(mapping=typology1, key='col_keys') %>%
+        ##   colformat_double(j =  1:11,
+        ##                 digits=2, big.mark='') %>% 
+        ##   merge_h(part = "header") %>%
+        ##   merge_v(part = "header") %>%
+        ##   merge_v(j=1:3, part = "body") %>%
+        ##   theme_booktabs() %>%
+        ##   flextable::align(i=1:2, align='center', part='header') %>%
+        ##   flextable::align(j = -1:-4, align='center', part='body') %>%
+        ##   flextable::align(j = 1:4, align='left', part='body') %>%
+        ##   valign(j=1:3, valign='top') %>%
+        ##   border_inner_v( border=fp_border(color="black")) %>%
+        ##   border_outer( border=fp_border(color="black", width=2)) %>%
+        ##   hline(part='body', j=-1:-3, border=fp_border(color='black')) %>%
+        ##   hline(part='body', i=with(data.summary1[ii,], match(unique(Subregion),Subregion))[-1]-1,
+        ##         border=fp_border(color='black')) %>%
+        ##   hline(part='body', i=with(data.summary1[ii,], match(unique(Site),Site))[-1]-1,
+        ##         border=fp_border(color='black')) %>%
+        ##   fontsize(size = 8, part = "all") %>%
+        ##   padding(padding=0, part='all') %>% 
+        ##   width(j=1:16,
+        ##         width=c(1,1,1,1,
+        ##                 0.3,
+        ##                 rep(0.6, 2),
+        ##                 rep(0.6, 4),
+        ##                 rep(0.4, 1),
+        ##                 rep(0.6, 1),
+        ##                 rep(0.6, 3))) %>%
+        ##   fix_border_issues() %>% 
+        ##   bg(j=6, i = ~ cols[ii,]$Mean == "yellow", bg = "yellow") %>% 
+        ##   bg(j=6, i = ~ cols[ii,]$Mean == "red", bg = "red") %>% 
+        ##   bg(j=7, i = ~ cols[ii,]$Median == "yellow", bg = "yellow") %>% 
+        ##   bg(j=7, i = ~ cols[ii,]$Median == "red", bg = "red") %>% 
+        ##   set_caption(paste("Table ",1,". Summary statistics for water quality parameters at individual monitoring sites from 1 October ", as.numeric(reportYear) - 1, " to 30 September ", reportYear, ". N = number of sampling occasions. See Section 2 for descriptions of each analyte and its abbreviation. Mean and median values that exceed available Water Quality Guidelines (DERM, 2009; Great Barrier Reef Marine Park Authority, 2010; State of Queensland, 2020) are shaded in red. Averages that exceed dry season guidelines are shaded in yellow. DOF is direction of failure ('H' = high values fail, while 'L' = low values fail)."))
+
+        ## save_as_docx(values = list("a" = a),
+        ##              path = DOCX_OUTPUT_FILE,
+        ##              pr_section = sect_properties
+        ##              )
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Word:', msg='Create the niskin docx tables', return=TRUE)
+    ## ----end
+
     ## ---- quarto - word 
     MMP_tryCatch(
     {
@@ -139,6 +236,7 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
                             TEXT_1 = structure(paste0("\n<p>An word document containing the following tables. \n
 <ul>\n
 <li>FLNTU</li>\n
+<li>Niskin</li>\n
 </ul>\n
 </p>\n"), 
                                                   parent = 'SUBSECTION_1'),

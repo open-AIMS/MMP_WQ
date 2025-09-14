@@ -88,6 +88,38 @@ for (item in logger_items) {
 ## ----end
 
 ## FLNTU data is currently being moved from the AIMS oracle database
+## to an external threds server. As of 2025 the data are at:
+## https://thredds.aodn.org.au/thredds/catalog/AIMS/Marine_Monitoring_Program/FLNTU_timeseries/catalog.html 
+## We need to parse the catalog.  The catalog seems to be formatted as:
+## FLNTU_timeseries
+##   2023
+##   2024
+##   2025
+
+## ---- Get data FLNTU 2025
+base_catalog_url <- "https://thredds.aodn.org.au/thredds/catalog/AIMS/Marine_Monitoring_Program/FLNTU_timeseries/catalog.html"
+# Step 1: Get subfolder URLs (e.g., 2023, 2024, 2025)
+subfolder_urls <- MMP_get_subfolder_urls(base_catalog_url)
+subfolder_urls <- str_subset(subfolder_urls, "20[0-9]{2}")
+# Step 2: Get .nc file URLs from each subfolder
+all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
+# Step 3: Download .nc files
+flntu_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
+flntu_files <- str_subset(flntu_files, "FLNTU")
+# Step 4: Get the flntu data exported from oracle
+flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
+            suppressMessages()
+# Step 5: Read and parse all the ncdf files
+flntu_2 <- MMP_read_flntu_nc(flntu_files)
+# Step 6: Bind together the two sources of flntu
+flntu <- bind_rows(flntu, flntu_2)
+# Step 7: Save as csv file
+data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
+write_csv(flntu, data_file)
+## ----
+
+
+## FLNTU data is currently being moved from the AIMS oracle database
 ## to an external threds server. However, for the 2024 report, these
 ## data are housed on pearl. Geoff has kindly made these available on
 ## the HPC as an NFS share mounted at:
@@ -100,44 +132,68 @@ for (item in logger_items) {
 ## standardise all the fields, it is necessary to bring in additional
 ## fields from some of the lookup tables
 
-## ---- Get data FLNTU 2024
-## flntu_path <- "/net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data/FLNTU_QAQCd/NetCDF/"
-flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
-            suppressMessages()
-flntu_path <- "/home/logger_data/FLNTU_QAQCd/NetCDF"
-flntu_files <- list.files(path = flntu_path, pattern = ".*nc", full.names = TRUE)
-## flntu_2 <- do.call("rbind", lapply(flntu_files, MMP_read_flntu_nc))
-flntu_2 <- MMP_read_flntu_nc(flntu_files)
-flntu <- bind_rows(flntu, flntu_2)
+## ## ---- Get data FLNTU 2024
+## ## flntu_path <- "/net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data/FLNTU_QAQCd/NetCDF/"
+## flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
+##             suppressMessages()
+## flntu_path <- "/home/logger_data/FLNTU_QAQCd/NetCDF"
+## flntu_files <- list.files(path = flntu_path, pattern = ".*nc", full.names = TRUE)
+## ## flntu_2 <- do.call("rbind", lapply(flntu_files, MMP_read_flntu_nc))
+## flntu_2 <- MMP_read_flntu_nc(flntu_files)
+## flntu <- bind_rows(flntu, flntu_2)
 
-data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
-write_csv(flntu, data_file)
+## data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
+## write_csv(flntu, data_file)
 ## ----
 
-## ---- Get data Salinity 2024
+## ---- Get data Salinity 2025
+base_catalog_url <- "https://thredds.aodn.org.au/thredds/catalog/AIMS/Marine_Monitoring_Program/SBE37_timeseries/catalog.html"
+# Step 1: Get subfolder URLs (e.g., 2023, 2024, 2025)
+subfolder_urls <- MMP_get_subfolder_urls(base_catalog_url)
+subfolder_urls <- str_subset(subfolder_urls, "20[0-9]{2}")
+# Step 2: Get .nc file URLs from each subfolder
+all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
+# Step 3: Download .nc files
+salinity_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
+salinity_files <- str_subset(salinity_files, "CSTZ")
+# Step 4: Get the salinity data exported from oracle
 waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
             suppressMessages()
-salinity_path <- "/home/logger_data/SBE37_QAQCd/NetCDF"
-salinity_files <- list.files(path = salinity_path, pattern = ".*nc", full.names = TRUE)
-salinity_files <- str_subset(salinity_files, "CSTZ")
+# Step 5: Read and parse all the ncdf files
 salinity_2 <- MMP_read_salinity_nc(salinity_files)
-## salinity_2 <- do.call("rbind", lapply(salinity_files, MMP_read_salinity_nc))
+# Step 6: Bind together the two sources of salinity
 waterSalinity <- bind_rows(waterSalinity, salinity_2)
-## # **The following is only needed because there are some new entries in the database that
-## # should not be there and this is the easiest place to filter them out at this stage**
-## waterSalinity <- waterSalinity %>%
-##   filter(str_detect(STATION_NAME, "test_file", negate = TRUE))
-## # exclude duplicate STATION_NAME/SAMPLE_DAY/PARAMETER values
-## waterSalinity <-
-##   waterSalinity %>%
-##   group_by(STATION_NAME, SAMPLE_DAY, PARAMETER) %>%
-##   mutate(n = 1:n()) %>%
-##   filter(n == 1) %>%
-##   dplyr::select(-n) %>%
-##   ungroup()
-
+# Step 7: Save as csv file
 data_file <- paste0(LOGGER_PATH, "waterSalinity", ".csv") # save data here
 write_csv(waterSalinity, data_file)
+## ----
+
+
+
+## ---- Get data Salinity 2024
+## waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
+##             suppressMessages()
+## salinity_path <- "/home/logger_data/SBE37_QAQCd/NetCDF"
+## salinity_files <- list.files(path = salinity_path, pattern = ".*nc", full.names = TRUE)
+## salinity_files <- str_subset(salinity_files, "CSTZ")
+## salinity_2 <- MMP_read_salinity_nc(salinity_files)
+## ## salinity_2 <- do.call("rbind", lapply(salinity_files, MMP_read_salinity_nc))
+## waterSalinity <- bind_rows(waterSalinity, salinity_2)
+## ## # **The following is only needed because there are some new entries in the database that
+## ## # should not be there and this is the easiest place to filter them out at this stage**
+## ## waterSalinity <- waterSalinity %>%
+## ##   filter(str_detect(STATION_NAME, "test_file", negate = TRUE))
+## ## # exclude duplicate STATION_NAME/SAMPLE_DAY/PARAMETER values
+## ## waterSalinity <-
+## ##   waterSalinity %>%
+## ##   group_by(STATION_NAME, SAMPLE_DAY, PARAMETER) %>%
+## ##   mutate(n = 1:n()) %>%
+## ##   filter(n == 1) %>%
+## ##   dplyr::select(-n) %>%
+## ##   ungroup()
+
+## data_file <- paste0(LOGGER_PATH, "waterSalinity", ".csv") # save data here
+## write_csv(waterSalinity, data_file)
 ## ----
 
 ## ---- Get data Water Temperature 2024

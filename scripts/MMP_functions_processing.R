@@ -996,9 +996,9 @@ mmp__timeseries_prepare_wind <- function(wind, Site, START_DATE) {
         arrange(Date) %>%
         complete(Date = seq.Date(min(Date), max(Date), by = 'week'))
 }
-mmp__timeseries_prepare_discharge <- function(discharge, Subregion, START_DATE) {
+mmp__timeseries_prepare_discharge <- function(discharge, Sub_region, START_DATE) {
     discharge %>%
-        filter(Subregion == Subregion) %>%
+        filter(Subregion == Sub_region) %>%
         droplevels() %>%
         ## filter(Date >= as.Date('2006-01-01')) %>%
         filter(Date >= START_DATE) %>%
@@ -1023,7 +1023,7 @@ mmp__timeseries_prepare_guidelines <- function(Site) {
 }
 mmp__timeseries_prepare_data <- function(flntu, tides, waterTemp, wind, discharge, Site, START_DATE) {
     ## FLNTU
-    flntu <- mmp__timeseries_prepare_flntu(flntu.all.daily, Site, START_DATE)
+    flntu <- mmp__timeseries_prepare_flntu(flntu, Site, START_DATE)
     if (nrow(flntu)<1) return(NULL)
     ## Tides
     tides <- tides[[Site]]
@@ -1033,7 +1033,7 @@ mmp__timeseries_prepare_data <- function(flntu, tides, waterTemp, wind, discharg
     wind <- mmp__timeseries_prepare_wind(wind, Site, START_DATE) 
     ## Discharge
     Subregion <- flntu %>% pull(Subregion) %>% unique() %>% na.omit() %>% as.character()
-    discharge <- mmp__timeseries_prepare_discharge(discharge, Subregion = Subregion, START_DATE)
+    discharge <- mmp__timeseries_prepare_discharge(discharge, Sub_region = Subregion, START_DATE)
     ## Guideline values
     GL <- mmp__timeseries_prepare_guidelines(Site)
     

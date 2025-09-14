@@ -1,18 +1,23 @@
 ## Starting instructions
 
 ## 1. start a terminal (shell)
-## 2. load the singularity module
+## 2a. load the singularity module
 ##    module load singularity
-## 3. run the singularity container (interactively)
+## 3a. run the singularity container (interactively)
 ##    singularity exec -B .:/home/Project -B /net/cluster1-prod-hpcnfs.aims.gov.au/rwqpp-field-data:/home/logger_data ../mmp.sif R
+## OR
+## 2b and 3b.  run docker image from project root (not scripts folder)
+##    docker run --workdir /home/Project --rm -it -v .:/home/Project mmp
+##    ## docker run --workdir /home/Project --rm -it -v .:/home/Project -u $(id -u):$(id -g) mmp
+##    setwd("scripts")
 ## 4. source the functions
 source("MMP_functions.R")
 ## 5. run fakeArgs
-##    MMP_fakeArgs(stage = 1, always_extract = TRUE, reportYear = 2024) 
+##    MMP_fakeArgs(stage = 1:9, always_extract = TRUE, reportYear = 2025) 
 
 ## If calling this application interactively, you will need to mimic
 ## the use of command line arguments.  To do so, call the following:
-## MMP_fakeArgs(stage = 1, always_extract = TRUE, reportYear = 2024)
+## MMP_fakeArgs(stage = 1:9, always_extract = TRUE, reportYear = 2025)
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations

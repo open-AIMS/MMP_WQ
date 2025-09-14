@@ -23,11 +23,14 @@ RUN apt-get update \
     zip \
     wget \
     fonts-dejavu-extra \
+    libfontconfig1-dev \
     curl \
     tk \
     xtide \
     openjdk-11-jre \
     gdebi-core \
+    cmake \
+    libcairo2-dev \
   && rm -rf /var/lib/apt/lists/*
 
 # NOTE: pandoc-citeproc no longer maintained - are packages above 'time-capsuled' in the same way as R and R packages below?
@@ -120,6 +123,19 @@ RUN R -e "options(repos = \
   install.packages(c('mgcv')); \
   install.packages(c('flextable'))"  
 
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  install.packages(c('ncdf4'))"
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  install.packages(c('car'))"
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  install.packages(c('officer')); \
+  install.packages(c('flextable'))"
+
 ## Create project directory in docker image
 RUN mkdir ~/MMP
 
@@ -127,6 +143,18 @@ RUN mkdir ~/MMP
 COPY scripts/ ~/MMP/scripts/
 COPY scripts/ ~/MMP/parameters/
 WORKDIR ~/MMP/scripts/
+
+## Add default values for USER_ID and GROUP_ID
+#ARG USER_ID=1000
+#ARG GROUP_ID=1000
+
+## Add a user with a specific UID and GID
+#RUN groupadd -g ${GROUP_ID} tempgroup && \
+#    useradd -m -u ${USER_ID} -g tempgroup tempuser
+#RUN echo "USER_ID=${USER_ID}, GROUP_ID=${GROUP_ID}"
+
+## Set the default user
+#USER tempuser
 
 
 

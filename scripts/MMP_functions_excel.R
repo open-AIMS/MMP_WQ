@@ -326,7 +326,7 @@ MMP_historical_index_spreadsheet <- function(wb, idx.df, level) {
     addWorksheet(wb, sheet)
     writeData(wb, sheet, headers, startRow = 1, colNames = FALSE, borderColour = 'black') 
     writeData(wb, sheet, idx, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 
-    setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
+    ## setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
     addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
              style = createStyle(border = "TopBottomLeftRight",
                                  fgFill = "lightblue",
@@ -463,7 +463,7 @@ MMP_version6_index_spreadsheet <- function(wb, idx.df, level = 1) {
     addWorksheet(wb, sheet)
     writeData(wb, sheet, headers, startRow = 1, colNames = FALSE, borderColour = 'black') 
     writeData(wb, sheet, idx, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 
-    setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
+    ## setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
     addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
              style = createStyle(border = "TopBottomLeftRight",
                                  fgFill = "lightblue",

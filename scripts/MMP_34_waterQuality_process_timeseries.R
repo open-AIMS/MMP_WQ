@@ -44,7 +44,7 @@ if (alwaysExtract &
       walk(.x = unique(flntu.all.daily$MMP_SITE_NAME),
            .f = function(S) {
                ## print(S)
-               data <- mmp__timeseries_prepare_data(flntu.all.daily,
+               data <- mmp__timeseries_prepare_data(flntu = flntu.all.daily,
                                                     tides = tides.daily,
                                                     waterTemp = waterTempWAll,
                                                     wind = bom.weather,

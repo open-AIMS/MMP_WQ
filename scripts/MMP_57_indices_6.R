@@ -53,6 +53,13 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.alt6.idx.RData"
         hier <- get(load(file=paste0(PARAMS_INPUT_PATH, 'hierarchy.RData')))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
 
+        ## As of 2025, Renee wants the CY Niskin data to exclude values prior
+        ## to 1st Sept 2020 (e.g. reneeYear < 2021)
+        wq.all.reef <-
+          wq.all.reef |> 
+          filter(!(Source == 'CY Niskin' & reneeYear < 2021)) |>
+          droplevels()
+        
         lookup <- lookup %>%
             left_join(names_lookup) %>%
             suppressWarnings() %>%

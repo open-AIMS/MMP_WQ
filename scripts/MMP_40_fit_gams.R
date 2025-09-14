@@ -142,8 +142,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.gams.RData
         wq.aims.jcu.gams <- wq.gamdata.all.reef %>%
             filter(!Measure %in% c('SI_NOx.wm','NOx_PO4.wm','SI_PO4.wm','Dtt.num',
                                    'CDOM_443.wm','Dt.num.wm','HAND_NH4.wm')) %>%
-            filter(!(Source=='JCU Niskin' & Measure %in% c('PP.wm'))) %>%  #Apparently, as of 2020,  the JCU PN data are good,  so they can go back into the GAMs (but PP should stay out!)
-            filter(!(Source=='CY Niskin' & Measure %in% c('PP.wm'))) %>%
+            ## As of 2025, PP can now be returned to the analyses
+            ## filter(!(Source=='JCU Niskin' & Measure %in% c('PP.wm'))) %>%  #Apparently, as of 2020,  the JCU PN data are good,  so they can go back into the GAMs (but PP should stay out!)
+            ## filter(!(Source=='CY Niskin' & Measure %in% c('PP.wm'))) %>%
+            ## As of 2025, we should exclude all CY data prior to the reneeYear of 2021
+            filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>% 
             droplevels() %>%
             group_by(Subregion, Measure) %>%
             summarise(data = list(cur_data_all()), .groups = "drop") %>%
@@ -256,8 +259,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo.gams.R
             droplevels() %>%
             filter(!Measure %in% c('SI_NOx.wm','NOx_PO4.wm','SI_PO4.wm','Dtt.num',
                                    'CDOM_443.wm','Dt.num.wm','HAND_NH4.wm')) %>%
-            filter(!(Source=='JCU Niskin' & Measure %in% c('PP.wm'))) %>%  #Apparently, as of 2020,  the JCU PN data are good,  so they can go back into the GAMs (but PP should stay out!)
-            filter(!(Source=='CY Niskin' & Measure %in% c('PP.wm'))) %>%
+            ## As of 2025, PP can now be returned to the analyses
+            ## filter(!(Source=='JCU Niskin' & Measure %in% c('PP.wm'))) %>%  #Apparently, as of 2020,  the JCU PN data are good,  so they can go back into the GAMs (but PP should stay out!)
+            ## filter(!(Source=='CY Niskin' & Measure %in% c('PP.wm'))) %>%
+            ## As of 2025, we should exclude all CY data prior to the reneeYear of 2021
+            filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>% 
             droplevels() %>%
             group_by(Subregion, Measure) %>%
             summarise(data = list(cur_data_all()), .groups = "drop") %>%

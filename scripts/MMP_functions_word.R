@@ -80,3 +80,54 @@ MMP__docx_table <- function(dat, docx.tab.count) {
     
 }
 
+
+MMP__docx_table_niskin <- function(dat, cols, docx.tab.count) {
+        key_cols <- colnames(dat)
+        typology1 <- data.frame(
+          col_keys = key_cols,
+          what = c("Region", "Subregion", "Site", "Measure", "N", "Mean", "Median",
+                   rep("Quantiles", 4), rep("Guideline Values", 5)
+                   ),
+          measure = key_cols
+        )
+        
+        ii <- 1:nrow(dat)
+        ## print(ii)
+        tab <- flextable(data = dat[ii,]) %>%
+          set_header_df(mapping=typology1, key='col_keys') %>%
+          colformat_double(j =  1:11,
+                        digits=2, big.mark='') %>% 
+          merge_h(part = "header") %>%
+          merge_v(part = "header") %>%
+          merge_v(j=1:3, part = "body") %>%
+          theme_booktabs() %>%
+          flextable::align(i=1:2, align='center', part='header') %>%
+          flextable::align(j = -1:-4, align='center', part='body') %>%
+          flextable::align(j = 1:4, align='left', part='body') %>%
+          valign(j=1:3, valign='top') %>%
+          border_inner_v( border=fp_border(color="black")) %>%
+          border_outer( border=fp_border(color="black", width=2)) %>%
+          hline(part='body', j=-1:-3, border=fp_border(color='black')) %>%
+          hline(part='body', i=with(dat[ii,], match(unique(Subregion),Subregion))[-1]-1,
+                border=fp_border(color='black')) %>%
+          hline(part='body', i=with(dat[ii,], match(unique(Site),Site))[-1]-1,
+                border=fp_border(color='black')) %>%
+          fontsize(size = 8, part = "all") %>%
+          padding(padding=0, part='all') %>% 
+          width(j=1:16,
+                width=c(1,1,1,1,
+                        0.3,
+                        rep(0.6, 2),
+                        rep(0.6, 4),
+                        rep(0.4, 1),
+                        rep(0.6, 1),
+                        rep(0.6, 3))) %>%
+          fix_border_issues() %>% 
+          bg(j=6, i = cols[ii,]$Mean == "yellow", bg = "yellow") %>% 
+          ## bg(j=6, i = ~ cols[ii,]$Mean == "red", bg = "red") %>% 
+          bg(j=6, i = cols[ii,]$Mean == "red", bg = "red") %>% 
+          bg(j=7, i = cols[ii,]$Median == "yellow", bg = "yellow") %>% 
+          bg(j=7, i = cols[ii,]$Median == "red", bg = "red") %>% 
+          set_caption(paste("Table ",docx.tab.count,". Summary statistics for water quality parameters at individual monitoring sites from 1 October ", as.numeric(reportYear) - 1, " to 30 September ", reportYear, ". N = number of sampling occasions. See Section 2 for descriptions of each analyte and its abbreviation. Mean and median values that exceed available Water Quality Guidelines (DERM, 2009; Great Barrier Reef Marine Park Authority, 2010; State of Queensland, 2020) are shaded in red. Averages that exceed dry season guidelines are shaded in yellow. DOF is direction of failure ('H' = high values fail, while 'L' = low values fail)."))
+    tab
+}

@@ -1,6 +1,6 @@
 ## Starting instructions
 
-## 1. start a terminal (shell)
+## 1. start a terminal (shell) from the **project root folder**
 ## 2a. load the singularity module
 ##    module load singularity
 ## 3a. run the singularity container (interactively)

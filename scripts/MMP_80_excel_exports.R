@@ -1,6 +1,7 @@
 source("MMP_functions.R")
 source("MMP_functions_models.R")
 source("MMP_functions_excel.R")
+source("MMP_functions_indices.R")
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
@@ -92,7 +93,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export stations', return=TRUE)
     ## ----end
-
+    
     ## 3. Add guidelines
     ## ---- guidelines
     MMP_tryCatch(
@@ -175,7 +176,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export niskin summaries', return=TRUE)
     ## ----end
 
-
+  if (1 == 2) {
+    
     ## 4. excel - indicators (historic)
     ## ---- excel - indicators (historic)
     MMP_tryCatch(
@@ -240,6 +242,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
         load(file = paste0(DATA_PATH, '/final/measure.site.year.RData'))
         wb <- MMP_historical_index_spreadsheet(wb, idx.df = measure.site.year, level = 1)
@@ -293,97 +296,193 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 0.4 indices', return=TRUE)
     ## ----end
 
-    ## 9. excel - indicators (version 6.1)
-    ## ---- excel - indicators (version 0.5)
+  }
+
+    ## 9. excel - indicators (version 8.1)
+    ## ---- excel - indicators (version 8.1)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.site.measure_8.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.site.measure, type = 8, level = 1)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.1 indices', return=TRUE)
+    ## ----end
+
+    ## 10. excel - indicators (version 8.2)
+    ## ---- excel - indicators (version 8.2)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.measure_8.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.measure, type = 8, level = 2)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.2 indices', return=TRUE)
+    ## ----end
+
+    ## 11. excel - indicators (version 8.3)
+    ## ---- excel - indicators (version 8.3)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
-        load(file = paste0(DATA_PATH, '/final/reneeYear.site.measure.RData'))
-        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.site.measure, level = 1)
+        load(file = paste0(DATA_PATH, '/final/reneeYear.region.measure_8.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.measure, type = 8, level = 3)
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.1 indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.3 indices', return=TRUE)
+    ## ----end
+
+    ## 12. excel - indicators (version 8.4)
+    ## ---- excel - indicators (version 8.4)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.subindicator_8.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.subindicator, type = 8, level = 4)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.4 indices', return=TRUE)
+    ## ----end
+
+    ## 13. excel - indicators (version 8.5)
+    ## ---- excel - indicators (version 8.5)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.indicator_8.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.indicator, type = 8, level = 5)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.5 indices', return=TRUE)
+    ## ----end
+
+    ## 14. excel - indicators (version 8.6)
+    ## ---- excel - indicators (version 8.6)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.region.indicator_8.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.indicator, type = 8, level = 6)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.6 indices', return=TRUE)
+    ## ----end
+
+
+  
+    ## 15. excel - indicators (version 7.1)
+    ## ---- excel - indicators (version 7.1)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.site.measure_7.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.site.measure, type = 7, level = 1)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 7.1 indices', return=TRUE)
     ## ----end
     
-    ## 10. excel - indicators (version 6.2)
-    ## ---- excel - indicators (version 6.2)
+    ## 16. excel - indicators (version 7.2)
+    ## ---- excel - indicators (version 7.2)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
-        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.measure.RData'))
-        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.measure, level = 2)
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.measure_7.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.measure, type = 7, level = 2)
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.2 indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 7.2 indices', return=TRUE)
     ## ----end
 
-    ## 11. excel - indicators (version 6.3)
-    ## ---- excel - indicators (version 6.3)
+    ## 17. excel - indicators (version 7.3)
+    ## ---- excel - indicators (version 7.3)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
-        load(file = paste0(DATA_PATH, '/final/reneeYear.region.measure.RData'))
-        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.measure, level = 3)
+        load(file = paste0(DATA_PATH, '/final/reneeYear.region.measure_7.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.measure, type = 7, level = 3)
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.3 indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 7.3 indices', return=TRUE)
     ## ----end
 
-    ## 12. excel - indicators (version 6.4)
-    ## ---- excel - indicators (version 6.4)
+    ## 18. excel - indicators (version 7.4)
+    ## ---- excel - indicators (version 7.4)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
-        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.subindicator.RData'))
-        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.subindicator, level = 4)
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.subindicator_7.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.subindicator, type = 7, level = 4)
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.4 indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 7.4 indices', return=TRUE)
     ## ----end
 
-    ## 13. excel - indicators (version 6.5)
-    ## ---- excel - indicators (version 6.5)
+    ## 19. excel - indicators (version 7.5)
+    ## ---- excel - indicators (version 7.5)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
-        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.indicator.RData'))
-        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.indicator, level = 5)
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.indicator_7.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.indicator, type = 7, level = 5)
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.5 indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 7.5 indices', return=TRUE)
     ## ----end
 
-    ## 14. excel - indicators (version 6.6)
-    ## ---- excel - indicators (version 6.6)
+    ## 20. excel - indicators (version 7.6)
+    ## ---- excel - indicators (version 7.6)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
-        load(file = paste0(DATA_PATH, '/final/reneeYear.region.indicator.RData'))
-        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.indicator, level = 6)
+        load(file = paste0(DATA_PATH, '/final/reneeYear.region.indicator_7.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.indicator, type = 7, level = 6)
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 6.6 indices', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 7.6 indices', return=TRUE)
     ## ----end
 
-  ## 15. gam change tables
+  ## 21. gam change tables
   ## ---- gam changes
     MMP_tryCatch(
     {
@@ -445,7 +544,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
 
     saveWorkbook(wb, XLS_OUTPUT_FILE, overwrite = TRUE)
 
-    ## 16. excel - FLNTU
+    ## 22. excel - FLNTU
     ## ---- excel - FLNTU 
     MMP_tryCatch(
     {
@@ -564,7 +663,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
 
     saveWorkbook(wb, XLS_OUTPUT_FILE, overwrite = TRUE)
 
-    ## 17. quarto - excel
+    ## 23. quarto - excel
     ## ---- quarto - excel 
     MMP_tryCatch(
     {
@@ -579,15 +678,15 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
 <li>guideline values</li>\n
 <li>niskin summaries</li>\n
 <li>indices - historical</li>\n
-<li>indices - version 0.1</li>\n
-<li>indices - version 0.2</li>\n
-<li>indices - version 0.3</li>\n
-<li>indices - version 0.4</li>\n
-<li>indices - version 6.1</li>\n
-<li>indices - version 6.2</li>\n
-<li>indices - version 6.3</li>\n
-<li>indices - version 6.4</li>\n
-<li>indices - version 6.5</li>\n
+<li>indices - version 8.1 (Long-term)</li>\n
+<li>indices - version 8.2 (Long-term)</li>\n
+<li>indices - version 8.3 (Long-term)</li>\n
+<li>indices - version 8.4 (Long-term)</li>\n
+<li>indices - version 7.1 (Annual)</li>\n
+<li>indices - version 7.2 (Annual)</li>\n
+<li>indices - version 7.3 (Annual)</li>\n
+<li>indices - version 7.4 (Annual)</li>\n
+<li>indices - version 7.5 (Annual)</li>\n
 <li>FLNTU</li>\n
 </ul>\n
 </p>\n"), 
@@ -627,9 +726,6 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Zip:', msg='embed zip in quarto', return=TRUE)
     ## ----end
 
-
-
-    
     source("MMP_35_processedData_report.R")
 
     MMP_checkData(name = "mmp.xlsx",
@@ -638,4 +734,6 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
                   label = "excel",
                   PATH = paste0(OUTPUT_PATH, "/"))
     MMP_openning_banner()
+
+    
 }

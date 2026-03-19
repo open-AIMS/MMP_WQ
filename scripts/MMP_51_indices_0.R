@@ -96,8 +96,11 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
             ) %>%
             dplyr:::select(-Source,-GL,-DirectionOfFailure,-Value) %>%
             spread(Measure,Index) %>%
-            mutate(CombinedTurb = rowMeans(cbind(NTU,TSS_MGPERL.wm), na.rm=TRUE),
-                   Index = rowMeans(cbind(DRIFTCHL_UGPERL.wm,CombinedTurb,PN.wm,PP.wm,NOx.wm))) %>%
+            mutate(CombinedTurb_old = rowMeans(cbind(NTU,TSS_MGPERL.wm), na.rm=TRUE)) |> 
+            mutate(CombinedTurb = rowMeans(cbind(NTU,TSS_MGPERL.wm, SECCHI_DEPTH.wm), na.rm=TRUE),
+                   Index_old = rowMeans(cbind(DRIFTCHL_UGPERL.wm,CombinedTurb_old,PN.wm,PP.wm,NOx.wm)),
+                   Index = rowMeans(cbind(DRIFTCHL_UGPERL.wm,CombinedTurb,PN.wm,PP.wm,NOx.wm))
+                   ) %>%
             mutate(reportCardYear = as.Date(paste0(Year,'-01-01'))) %>%
             suppressMessages() %>%
             suppressWarnings()

@@ -700,6 +700,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                Temperature=ifelse(!is.na(temp),temp,temperature)
                )
     MINx <- as.Date('2015-01-01') #min(wsa$Date, na.rm=TRUE)
+    MINx <- as.Date(paste0(reportYear,'-07-01')) - years(5) - days(1)
 
     wsa <- waterSalinityAll %>%
         left_join(wq.sites %>%
@@ -707,6 +708,7 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                   dplyr:::select(MMP_SITE_NAME,Latitude)) %>%
         group_by(Subregion,MMP_SITE_NAME) %>%
         arrange(Date) %>% 
+      filter(Date >= MINx) %>% 
         complete(Date=seq(as.Date(MINx), as.Date(MAXDATE), '1 day')) %>% 
         ungroup %>%
         arrange((Latitude)) %>%
@@ -730,11 +732,12 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
         mutate(Date = min(Date, na.rm=TRUE)) %>%
         distinct() %>%
         mutate(lab = letters[n():1])
-    
-    g <- wsa %>%
-        ggplot(aes(x = Date)) +
-        geom_line(aes(y = Temperature), colour = '#56b4e9') +
-        geom_line(aes(y = sSalinity), colour = '#D55E00') +
+  temp_colour <- "#D55E00"
+  sal_colour <- "#56b4e9"
+  g <- wsa %>%
+    ggplot(aes(x = Date)) +
+    geom_line(aes(y = Temperature), colour = temp_colour) +
+    geom_line(aes(y = sSalinity), colour = sal_colour) +
         facet_grid(MMP_SITE_NAME + Subregion~.,
                    labeller = label_bquote(rows=.(str_wrap(Subregion,15)), cols="")) +
         scale_x_date('', expand = c(0.01,0)) + 
@@ -752,16 +755,16 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                   hjust = 0, vjust = 1) +
         theme_bw() +
         theme(
-            axis.line.y.left = element_line(colour = '#56b4e9'),
-            axis.text.y.left = element_text(colour = '#56b4e9'),
-            axis.title.y.left = element_text(colour = '#56b4e9',
+            axis.line.y.left = element_line(colour = temp_colour),
+            axis.text.y.left = element_text(colour = temp_colour),
+            axis.title.y.left = element_text(colour = temp_colour,
                                              margin = margin(r = 1, unit = 'lines')),
-            axis.ticks.y.left = element_line(colour = '#56b4e9'),
-            axis.line.y.right = element_line(colour = '#D55E00'),
-            axis.text.y.right = element_text(colour = '#D55E00'),
-            axis.title.y.right = element_text(colour = '#D55E00',
+            axis.ticks.y.left = element_line(colour = temp_colour),
+            axis.line.y.right = element_line(colour = sal_colour),
+            axis.text.y.right = element_text(colour = sal_colour),
+            axis.title.y.right = element_text(colour = sal_colour,
                                               margin = margin(l = 1, unit = 'lines')),
-            axis.ticks.y.right = element_line(colour = '#D55E00')
+            axis.ticks.y.right = element_line(colour = sal_colour)
         )
 
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterTempSalinity.png'),
@@ -782,50 +785,55 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
                                                        parent = 'SUBSECTION_SALINITY')
                               )
 
-    ## And now for individual plots
-    wsa.indiv <- wsa %>%
-        left_join(labs %>% rename(LabDate = Date)) %>%
-        arrange(lab, Date) %>%
-        mutate(MMP_SITE_NAME = fct_inorder(MMP_SITE_NAME)) %>% 
-        mutate(Site = MMP_SITE_NAME) %>% 
-        group_by(MMP_SITE_NAME) %>%
-        nest() %>%
-        mutate(g = map(.x = data,
-                       .f = function(x) {
-                           x %>%
-                               ggplot(aes(x = Date)) +
-                               geom_line(aes(y = Temperature), colour = '#56b4e9') +
-                               geom_line(aes(y = sSalinity), colour = '#D55E00') +
-                               scale_x_date('', expand = c(0.01,0)) + 
-                               scale_y_continuous(expression(Temperature~(C*degree)),
-                                                  limits = range(wsa.limits,40),
-                                                  sec.axis = sec_axis(trans = ~ . * 1,
-                                                                      breaks = scales::rescale(pretty(range(wsa$Salinity, na.rm= TRUE), 3),
-                                                                                               from = range(pretty(wsa$Salinity, na.rm = TRUE)),
-                                                                                               to = range(wsa.limits)),
-                                                                      labels = function(x) scales::rescale(x,
-                                                                                                           from = range(wsa.limits),
-                                                                                                           to = range(pretty(wsa$Salinity, na.rm = TRUE))),
-                                                                      name = 'Salinity')) +
-                               geom_text(data = x %>% dplyr::select(Site, lab, LabDate) %>% distinct(),
-                                         aes(y = 40, x = LabDate, label = paste0(lab, ") ", Site)),
-                                         hjust = 0, vjust = 1) +
-                               theme_bw() +
-                               theme(
-                                   axis.line.y.left = element_line(colour = '#56b4e9'),
-                                   axis.text.y.left = element_text(colour = '#56b4e9'),
-                                   axis.title.y.left = element_text(colour = '#56b4e9',
-                                                                    margin = margin(r = 1, unit = 'lines')),
-                                   axis.ticks.y.left = element_line(colour = '#56b4e9'),
-                                   axis.line.y.right = element_line(colour = '#D55E00'),
-                                   axis.text.y.right = element_text(colour = '#D55E00'),
-                                   axis.title.y.right = element_text(colour = '#D55E00',
-                                                                     margin = margin(l = 1, unit = 'lines')),
-                                   axis.ticks.y.right = element_line(colour = '#D55E00')
-                               )
-                       })) %>%
-        suppressWarnings() %>%
-        suppressMessages()
+  ## And now for individual plots
+  wsa.indiv <- wsa %>%
+    left_join(labs %>% rename(LabDate = Date)) %>%
+    arrange(lab, Date) %>%
+    mutate(MMP_SITE_NAME = fct_inorder(MMP_SITE_NAME)) %>% 
+    mutate(Site = MMP_SITE_NAME) %>% 
+    group_by(MMP_SITE_NAME) %>%
+    nest() %>%
+    mutate(g = map(.x = data,
+                   .f = function(x) {
+                     title <- x %>% dplyr::select(Site, lab, LabDate) %>% distinct() %>%
+                       mutate(lab = paste(lab, ") ", Site)) |>
+                       pull(lab)
+                     x %>%
+                       ggplot(aes(x = Date)) +
+                       geom_line(aes(y = Temperature), colour = temp_colour) +
+                       geom_line(aes(y = sSalinity), colour = sal_colour) +
+                       scale_x_date('', expand = c(0.01,0)) + 
+                       scale_y_continuous(expression(Temperature~(C*degree)),
+                                          ## limits = range(wsa.limits,40),
+                                          limits = range(wsa.limits),
+                                          sec.axis = sec_axis(trans = ~ . * 1,
+                                                              breaks = scales::rescale(pretty(range(wsa$Salinity, na.rm= TRUE), 3),
+                                                                                       from = range(pretty(wsa$Salinity, na.rm = TRUE)),
+                                                                                       to = range(wsa.limits)),
+                                                              labels = function(x) scales::rescale(x,
+                                                                                                   from = range(wsa.limits),
+                                                                                                   to = range(pretty(wsa$Salinity, na.rm = TRUE))),
+                                                              name = 'Salinity')) +
+                       ## geom_text(data = x %>% dplyr::select(Site, lab, LabDate) %>% distinct(),
+                       ##           aes(y = 40, x = LabDate, label = paste0(lab, ") ", Site)),
+                       ##           hjust = 0, vjust = 1) +
+                      ggtitle(title) +
+                       theme_bw() +
+                       theme(
+                         axis.line.y.left = element_line(colour = temp_colour),
+                         axis.text.y.left = element_text(colour = temp_colour),
+                         axis.title.y.left = element_text(colour = temp_colour,
+                                                          margin = margin(r = 1, unit = 'lines')),
+                         axis.ticks.y.left = element_line(colour = temp_colour),
+                         axis.line.y.right = element_line(colour = sal_colour),
+                         axis.text.y.right = element_text(colour = sal_colour),
+                         axis.title.y.right = element_text(colour = sal_colour,
+                                                           margin = margin(l = 1, unit = 'lines')),
+                         axis.ticks.y.right = element_line(colour = sal_colour)
+                       )
+                   })) %>%
+    suppressWarnings() %>%
+    suppressMessages()
     
     ## wsa.indiv[1,'g'][[1]][[1]]    
     wsa.indiv %>%

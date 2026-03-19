@@ -29,33 +29,36 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     file.exists(paste0(GAM_OUTPUT_PATH, 'wq.gams.RData')) &
-    file.exists(paste0(DATA_PATH, '/indices/wq.alt6.idx.subregion.subindicator.RData')) &
+    file.exists(paste0(DATA_PATH, '/indices/wq.alt7.idx.subregion.subindicator.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, 'names_lookup.RData')) 
     ) {
+    
     ## 1. Read in data
     ## ---- Read in data
     MMP_tryCatch(
     {
         load(file=paste0(DATA_PATH, '/indices/wq.historic.idx.subregion.RData'))
-        load(file=paste0(DATA_PATH, '/final/wq.alt6.idx.subregion.RData'))
+        load(file=paste0(DATA_PATH, '/final/wq.alt7.idx.subregion.RData'))
+        load(file=paste0(DATA_PATH, '/final/wq.alt8.idx.subregion.RData'))
         load(file=paste0(GAM_OUTPUT_PATH, 'wq.gams.RData'))
         load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.gams.RData'))
         load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo.gams.RData'))
         load(file=paste0(DATA_PATH, '/primary/other/wq.units.RData'))
         
         load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt1.idx.subregion.subindicator.RData'))
-        load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt6.idx.subregion.subindicator.RData'))
-        reneeYear.subregion.subindicator.worm <- wq.alt6.idx.subregion.subindicator
+        load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt7.idx.subregion.subindicator.RData'))
+        load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt8.idx.subregion.subindicator.RData'))
+        reneeYear.subregion.subindicator.worm <- wq.alt7.idx.subregion.subindicator
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Reading in data.', return=TRUE)
     ## ----end
 
-    ## 2. Hist vs Alt6
-    ## ---- Hist vs Alt6
+    ## 2. Hist vs Alt7
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_0 = structure(paste0("## Hist vs Alt6\n"),
+                               SUBSECTION_0 = structure(paste0("## Hist vs Alt7\n"),
                                                         parent = 'TABSET'),
                                TABSET_0 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_0'),
@@ -69,16 +72,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
             nest() %>%
             mutate(Subregion = as.character(Subregion)) %>%
             mutate(Historic.idx.subregion = map(.x = Subregion,
-                                                .f = ~ wq.historic.idx.subregion %>%
+                                                ## .f = ~ wq.historic.idx.subregion %>%
+                                                .f = ~ wq.alt8.idx.subregion %>%
+                                                  mutate(Year = reneeYear) |> 
                                                     dplyr::filter(Year>2007,
                                                            Year<as.numeric(as.character(reportYear))+1,
                                                            Subregion == .x)),
-                   alt6.idx.subregion = map(.x = Subregion,
-                                            .f = ~ wq.alt6.idx.subregion %>%
+                   alt7.idx.subregion = map(.x = Subregion,
+                                            .f = ~ wq.alt7.idx.subregion %>%
                                                 dplyr::filter(Subregion == .x))
                    ) %>%
             mutate(Index_Plot = map2(.x = Historic.idx.subregion,
-                             .y = alt6.idx.subregion,
+                             .y = alt7.idx.subregion,
                              .f = ~MMP__worm_historic_and_alt(hist.idx = .x, alt.idx = .y,
                                                               minDate = minDate, MAXDATE = MAXDATE))
                              ) %>%
@@ -104,13 +109,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = "_summary",
-                                          label_suffix="_Hist_Alt6_",
+                                          label_suffix="_Hist_Alt7_",
                                           Cnt, tabset_parent = "TABSET_0",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index as well as b-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6.', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7.', return=TRUE)
     ## ----end
 
 
@@ -166,11 +171,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     ## ----end
     
     ## 3. 2020 separate the worms 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_1 = structure(paste0("## Hist vs Alt6 2020\n"),
+                               SUBSECTION_1 = structure(paste0("## Hist vs Alt7 2020\n"),
                                                         parent = 'TABSET'),
                                TABSET_1 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_1'),
@@ -186,7 +191,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                        map(.x = Subregion,
                            .f = ~ reneeYear.subregion.subindicator.worm %>%
                                filter(Subregion == .x))) %>%
-            mutate(Index_alt_Plot = map2(.x = alt6.idx.subregion,
+            mutate(Index_alt_Plot = map2(.x = alt7.idx.subregion,
                                         .y = ReneeYear.subregion.subindicator.worm,
                                         .f = ~MMP__worm_alt(alt.idx = .x,
                                                             subregion.worm = .y,
@@ -208,21 +213,21 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = "_2020_summary",
-                                          label_suffix="_Hist_Alt6a_",
+                                          label_suffix="_Hist_Alt7a_",
                                           Cnt, tabset_parent = "TABSET_1",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-l) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (separate worms).', return=TRUE)
     ## ----end
 
     ## 4. 2019 Renee would prefer two separate pages of plots 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_2 = structure(paste0("## Hist vs Alt6 Part 1\n"),
+                               SUBSECTION_2 = structure(paste0("## Hist vs Alt7 Part 1\n"),
                                                         parent = 'TABSET'),
                                TABSET_2 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_2'),
@@ -250,14 +255,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = "_summary_part1",
-                                          label_suffix="_Hist_Alt6_1_",
+                                          label_suffix="_Hist_Alt7_1_",
                                           Cnt, tabset_parent = "TABSET_2",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies, full trend, circular symbols) and (current methodologies, diamond symbols) as well as b-e) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_3 = structure(paste0("## Hist vs Alt6 Part 2\n"),
+                               SUBSECTION_3 = structure(paste0("## Hist vs Alt7 Part 2\n"),
                                                         parent = 'TABSET'),
                                TABSET_3 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_3'),
@@ -276,18 +281,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = "_summary_part2",
-                                          label_suffix="_Hist_Alt6_2_",
+                                          label_suffix="_Hist_Alt7_2_",
                                           Cnt, tabset_parent = "TABSET_3",
                                           fig.caption = paste0("\nTemporal trends in a-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and blue lines represent smooth trends fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 1 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 Part 1 (separate worms).', return=TRUE)
     ## ----end
 
     ## 5. 2020 Renee would like the historical and recent worms presented in two separate figures
     ##         Renee would prefertwo separate pages of plots 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.tbl <- gam.tbl %>%
@@ -297,7 +302,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 )) 
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_4 = structure(paste0("## Hist vs Alt6 2020 Part 1\n"),
+                               SUBSECTION_4 = structure(paste0("## Hist vs Alt7 2020 Part 1\n"),
                                                         parent = 'TABSET'),
                                TABSET_4 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_4'),
@@ -316,18 +321,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = "_summary_2020_part1",
-                                          label_suffix="_Hist_Alt6a_1_",
+                                          label_suffix="_Hist_Alt7a_1_",
                                           Cnt, tabset_parent = "TABSET_4",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 2020 Part1 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 2020 Part1 (separate worms).', return=TRUE)
     ## ----end
 
 
-  ## 6. Hist vs Alt6 (AIMS and JCU GAMS)
-    ## ---- Hist vs Alt6
+    ## 6. Hist vs Alt7 (AIMS and JCU GAMS)
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         ## As of 2025, the following is no longer the case
@@ -366,8 +371,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                                     dplyr::filter(Year>2007,
                                                            Year<as.numeric(as.character(reportYear))+1,
                                                            Subregion == .x)),
-                   alt6.idx.subregion = map(.x = Subregion,
-                                            .f = ~ wq.alt6.idx.subregion %>%
+                   alt7.idx.subregion = map(.x = Subregion,
+                                            .f = ~ wq.alt7.idx.subregion %>%
                                                 dplyr::filter(Subregion == .x))
                    ) 
 
@@ -378,7 +383,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                                                         flntu = wq.flntu.gams,
                                                                         subr = .x))) %>%
             mutate(Index_Plot = map2(.x = Historic.idx.subregion,
-                             .y = alt6.idx.subregion,
+                             .y = alt7.idx.subregion,
                              .f = ~MMP__worm_historic_and_alt(hist.idx = .x, alt.idx = .y,
                                                               minDate = minDate, MAXDATE = MAXDATE))
                              ) %>%
@@ -390,7 +395,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 ))
 
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_5 = structure(paste0("## Hist vs Alt6 (AIMS & JCU)\n"),
+                               SUBSECTION_5 = structure(paste0("## Hist vs Alt7 (AIMS & JCU)\n"),
                                                         parent = 'TABSET'),
                                TABSET_5 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_5'),
@@ -408,14 +413,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           fig.width=7, fig.height=9, pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_summary",
-                                          label_suffix="_Hist_Alt6b_",
+                                          label_suffix="_Hist_Alt7b_",
                                           Cnt, tabset_parent = "TABSET_5",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index as well as b-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (AIMS & JCU).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (AIMS & JCU).', return=TRUE)
     ## ----end
 
     ## 6b. GAM table 
@@ -462,7 +467,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     ## ----end
 
     ## 7. 2020 separate the worms 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.aims.jcu.tbl <- gam.aims.jcu.tbl %>%
@@ -471,7 +476,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
             ##                                                       minDate = minDate, MAXDATE = MAXDATE))
             ##        ) %>%
             mutate(Index_hist_Plot = map2(.x = Historic.idx.subregion,
-                             .y = alt6.idx.subregion,
+                             .y = alt7.idx.subregion,
                              .f = ~MMP__worm_historic_and_alt(hist.idx = .x, alt.idx = .y,
                                                               minDate = minDate, MAXDATE = MAXDATE))
                              ) %>%
@@ -479,7 +484,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                        map(.x = Subregion,
                            .f = ~ reneeYear.subregion.subindicator.worm %>%
                                filter(Subregion == .x))) %>%
-            mutate(Index_alt_Plot = map2(.x = alt6.idx.subregion,
+            mutate(Index_alt_Plot = map2(.x = alt7.idx.subregion,
                                         .y = ReneeYear.subregion.subindicator.worm,
                                         .f = ~MMP__worm_alt(alt.idx = .x,
                                                             subregion.worm = .y,
@@ -491,7 +496,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 ))
 
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_6 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, 2020)\n"),
+                               SUBSECTION_6 = structure(paste0("## Hist vs Alt7 (AIMS & JCU, 2020)\n"),
                                                         parent = 'TABSET'),
                                TABSET_6 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_6'),
@@ -509,18 +514,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           fig.width=7, fig.height=9, pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_2020_summary",
-                                          label_suffix="_Hist_Alt6_3",
+                                          label_suffix="_Hist_Alt7_3",
                                           Cnt, tabset_parent = "TABSET_6",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-l) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms, 2020).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (separate worms, 2020).', return=TRUE)
     ## ----end
 
     ## 8. 2019 Renee would prefer two separate pages of plots 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.aims.jcu.tbl <- gam.aims.jcu.tbl %>%
@@ -533,7 +538,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 ))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_7 = structure(paste0("## Hist vs Alt6 Part 1 (AIMS & JCU)\n"),
+                               SUBSECTION_7 = structure(paste0("## Hist vs Alt7 Part 1 (AIMS & JCU)\n"),
                                                         parent = 'TABSET'),
                                TABSET_7 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_7'),
@@ -552,14 +557,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_summary_part1",
-                                          label_suffix="_Hist_Alt6_3a",
+                                          label_suffix="_Hist_Alt7_3a",
                                           Cnt, tabset_parent = "TABSET_7",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies, full trend, circular symbols) and (current methodologies, diamond symbols) as well as b-e) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_8 = structure(paste0("## Hist vs Alt6 Part 2 (AIMS & JCU)\n"),
+                               SUBSECTION_8 = structure(paste0("## Hist vs Alt7 Part 2 (AIMS & JCU)\n"),
                                                         parent = 'TABSET'),
                                TABSET_8 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_8'),
@@ -577,18 +582,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_summary_part2",
-                                          label_suffix="_Hist_Alt6_3b",
+                                          label_suffix="_Hist_Alt7_3b",
                                           Cnt, tabset_parent = "TABSET_8",
                                           fig.caption = paste0("\nTemporal trends in a-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 2 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 Part 2 (separate worms).', return=TRUE)
     ## ----end
 
     ## 9. 2020 Renee would like the historical and recent worms presented in two separate figuresi
     ##         Renee would prefertwo separate pages of plots 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.aims.jcu.tbl <- gam.aims.jcu.tbl %>%
@@ -598,7 +603,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 )) 
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_9 = structure(paste0("## Hist vs Alt6 Part 1 (AIMS & JCU, 2020)\n"),
+                               SUBSECTION_9 = structure(paste0("## Hist vs Alt7 Part 1 (AIMS & JCU, 2020)\n"),
                                                         parent = 'TABSET'),
                                TABSET_9 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_9'),
@@ -616,18 +621,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_summary_2020_part1",
-                                          label_suffix="_Hist_Alt6_4",
+                                          label_suffix="_Hist_Alt7_4",
                                           Cnt, tabset_parent = "TABSET_9",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part1 (separate worms, 2020).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 Part1 (separate worms, 2020).', return=TRUE)
     ## ----end
     
-    ## 10. Hist vs Alt6 (AIMS and JCU OMO GAMS)
-    ## ---- Hist vs Alt6
+    ## 10. Hist vs Alt7 (AIMS and JCU OMO GAMS) - From now on it is also using the new Historic index
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
 
@@ -661,12 +666,15 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
             nest() %>%
             mutate(Subregion = as.character(Subregion)) %>%
             mutate(Historic.idx.subregion = map(.x = Subregion,
-                                                .f = ~ wq.historic.idx.subregion %>%
-                                                    dplyr::filter(Year>2007,
+                                                ## .f = ~ wq.historic.idx.subregion %>%
+                                                .f = ~ wq.alt8.idx.subregion %>%
+                                                  mutate(Year = reneeYear) |> 
+                                                  dplyr::filter(Year>2007,
+                                                                ## Year < 2016,
                                                            Year<as.numeric(as.character(reportYear))+1,
                                                            Subregion == .x)),
-                   alt6.idx.subregion = map(.x = Subregion,
-                                            .f = ~ wq.alt6.idx.subregion %>%
+                   alt7.idx.subregion = map(.x = Subregion,
+                                            .f = ~ wq.alt7.idx.subregion %>%
                                                 dplyr::filter(Subregion == .x))
                    ) 
 
@@ -677,7 +685,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                                                         flntu = wq.flntu.gams,
                                                                         subr = .x))) %>%
             mutate(Index_Plot = map2(.x = Historic.idx.subregion,
-                             .y = alt6.idx.subregion,
+                             .y = alt7.idx.subregion,
                              .f = ~MMP__worm_historic_and_alt(hist.idx = .x, alt.idx = .y,
                                                               minDate = minDate, MAXDATE = MAXDATE))
                              ) %>%
@@ -690,7 +698,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 ))
 
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_10 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO)\n"),
+                               SUBSECTION_10 = structure(paste0("## Hist vs Alt7 (AIMS & JCU, OMO)\n"),
                                                         parent = 'TABSET'),
                                TABSET_10 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_10'),
@@ -709,13 +717,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_summary",
-                                          label_suffix="_Hist_Alt6_5",
+                                          label_suffix="_Hist_Alt7_5",
                                           Cnt, tabset_parent = "TABSET_10",
-                                          fig.caption = paste0("\nTemporal trends in a) water quality index as well as b-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
+                                          fig.caption = paste0("\nTemporal trends in a) water quality index as well as b-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 sampling design (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (AIMS & JCU, OMO)', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (AIMS & JCU, OMO)', return=TRUE)
     ## ----end
 
     ## 10b. GAM table 
@@ -774,7 +782,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
     ## ----end
 
     ## 11. 2020 separate the worms 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
@@ -786,7 +794,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                        map(.x = Subregion,
                            .f = ~ reneeYear.subregion.subindicator.worm %>%
                                filter(Subregion == .x))) %>%
-            mutate(Index_alt_Plot = map2(.x = alt6.idx.subregion,
+            mutate(Index_alt_Plot = map2(.x = alt7.idx.subregion,
                                         .y = ReneeYear.subregion.subindicator.worm,
                                         .f = ~MMP__worm_alt(alt.idx = .x,
                                                             subregion.worm = .y,
@@ -798,7 +806,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 ))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_11 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2020)\n"),
+                               SUBSECTION_11 = structure(paste0("## Hist vs Alt7 (AIMS & JCU, OMO, 2020)\n"),
                                                         parent = 'TABSET'),
                                TABSET_11 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_11'),
@@ -817,18 +825,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2020_summary",
-                                          label_suffix="_Hist_Alt6_6",
+                                          label_suffix="_Hist_Alt7_6",
                                           Cnt, tabset_parent = "TABSET_11",
-                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-l) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offset only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
+                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-l) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 sampling design (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offset only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms, AIMS & JCU, OMO 2020).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (separate worms, AIMS & JCU, OMO 2020).', return=TRUE)
     ## ----end
     
     ## 12. 2019 Renee would prefer two separate pages of plots 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
@@ -841,7 +849,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 ))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_12 = structure(paste0("## Hist vs Alt6 Part 1 (AIMS & JCU, OMO)\n"),
+                               SUBSECTION_12 = structure(paste0("## Hist vs Alt7 Part 1 (AIMS & JCU, OMO)\n"),
                                                         parent = 'TABSET'),
                                TABSET_12 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_12'),
@@ -860,14 +868,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_summary_part1",
-                                          label_suffix="_Hist_Alt6_7",
+                                          label_suffix="_Hist_Alt7_7",
                                           Cnt, tabset_parent = "TABSET_12",
-                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies, full trend, circular symbols) and (current methodologies, diamond symbols) as well as b-e) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
+                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies, full trend, circular symbols) and (current methodologies, diamond symbols) as well as b-e) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 sampling design (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_13 = structure(paste0("## Hist vs Alt6 Part 2 (AIMS & JCU, OMO)\n"),
+                               SUBSECTION_13 = structure(paste0("## Hist vs Alt7 Part 2 (AIMS & JCU, OMO)\n"),
                                                         parent = 'TABSET'),
                                TABSET_13 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_13'),
@@ -886,18 +894,18 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_summary_part2",
-                                          label_suffix="_Hist_Alt6_8",
+                                          label_suffix="_Hist_Alt7_8",
                                           Cnt, tabset_parent = "TABSET_12",
-                                          fig.caption = paste0("\nTemporal trends in a-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.\n")) 
+                                          fig.caption = paste0("\nTemporal trends in a-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 sampling design (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.\n")) 
               }
               )          
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 2 (separate worms, AIMS & JCU, OMO).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 Part 2 (separate worms, AIMS & JCU, OMO).', return=TRUE)
     ## ----end
 
     ## 13. 2020 Renee would like the historical and recent worms presented in two separate figuresi
     ##         Renee would prefertwo separate pages of plots 
-    ## ---- Hist vs Alt6
+    ## ---- Hist vs Alt7
     MMP_tryCatch(
     {
         gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
@@ -907,7 +915,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                 )) 
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_14 = structure(paste0("## Hist vs Alt6 Part 1 (AIMS & JCU, OMO, 2020)\n"),
+                               SUBSECTION_14 = structure(paste0("## Hist vs Alt7 Part 1 (AIMS & JCU, OMO, 2020)\n"),
                                                         parent = 'TABSET'),
                                TABSET_14 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_14'),
@@ -926,19 +934,19 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_summary_2020_part1",
-                                          label_suffix="_Hist_Alt6_9",
+                                          label_suffix="_Hist_Alt7_9",
                                           Cnt, tabset_parent = "TABSET_14",
-                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
+                                          fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) as well as c-f) generalized additive models of various water quality measures for the ",Subregion," subregion. Water quality indices calculated via 2015 sampling design (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coastal/Midshelf/Offshore only) and hierarchical formulation (diamond symbols).  Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 Part 1 (separate worms, AIMS & JCU, OMO 2020).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 Part 1 (separate worms, AIMS & JCU, OMO 2020).', return=TRUE)
     ## ----end
 
     ## 14. 2023 Renee would like the historical and recent worms presented in a single top and bottom
     ## figure
-    ## ---- Hist vs Alt6 2023
+    ## ---- Hist vs Alt7 2023
     MMP_tryCatch(
     {
         wq.alt1.idx.subregion.subindicator <- wq.alt1.idx.subregion.subindicator %>%
@@ -946,19 +954,20 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                   reportCardYear == as.Date("2016-01-01") &
                                   Measure == "CombinedTurb", NA, Index))
         gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
-            mutate(Alt1.subregion.subindicator = map(.x = Subregion,
-                                                      .f = ~ wq.alt1.idx.subregion.subindicator %>%
-                                                          filter(Subregion == .x) %>%
-                                                          mutate(Measure = factor(ifelse(Measure == 'DRIFTCHL_UGPERL.wm', 'Chl-a',
-                                                                                 ifelse(Measure == 'NOx.wm', 'NOx',
-                                                                                 ifelse(Measure == 'NTU', 'NTU',
-                                                                                 ifelse(Measure == 'PN.wm', 'PN',
-                                                                                 ifelse(Measure == 'PP.wm', 'PP',
-                                                                                 ifelse(Measure == 'CombinedTurb', 'Water Clarity', '')))))))) %>%
-                                                         group_by(Subregion, reportCardYear, Measure) %>%
-                                                         summarise(Index=mean(Index))
-                                                     )
-                   ) %>%
+          mutate(Alt1.subregion.subindicator =
+                   map(.x = Subregion,
+                       .f = ~ wq.alt1.idx.subregion.subindicator %>%
+                         filter(Subregion == .x) %>%
+                         mutate(Measure = factor(ifelse(Measure == 'DRIFTCHL_UGPERL.wm', 'Chlorophyll-a',
+                                                 ifelse(Measure == 'NOx.wm', 'Nitrate/Nitrite',
+                                                 ifelse(Measure == 'NTU', 'NTU',
+                                                 ifelse(Measure == 'PN.wm', 'Particulate nitrogen',
+                                                 ifelse(Measure == 'PP.wm', 'Particulate phosphorus',
+                                                 ifelse(Measure == 'CombinedTurb', 'Water Clarity', '')))))))) %>%
+                         group_by(Subregion, reportCardYear, Measure) %>%
+                         summarise(Index=mean(Index))
+                       )
+                 ) %>%
             mutate(Index_hist_plot2 = map2(.x = Historic.idx.subregion,
                                            .y = Alt1.subregion.subindicator,
                                            .f = ~ MMP__worm_hist_2(hist.idx = .x,
@@ -967,7 +976,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                                                    MAXDATE = MAXDATE))
                    ) %>%
           mutate(Index_alt_Plot2 =
-                   map2(.x = alt6.idx.subregion,
+                   map2(.x = alt7.idx.subregion,
                         .y = ReneeYear.subregion.subindicator.worm,
                         .f = ~MMP__worm_alt_2023(
                               alt.idx = .x %>%
@@ -992,7 +1001,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
             ##                           .f = ~ .x/.y))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_15 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 1)\n"),
+                               SUBSECTION_15 = structure(paste0("## Hist vs Alt7 (AIMS & JCU, OMO, 2023 part 1)\n"),
                                                         parent = 'TABSET'),
                                TABSET_15 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_15'),
@@ -1012,19 +1021,19 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 12) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part1",
-                                          label_suffix="_Hist_Alt6_6_1",
+                                          label_suffix="_Hist_Alt7_6_1",
                                           Cnt, tabset_parent = "TABSET_15",
                                           fig.caption = paste0("\nTemporal trends in a) water quality index (2015 methodologies), b) water quality index for the current design (with individual coloured subindicators) for the ",Subregion," subregion. Water quality indices calculated via 2015 methodologies (full trend, circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offset only) and hierarchical formulation (diamond symbols).\n")) 
               }
               )          
         
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms, AIMS & JCU, OMO 2023).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (separate worms, AIMS & JCU, OMO 2023).', return=TRUE)
     ## ----end
         
     ## 15. 2023 Renee would like the historical and recent worms presented in a single top and bottom
     ## figure
-    ## ---- Hist vs Alt6 2023 part 2
+    ## ---- Hist vs Alt7 2023 part 2
     MMP_tryCatch(
     {
         gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
@@ -1034,7 +1043,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                       .f = ~ MMP__gam_plot2023(..1, ..2, ..3, wq.aims.jcu.omo.gams)))
         
         MMP_add_to_report_list(CURRENT_STAGE, "compilations",
-                               SUBSECTION_16 = structure(paste0("## Hist vs Alt6 (AIMS & JCU, OMO, 2023 part 2)\n"),
+                               SUBSECTION_16 = structure(paste0("## Hist vs Alt7 (AIMS & JCU, OMO, 2023 part 2)\n"),
                                                         parent = 'TABSET'),
                                TABSET_16 = structure(paste0("\n:::: panel-tabset\n"),
                                                     parent = 'SUBSECTION_16'),
@@ -1052,15 +1061,143 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
                                           pt.size = 10) 
                   MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
                                           fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part2",
-                                          label_suffix="_Hist_Alt6_6_2",
+                                          label_suffix="_Hist_Alt7_6_2",
                                           Cnt, tabset_parent = "TABSET_16",
                                           fig.caption = paste0("\nTemporal trends in a-j) generalized additive models of various water quality measures for the ",Subregion," subregion. Black dots represent depth weighted averages and red/blue lines represent smooth trends of AIMS + JCU data fitted by Generalized Additive Models (GAMMs).  Transparent ribbons represent estimate ±1 and ±2 SE.  Horizontal dashed line represents old Water Quality Guidelines.  Red and blue GAMM lines and confidence ribbons represent FLNTU and Niskin samples respectively.\n")) 
               }
               )          
 
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt6 (separate worms).', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (separate worms).', return=TRUE)
     ## ----end
+
+
+    ## 16. 2026 Renee would like the historical and recent worms presented in a single 
+    ## figure in which the long-term trend stops < 2016 and the annual trend is
+    ## from 2016 onwards 
+    ## ---- Hist vs Alt7 2026
+    MMP_tryCatch(
+    {
+        ## load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo.gams.RData'))
+        ## load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt1.idx.subregion.subindicator.RData'))
+        ## load(file = paste0(INDICES_OUTPUT_PATH, 'wq.alt7.idx.subregion.subindicator.RData'))
+        ## reneeYear.subregion.subindicator.worm <- wq.alt7.idx.subregion.subindicator
+
+        wq.alt1.idx.subregion.subindicator <- wq.alt1.idx.subregion.subindicator %>%
+            mutate(Index = ifelse(Subregion == "Fitzroy" &
+                                  reportCardYear == as.Date("2016-01-01") &
+                                  Measure == "CombinedTurb", NA, Index))
+        gam.aims.jcu.omo.tbl <- gam.aims.jcu.omo.tbl %>%
+          mutate(Alt1.subregion.subindicator =
+                   map(.x = Subregion,
+                       .f = ~ wq.alt1.idx.subregion.subindicator %>%
+                         filter(Subregion == .x) %>%
+                         mutate(Measure = factor(ifelse(Measure == 'DRIFTCHL_UGPERL.wm', 'Chl-a',
+                                                 ifelse(Measure == 'NOx.wm', 'NOx',
+                                                 ifelse(Measure == 'NTU', 'NTU',
+                                                 ifelse(Measure == 'PN.wm', 'PN',
+                                                 ifelse(Measure == 'PP.wm', 'PP',
+                                                 ifelse(Measure == 'CombinedTurb', 'Water Clarity', '')))))))) %>%
+                         group_by(Subregion, reportCardYear, Measure) %>%
+                         summarise(Index=mean(Index))
+                       )
+                 ) %>%
+          mutate(Index_hist_plot2 = map2(.x = Historic.idx.subregion,
+                                         .y = Alt1.subregion.subindicator,
+                                         .f = ~ MMP__worm_hist_2(hist.idx = .x,
+                                                                 subregion.worm = .y,
+                                                                 minDate = minDate,
+                                                                 MAXDATE = MAXDATE))
+                 ) %>%
+          mutate(Index_alt_Plot2 =
+                   map2(.x = alt7.idx.subregion,
+                        .y = ReneeYear.subregion.subindicator.worm,
+                        .f = ~MMP__worm_alt_2023(
+                              alt.idx = .x %>%
+                                filter(!(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour") &
+                                      reportCardYear < as.Date("2021-01-01"))) %>%
+                                droplevels(),
+                              subregion.worm = .y %>%
+                                filter(!(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour") &                                      reportCardYear < as.Date("2021-01-01"))) %>%
+                                droplevels(),
+                              minDate = minDate, MAXDATE = MAXDATE))
+                 ) %>%
+          mutate(Index_plots =
+                   ifelse(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour"),
+                          Index_alt_Plot2,
+                          map2(.x = Index_hist_plot2,
+                                      .y = Index_alt_Plot2,
+                               .f = ~ .x/.y)
+                          )
+                 ) |> 
+            ## mutate(Index_plots = map2(.x = Index_hist_plot2,
+            ##                           .y = Index_alt_Plot2,
+            ##                           .f = ~ .x/.y))
+          mutate(Index_plots_new =
+                   pmap(.l = list(Historic.idx.subregion,                  # Indicator indices for type 8 (e.g. points)
+                                  Alt1.subregion.subindicator,             # Measure/Subindicator for type 8 (e.g. lines)
+                                  alt7.idx.subregion,                      # Indicator for type 7 (e.g. points)
+                                  ReneeYear.subregion.subindicator.worm),  # Measure/Subindicator for type 7 (e.g. lines)
+                        .f =  ~ {
+                          hist.idx <- ..1  
+                          subregion.worm <- ..2 
+                          alt.idx <- ..3 %>%
+                            filter(!(Subregion %in%
+                                     c("Pascoe", "Stewart", "Normanby", "Endeavour") &
+                                     reportCardYear < as.Date("2021-01-01"))) %>%
+                            droplevels()
+                          subregion.worm.7 <- ..4 %>%
+                            filter(!(Subregion %in%
+                                     c("Pascoe", "Stewart", "Normanby", "Endeavour") &                                      reportCardYear < as.Date("2021-01-01"))) %>%
+                            droplevels()
+                          MMP__worm_alt_2026(
+                            hist.idx = hist.idx,
+                            subregion.worm = subregion.worm,
+                            alt.idx =  alt.idx,
+                            subregion.worm.7 = subregion.worm.7,
+                            minDate = minDate,
+                            MAXDATE = MAXDATE
+                          )
+                        }
+                        )
+                 ) 
+        
+        MMP_add_to_report_list(CURRENT_STAGE, "compilations",
+                               SUBSECTION_17 = structure(paste0("## Hist vs Alt7 (AIMS & JCU, OMO, 2026 part 1)\n"),
+                                                        parent = 'TABSET'),
+                               TABSET_17 = structure(paste0("\n:::: panel-tabset\n"),
+                                                    parent = 'SUBSECTION_17'),
+                               TABSET_17_END = structure(paste0("\n:::: \n"),
+                                                        parent = 'SUBSECTION_17')
+                               )
+
+        pwalk(list(Subregion = gam.aims.jcu.omo.tbl$Subregion,
+                   IndexPlots.AIMS.JCU.OMO.2026.part1 = gam.aims.jcu.omo.tbl$Index_plots_new,
+                   Cnt = 1:length(gam.aims.jcu.omo.tbl$Subregion)),
+              .f = function(Subregion, IndexPlots.AIMS.JCU.OMO.2026.part1, Cnt) { 
+                  MMP__comp_figure_export(FIGURE_OUTPUT_PATH, Subregion,
+                                          fig_name_suffix = ".AIMS_JCU_OMO_2026_summary_part1",
+                                          Plot = IndexPlots.AIMS.JCU.OMO.2026.part1,
+                                          fig.width=6,
+                                          ## fig.height=ifelse(Subregion %in% c("Pascoe", "Stewart", "Normanby", "Endeavour"),3,6),
+                                          fig.height = 3,
+                                          pt.size = 12) 
+                  MMP__comp_figure_quarto(FIGURE_OUTPUT_PATH, Subregion,
+                                          fig_name_suffix = ".AIMS_JCU_OMO_2026_summary_part1",
+                                          label_suffix="_Hist_Alt7_6_1b",
+                                          Cnt, tabset_parent = "TABSET_17",
+                                          fig.caption = paste0("\nTemporal trends in water quality index with individual coloured subindicators for the ",Subregion," subregion. Water quality indices calculated via 2015 sampling design (circular symbols) and full data ingest methodologies (AIMS + JCU, Open Coasta/Midshelf/Offset only) and hierarchical formulation (diamond symbols).\n")) 
+              }
+              )          
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist vs Alt7 (separate worms, AIMS & JCU, OMO 2026).', return=TRUE)
+    ## ----end
+
+
+
+
+  
     save(gam.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.tbl.RData"))
     ## save(gam.aims.jcu.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.aims.jcu.tbl.RData"))
     ## save(gam.aims.jcu.omo.tbl, file = paste0(GAM_OUTPUT_PATH, "gam.aims.jcu.omo.tbl.RData"))

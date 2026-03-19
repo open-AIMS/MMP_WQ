@@ -190,3 +190,18 @@ MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
 
 save(hierarchy, file=paste0(DATA_PATH, '/primary/other/hierarchy.RData'))
 ## ----end
+
+## ---- PARAMS new_hierarchy
+CURRENT_ITEM <<- 'new_hierarchy'
+new_hierarchy <- read.csv(file=paste0(PARAMS_PATH, '/new_hierarchy.csv'), strip.white=TRUE)
+MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
+                       SUBSECTION_hier = structure(paste0("# ", CURRENT_ITEM, "\n\n"),
+                                              parent = 'TABSET'),
+                               TAB_hier.lookup = structure(mmp__add_table(new_hierarchy),
+                                               parent = 'SUBSECTION_new_hier'),
+                               TAB_CAP.hier.lookup = structure(paste0("\n:New Index aggregation hierarchy. {#tbl-new-hier}\n\n"),
+                                                   parent = 'SUBSECTION_new_hier')
+                              )
+
+save(new_hierarchy, file=paste0(DATA_PATH, '/primary/other/new_hierarchy.RData'))
+## ----end

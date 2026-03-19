@@ -29,7 +29,7 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"Plots4Angus"))) &
     file.exists(paste0(GAM_OUTPUT_PATH, 'wq.gams.RData')) &
-    file.exists(paste0(DATA_PATH, '/indices/wq.alt6.idx.subregion.subindicator.RData')) &
+    file.exists(paste0(DATA_PATH, '/indices/wq.alt7.idx.subregion.subindicator.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, 'names_lookup.RData')) 
     ) {
 
@@ -48,13 +48,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"Plots4Angus"))) &
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
-        load(file=paste0(DATA_PATH, '/indices/wq.alt6.idx.subregion.subindicator.RData'))
+        load(file=paste0(DATA_PATH, '/indices/wq.alt7.idx.subregion.subindicator.RData'))
         load(file = paste0(GAM_OUTPUT_PATH, "wq.gams.RData"))
         load(file = paste0(GAM_OUTPUT_PATH, "wq.flntu.gams.RData"))
         load(file = paste0(GAM_OUTPUT_PATH, "wq.aims.jcu.gams.RData"))
         load(file = paste0(GAM_OUTPUT_PATH, "wq.aims.jcu.omo.gams.RData"))
 
-        reneeYear.subregion.subindicator.worm <- wq.alt6.idx.subregion.subindicator
+        reneeYear.subregion.subindicator.worm <- wq.alt7.idx.subregion.subindicator
 
 
     },

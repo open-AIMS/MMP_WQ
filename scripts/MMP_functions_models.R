@@ -359,14 +359,19 @@ MMP__worm_historic_and_alt <- function(hist.idx, alt.idx, minDate, MAXDATE) {
     if (nrow(hist.idx) > 0) {
         g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
             geom_hline(yintercept = 0, linetype = 'dashed') +
-            geom_line() +
+            geom_line() 
+        if ("Lower" %in% colnames(hist.idx)) {
+          g <- g +  
+            geom_linerange(aes(ymin = Lower, ymax = Upper)) 
+        }
+        g <- g +
             geom_point(aes(fill = Grade), shape = 21,
-                       size = 3, show.legend = FALSE)  +
+                       size = 3, show.legend = FALSE) +
             geom_line(data = alt.idx) +
+            geom_linerange(data = alt.idx, aes(ymin = Lower, ymax = Upper)) +
             geom_point(data = alt.idx,
                        aes(fill = Grade), shape = 23,
                        size = 3, show.legend = FALSE) +
-            geom_linerange(data = alt.idx, aes(ymin = Lower, ymax = Upper)) +
             scale_y_continuous(expression(atop(Water~Quality, Index)),
                                limits = c(-1,1)) +
             scale_x_date('', limits = c(minDate, MAXDATE)) +
@@ -599,7 +604,12 @@ MMP__worm_historic <- function(hist.idx, minDate, MAXDATE) {
     if (nrow(hist.idx) > 0) {
         g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
             geom_hline(yintercept = 0, linetype = 'dashed') +
-            geom_line() +
+          geom_line()
+        if ("Lower" %in% colnames(hist.idx)) {
+          g <- g +
+            geom_linerange(aes(ymin = Lower, ymax = Upper))
+        }
+        g <- g +
             geom_point(aes(fill = Grade), shape = 21,
                        size = 3, show.legend = FALSE)  +
             scale_y_continuous(expression(atop(Water~Quality, Index)),
@@ -631,11 +641,17 @@ MMP__worm_historic <- function(hist.idx, minDate, MAXDATE) {
         ##              y=Inf, label = 'a)', vjust = 1)
         g <- ggplot(data = NULL) + theme_nothing()
     }
+    g
 }
 MMP__worm_hist_2 <- function(hist.idx, subregion.worm, minDate, MAXDATE) {
     if (nrow(hist.idx) > 0) {
         g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
-            geom_hline(yintercept = 0, linetype = 'dashed') +
+            geom_hline(yintercept = 0, linetype = 'dashed') 
+        if ("Lower" %in% colnames(hist.idx)) {
+          g <- g +
+            geom_linerange(aes(ymin = Lower, ymax = Upper))
+        }
+        g <- g +
             geom_line(data = subregion.worm,
                       aes(color = Measure), show.legend = TRUE) +
             geom_line(show.legend=FALSE) +
@@ -657,6 +673,7 @@ MMP__worm_hist_2 <- function(hist.idx, subregion.worm, minDate, MAXDATE) {
     } else {
         g <- ggplot(data = NULL) + theme_nothing()
     }
+    g
 }
 
 MMP__worm_alt <- function(alt.idx, subregion.worm, minDate, MAXDATE) {
@@ -679,6 +696,72 @@ MMP__worm_alt <- function(alt.idx, subregion.worm, minDate, MAXDATE) {
         annotate(geom = 'text', x = as.Date(minDate),
                  y = Inf, label = 'b)', vjust = 1)
 }
+
+MMP__worm_alt_2026 <- function(hist.idx, subregion.worm, alt.idx, subregion.worm.7,
+                               minDate, MAXDATE) {
+  if (nrow(hist.idx) > 0) {
+    hist.idx <- hist.idx |>
+      filter(Year < 2016)
+    subregion.worm <- subregion.worm |>
+      filter(reportCardYear < as.Date("2016-01-01")) |> 
+      mutate(Measure = forcats::fct_recode(Measure,
+                                           "Chlorophyll*'-'*italic(a)" = "Chl-a",
+                                           "Nitrate/Nitrite" = "NOx",
+                                           "Particulate~phosphorus" = "PP",
+                                           "Particulate~nitrogen" =  "PN")) |>
+      mutate(Indicator = Measure) |>
+      ## mutate(Indicator = str_replace_all(Indicator, " ", "~")) |> 
+      filter(reportCardYear > as.Date("2007-12-30")) |>
+      droplevels()
+
+    g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
+      geom_hline(yintercept = 0, linetype = 'dashed') +
+      geom_line(data = subregion.worm,
+                aes(color = Indicator), show.legend = TRUE) +
+      geom_line(show.legend=FALSE) +
+      geom_linerange(aes(ymin = Lower, ymax = Upper)) +
+      geom_point(aes(fill = Grade), shape = 21,
+                 size = 3, show.legend = FALSE)  
+  } else {
+    g <- ggplot(data = NULL, aes(y = Index, x = reportCardYear)) +
+      geom_hline(yintercept = 0, linetype = 'dashed') +
+      theme_nothing()
+  }
+  subregion.worm.7 <- subregion.worm.7 |>
+    mutate(Subindicator = forcats::fct_recode(Subindicator,
+                                              "Chlorophyll*'-'*italic(a)" = "Chlorophyll-a",
+                                              "Nitrate/Nitrite" = "NOx",
+                                              "Particulate~phosphorus" = "Particulate phosphorus",
+                                              "Particulate~nitrogen" =  "Particulate nitrogen")) |>
+    mutate(Indicator = Subindicator)
+  g <- g +
+    geom_line(data = subregion.worm.7, # |>
+              aes(color = Indicator), show.legend = TRUE) +
+    geom_linerange(data = alt.idx, aes(ymin = Lower, ymax = Upper)) +
+    geom_line(data= alt.idx) +
+    geom_point(data = alt.idx,
+               aes(fill = Grade), shape = 23, size = 3, show.legend = FALSE) +
+    scale_y_continuous(expression(atop(Water~Quality, Index)),
+                       limits = c(-1,1)) +
+    scale_color_discrete(name = "Indicator",
+                         labels = function(x) parse(text = str_replace_all(x, " ", "~"))) +
+    scale_x_date('', limits = c(minDate, MAXDATE)) +
+    scale_fill_manual('', breaks = c('A','B','C','D','E'),
+                      values = rev(trafficLightPalette),
+                      limits = c('A','B','C','D','E')) +
+    theme_mmp +
+    theme(strip.background = element_blank(),
+          panel.margin.x = unit(1,'line'),
+          axis.title.y = element_text(size = rel(1.25)),
+          legend.text.align = 0
+          ) +
+    ## annotate(geom = 'text', x = as.Date(minDate),
+    ##          y=Inf, label = 'a)', vjust = 1) +
+    guides(fill = "none")
+  return(g)
+  
+}
+
 
 MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 2

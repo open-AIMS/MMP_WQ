@@ -210,6 +210,7 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.all.reef.RData"
             dplyr::select(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,
                           PP.wm,PN.wm,NOx.wm,            #select only necessary info
                           SI.wm,POC.wm,DIN.wm,DOC.wm,DON.wm,DOP.wm,PO4.wm,NH4.wm,  #add others of interest (although they dont have guidelines)
+                          TDN.wm, TDP.wm,  ## new to 2026
                           MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
                           GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
                           oldSamplingYear,waterYear,reneeYear,cwaterYear,
@@ -219,6 +220,7 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.all.reef.RData"
                       dplyr::select(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,
                                     PP.wm,PN.wm,NOx.wm,            #select only necessary info
                                     SI.wm,POC.wm,DIN.wm,DOC.wm,DON.wm,DOP.wm,PO4.wm,NH4.wm,  #add others of interest (although they dont have guidelines)
+                                    TDN.wm, TDP.wm,  ## new to 2026
                                     MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
                                     GBRMPA_water_area,Region,Reg,Subregion,Subreg,
                                     Season,oldSamplingYear,waterYear,reneeYear,cwaterYear,
@@ -229,6 +231,7 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.all.reef.RData"
                       dplyr::select(DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,PP.wm,
                                     PN.wm,NOx.wm,            #select only necessary info
                                     SI.wm,POC.wm,DIN.wm,DOC.wm,DON.wm,DOP.wm,PO4.wm,NH4.wm,  #add others of interest (although they dont have guidelines)
+                                    TDN.wm, TDP.wm,  ## new to 2026
                                     MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
                                     GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
                                     oldSamplingYear,waterYear,reneeYear,cwaterYear,
@@ -237,7 +240,8 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.all.reef.RData"
                       ) %>%
             gather(key=Measure, value=Value, DRIFTCHL_UGPERL.wm,TSS_MGPERL.wm,SECCHI_DEPTH.wm,
                    PP.wm,PN.wm,NOx.wm,
-                   SI.wm,POC.wm,DIN.wm,DOC.wm,DON.wm,DOP.wm,PO4.wm, NH4.wm) %>%
+                   SI.wm,POC.wm,DIN.wm,DOC.wm,DON.wm,DOP.wm,PO4.wm, NH4.wm,
+                   TDN.wm, TDP.wm) %>%
             suppressMessages() %>%
             suppressWarnings()
         

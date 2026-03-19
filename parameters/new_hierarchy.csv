@@ -1,0 +1,8 @@
+Indicator, Subindicator, Measure
+Water Quality, Water Clarity, TSS_MGPERL.wm
+Water Quality, Water Clarity, SECCHI_DEPTH.wm
+Water Quality, Water Clarity, NTU
+Water Quality, Chlorophyll-a, DRIFTCHL_UGPERL.wm
+Water Quality, Nitrate/Nitrite, NOx.wm
+Water Quality, Particulate nitrogen, PN.wm
+Water Quality, Particulate phosphorus, PP.wm

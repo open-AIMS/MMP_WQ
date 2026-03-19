@@ -166,13 +166,22 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
                          )
             )
         transect.tbl <- transect.tbl %>%
+          mutate(glab =  case_when(Measure == "DRIFTCHL_UGPERL.wm" ~ "a)",
+                                   Measure == "NOx.wm" ~ "b)",
+                                   Measure == "TSS_MGPERL.wm" ~ "c)",
+                                   Measure == "SECCHI_DEPTH.wm" ~ "d)",
+                                   Measure == "PN.wm" ~ "f)",
+                                   Measure == "PP.wm" ~ "e)")) |> 
             mutate(
-                Plot = pmap(.l = list(Data, wb, wq.subs.gams),
+                Plot = pmap(.l = list(Data, wb, wq.subs.gams, glab),
                             .f = ~ {
                                 ggplot(..1) +
                                     geom_rugRect(data=..2, aes(x=min,  xmin=min, xmax=max,
                                                                fill=GBRMPA_water_area),
                                                  sides='b', show.legend=FALSE) +
+                                  annotate(geom = "text", y = Inf, x = -Inf, hjust = -0.5,
+                                           vjust = 1,
+                                           label = ..4) +
                                     geom_text(data=..2,  aes(x=(max+min)/2,label=Label),
                                               y=-Inf, vjust=-1) +
                                     scale_fill_manual(breaks=c('Enclosed Coastal waters',

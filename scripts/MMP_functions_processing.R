@@ -976,8 +976,11 @@ mmp__timeseries_prepare_waterTemp <- function(waterTemp, Site, START_DATE) {
             filter(!is.na(Date),
                    Date >= START_DATE) %>%
             droplevels() %>% 
-            arrange(Date) %>%
+          arrange(Date)
+        if (waterTemp %>% nrow() > 0) {
+          waterTemp <- waterTemp %>% 
             complete(Date = seq.Date(min(Date), max(Date), by = 'week'))
+        }
     } else {
         waterTemp <- NULL
     }

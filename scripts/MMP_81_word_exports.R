@@ -1,6 +1,7 @@
 source("MMP_functions.R")
 source("MMP_functions_models.R")
 source("MMP_functions_word.R")
+source("MMP_functions_excel.R")
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
@@ -9,6 +10,7 @@ if (MMP_isParent()) {
 }
 
 FLNTU_INPUT_PATH <- paste0(DATA_PATH, "/processed/loggers/")
+PARAMS_INPUT_PATH <- paste0(DATA_PATH, "/primary/other/")
 DOCX_OUTPUT_FILE <- paste0(OUTPUT_PATH, "/mmp.docx")
 
 assign("CURRENT_STAGE", 9, env = globalenv())
@@ -45,6 +47,8 @@ if ((alwaysExtract | !file.exists(paste0(DOCX_OUTPUT_FILE))) &
         library(officer)
 
         load(file=paste0(FLNTU_INPUT_PATH, 'flntu.all.daily.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
 
         
         flntu.all.sum <- flntu.all.daily %>%

@@ -1,0 +1,54 @@
+* Change log
+** 2026
+- [X] restrict the x-axis range to the last 5 years for temperature/salinity plots
+- [X] move the title to above the plot so that the trends occupy more realestate
+- [X] add Secchi depth to the long-term index calculations (Type 0) - make this Type 8
+- [X] alter the annual index to use the new hierarchy
+- [ ] alter the long-term index to have uncertainty
+- [X] add ggtitle (a), b), c), etc) to the top left of each transect plots (Renee via Teams 12:58 24/02/2026)
+- [X] in the large table that shows the quantiles and GL values for each analyte,
+    remove DIN from the table, replace DON with TDN, replace DOP with TDP (Renee via Teams 11:04 26/02/2026)
+- [X] combine the Hist sv Alt7 worm plot in the Compilations section
+
+* Comparing indices
+** Historic (old)
+*** 4 year rolling average
+*** Index
+    Benchmark=dat$GL
+    e <- (log(dat$Value,2) - log(Benchmark,2))*ifelse(dat$DirectionOfFailure=='H',-1,1)
+    e[e>1]<-1
+    e[e< -1] <- -1
+    e
+*** Aggregations
+    CombinedTurb <- (NTU, TSS, SECCHI_DEPTH)
+    Index <- (Chl, CombinedTurb, PN, PP, NOx)
+    (only partially hierachical)
+    
+    Site/Measure/Year   ->   Site/Subindicator/Year  (aggregate over measures)   -> Subregion/Indicator/Year   (aggregate over sites within subregions and subindicators)
+                                      |
+                                      v
+                             Region/Indicator/Year (aggregate over all sites within regions and subindicators)
+** alt8 (new historical index)
+*** 4 year rolling average
+*** Index
+    Benchmark=dat$GL
+    e <- (log(dat$Value,2) - log(Benchmark,2))*ifelse(dat$DirectionOfFailure=='H',-1,1)
+    e[e>1]<-1
+    e[e< -1] <- -1
+    e
+*** Score
+   Index that is capped and scaled to a fold of 2 (e.g half and twice GL)
+*** Aggregations
+   Site/Measure/Year/Season   ->   Site/Measure/Year (aggregate seasons)
+                                                 |
+                                                 v
+                                  Subregion/Measure/Year (aggregate sites)       ->  Region/Measure/Year (aggregate subregions)
+                                                 |
+                                                 v
+                              Subregion/Subindicator/Year (aggregate measures)   ->  Region/Subindicator/Year (aggregate subregions)
+                                                 |
+                                                 v
+                             Subregion/Indicator/Year (aggregate subindicators)
+                                                 |
+                                                 v
+                               Region/Indicator/Year (aggregate subregions)

@@ -114,7 +114,8 @@ MMP_prepare_table_niskin_summaries <- function() {
 
     niskin.tableData <- wq.all.reef
     niskin.tableData <- niskin.tableData %>%
-        filter(reneeYear == reportYear) 
+      filter(reneeYear == reportYear) |>
+      filter(!Measure %in% c("DIN.wm", "DON.wm", "DOP.wm"))
     niskin.tableData <- niskin.tableData %>% 
         left_join(hierarchy) %>%
         left_join(wq.units) 
@@ -350,7 +351,7 @@ MMP_historical_index_spreadsheet <- function(wb, idx.df, level) {
     wb
 }
 
-MMP_version6_index_spreadsheet <- function(wb, idx.df, level = 1) {
+MMP_version6_index_spreadsheet <- function(wb, idx.df, type = 7, level = 1) {
     switch(level,
            { # Level 1 (measure/site/year)
                idx <- idx.df %>%
@@ -459,7 +460,7 @@ MMP_version6_index_spreadsheet <- function(wb, idx.df, level = 1) {
     nRows <- nrow(headers)
     nCols <- ncol(headers)
     ## wb <- createWorkbook()
-    sheet <- paste0("Indices - Version 6.",level)
+    sheet <- paste0("Indices - Version ", type, ".", level)
     addWorksheet(wb, sheet)
     writeData(wb, sheet, headers, startRow = 1, colNames = FALSE, borderColour = 'black') 
     writeData(wb, sheet, idx, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 

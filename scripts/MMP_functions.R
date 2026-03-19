@@ -118,11 +118,11 @@ MMP_initialise_status <- function() {
                       ),
         STAGE5 = list(title = "Stage 5 - calculate indices",
                       items = c("Type0", "Type1", "Type2", "Type3",
-                                "Type4", "Type5", "Type6", "Comp"),
+                                "Type4", "Type5", "Type6", "Type7", "Type8", "Comp"),
                       names = c("Type 0", "Type 1", "Type 2", "Type 3",
-                                "Type 4", "Type 5", "Type 6", "Comparisons"),
+                                "Type 4", "Type 5", "Type 6", "Type 7", "Type 8", "Comparisons"),
                       status = c("pending", "pending", "pending", "pending",
-                                 "pending", "pending", "pending", "pending")
+                                 "pending", "pending", "pending", "pending", "pending", "pending")
                       ),
         STAGE6 = list(title = "Stage 6 - compilations",
                       items = c("GAMS", "GAMPages"),

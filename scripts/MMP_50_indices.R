@@ -96,7 +96,12 @@ MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
 ##    - indices based on wet/dry guidelines - aggregate wet and dry
 ##    into annual index
 
-source("MMP_51_indices_0.R")
+## Changes in 2026
+## - add Secchi depth to the long-term index calculations (Type 0)
+## - add a 7th version of the index - this one is only partially hierarchical
+##    - DRIFTCHL_UGPERL.wm, NOx.wm, PN.wm, PP.wm, Water Clarity (TSS_MGPERL.wm, SECCHI_DEPTH.wm, NTU)
+
+source("MMP_51_indices_0.R")  # long-term trend (historic)
 
 source("MMP_52_indices_1.R")
 
@@ -109,6 +114,10 @@ source("MMP_55_indices_4.R")
 source("MMP_56_indices_5.R")
 
 source("MMP_57_indices_6.R")
+
+source("MMP_57_indices_7.R")  # annual trend
+
+source("MMP_57_indices_8.R")  # long-term (with uncertainty)
 
 source("MMP_58_indices_comp.R")
 

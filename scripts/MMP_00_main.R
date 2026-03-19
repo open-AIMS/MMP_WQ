@@ -9,7 +9,7 @@
 ## 2b and 3b.  run docker image from project root (not scripts folder)
 ##    docker run --workdir /home/Project --rm -it -v .:/home/Project mmp
 ##    ## docker run --workdir /home/Project --rm -it -v .:/home/Project -u $(id -u):$(id -g) mmp
-##    setwd("scripts")
+setwd("scripts")
 ## 4. source the functions
 source("MMP_functions.R")
 ## 5. run fakeArgs

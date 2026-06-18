@@ -47,7 +47,8 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
     {
         load(file=paste0(NISKIN_INPUT_PATH, 'wq.historic.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
-        load(file=paste0(PARAMS_INPUT_PATH, 'old.wq.guidelines.RData'))
+        ## load(file=paste0(PARAMS_INPUT_PATH, 'old.wq.guidelines.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData')) 
         hier <- get(load(file=paste0(PARAMS_INPUT_PATH, 'new_hierarchy.RData')))
@@ -80,7 +81,10 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
               filter(Source %in% c('AIMS Niskin', 'AIMS FLNTU'), HistoricReef == TRUE) %>%
               ungroup %>% #arrange(MMP_SITE_NAME,Measure,financialYear) %>%
               left_join(hier) |> 
-              left_join(old.wq.guidelines) %>%
+              ## left_join(old.wq.guidelines) %>%
+              left_join(wq.guidelines %>%                   # add the guideline data
+                        dplyr::select(GBRMPA_group,Measure,GL.Season,Location,GL,
+                                      DirectionOfFailure,SHORT_NAME,Latitude)) %>%
               ungroup() 
            ) %>%
            group_by(MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,

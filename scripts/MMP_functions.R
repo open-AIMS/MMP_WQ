@@ -1213,7 +1213,7 @@ mmp__read_flntu_nc <- function(nc_file) {
       mutate(
         chla = chla,
         chla_quality_control = chla_quality_control) %>% 
-      filter(chla_quality_control == 1) %>% 
+      filter(chla_quality_control %in% c(1,2)) %>% 
       pivot_longer(cols = c(chla, chla_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)
@@ -1225,7 +1225,7 @@ mmp__read_flntu_nc <- function(nc_file) {
       mutate(
         turb = turb,
         turb_quality_control = turb_quality_control) %>% 
-      filter(turb_quality_control == 1) %>% 
+      filter(turb_quality_control %in% c(1,2)) %>% 
       pivot_longer(cols = c(turb, turb_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)

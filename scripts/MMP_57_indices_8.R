@@ -27,7 +27,8 @@ MMP_openning_banner()
 if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.all.reef.RData')) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.historic.RData')) &
-    file.exists(paste0(PARAMS_INPUT_PATH, '/old.wq.guidelines.RData')) &
+    ## file.exists(paste0(PARAMS_INPUT_PATH, '/old.wq.guidelines.RData')) &
+    file.exists(paste0(PARAMS_INPUT_PATH, '/wq.guidelines.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, '/wq.units.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, '/new_hierarchy.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, '/names_lookup.RData')) 

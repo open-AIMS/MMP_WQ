@@ -1165,6 +1165,7 @@ MMP__gam_table_quarto <- function(CURRENT_STAGE, Subregion,label_suffix,
 ##    tibble: a tibble representing the data.                          ##
 #########################################################################
 mmp__read_flntu_nc <- function(nc_file) {
+  ## print(nc_file)
   lookup <- read_csv("../parameters/lookup.csv") %>% suppressMessages()
   names_lookup <- read_csv("../parameters/names_lookup.csv") %>% suppressMessages()
 
@@ -1175,6 +1176,7 @@ mmp__read_flntu_nc <- function(nc_file) {
   ## get the site_code
   site_code <- ncdf4::ncatt_get(dat, 0, "site_code")$value
   region <- lookup %>% filter(SHORT_NAME == site_code) %>% pull(Region)
+  if (length(region) == 0) region <- NA
   ## extract the time dimension
   time <- ncdf4::ncvar_get(dat, "TIME")
   ## determine the units of time
@@ -1238,9 +1240,11 @@ mmp__read_flntu_nc <- function(nc_file) {
 }
 
 MMP_read_flntu_nc <- function(flntu_files) {
-  df <- do.call('rbind', lapply(flntu_files, mmp__read_flntu_nc))
+  df <- do.call('rbind', lapply(flntu_files, mmp__read_flntu_nc)) |>
+    unnest(c("chla", "chla_quality_control", "turb", "turb_quality_control"))
 
   df <- df %>%
+    dplyr::filter(!is.na(NRM_REGION)) %>% 
     dplyr::filter(!is.na(chla)) %>% 
     group_by(STATION_ID, SHORT_NAME, MMP_SITE_NAME, SAMPLE_DAY) %>%
     summarise(

@@ -75,8 +75,7 @@ for (item in logger_items) {
             db_user = item_db_user,
             progressive = FALSE
         )
-    } # Otherwise ! alwaysExtract AND data file exists --> update log & status, append file size to banner
-    else {
+    }  else { # Otherwise ! alwaysExtract AND data file exists --> update log & status, append file size to banner
         existing_data_msg <- paste("Using existing", item_label, "data in", item_data_file)
         MMP_log("SUCCESS", LOG_FILE, Category = existing_data_msg)
         mmp__change_status(load_stage, item, status = "success")

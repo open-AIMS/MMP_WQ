@@ -69,7 +69,7 @@ mmp__qaqc_1 <- function(wq.qaqc, type, ...) {
         ungroup() %>%
         mutate(Subregion=gsub(' ','~',Subregion),
                Subregion=factor(Subregion, levels=unique(Subregion))) %>%
-        {if(type %in% c('0','1','2','3','4', '8'))
+        {if(type %in% c('0','1','2','3','4', '8','9'))
              filter(., waterYear == reportYear)
          else if (type %in% c('5','6','7'))
              filter(., reneeYear == reportYear)
@@ -86,7 +86,7 @@ mmp__qaqc_1 <- function(wq.qaqc, type, ...) {
         suppressMessages() %>%
         suppressWarnings()
 
-    if(type %in% c('0','1','2','3','4','8')) {
+    if(type %in% c('0','1','2','3','4','8','9')) {
         GL <- wq.qaqc %>%
             dplyr::select(Name.graphs.abbr,Subregion,MMP_SITE_NAME,GL) %>%
             distinct() %>%
@@ -108,7 +108,8 @@ mmp__qaqc_1 <- function(wq.qaqc, type, ...) {
            "5" = mmp__qaqc_1_5(wq.qaqc, GL),
            "6" = mmp__qaqc_1_5(wq.qaqc, GL),
            "7" = mmp__qaqc_1_5(wq.qaqc, GL),
-           "8" = mmp__qaqc_1_1(wq.qaqc, GL)
+           "8" = mmp__qaqc_1_1(wq.qaqc, GL),
+           "9" = mmp__qaqc_1_1(wq.qaqc, GL)
            )
 }
 
@@ -121,7 +122,7 @@ mmp__qaqc_2 <- function(wq.qaqc, type, ...) {
         ungroup() %>%
         mutate(Subregion=gsub(' ','~',Subregion),
                Subregion=factor(Subregion, levels=unique(Subregion))) %>%
-        {if(type %in% c('0','1','2', '8'))
+        {if(type %in% c('0','1','2', '8','9'))
              filter(., Year == reportYear)
          else if (type %in% c('3','4'))
              filter(., waterYear == reportYear)
@@ -134,7 +135,7 @@ mmp__qaqc_2 <- function(wq.qaqc, type, ...) {
                   dplyr:::select(Measure,Name.graphs.abbr)) %>%
         left_join(wq.sites %>%
                   dplyr:::select(MMP_SITE_NAME, Latitude)) %>% 
-        {if(type %in% c('0','1','2','3','4', '8'))
+        {if(type %in% c('0','1','2','3','4', '8','9'))
              mutate(., Season='Annual')
          else if (type %in% c('5','6', '7'))
              mutate(., Season=GL.Season)
@@ -147,7 +148,7 @@ mmp__qaqc_2 <- function(wq.qaqc, type, ...) {
         suppressMessages() %>%
         suppressWarnings()
 
-    if(type %in% c('0','1','2','3','4','8')) {
+    if(type %in% c('0','1','2','3','4','8','9')) {
         GL <- wq.qaqc %>%
             dplyr::select(Name.graphs.abbr,Subregion,MMP_SITE_NAME,GL) %>%
             distinct() %>%
@@ -170,7 +171,8 @@ mmp__qaqc_2 <- function(wq.qaqc, type, ...) {
            "5" = mmp__qaqc_2_5(wq.qaqc, GL),
            "6" = mmp__qaqc_2_5(wq.qaqc, GL),
            "7" = mmp__qaqc_2_5(wq.qaqc, GL),
-           "8" = mmp__qaqc_2_1(wq.qaqc, GL)
+           "8" = mmp__qaqc_2_1(wq.qaqc, GL),
+           "9" = mmp__qaqc_2_1(wq.qaqc, GL)
            )
 }
 
@@ -178,7 +180,7 @@ mmp__qaqc_3 <- function(wq.qaqc, type, ...) {
     list2env(list2(...))
     wq.qaqc <-
         wq.qaqc %>%
-        {if(type %in% c('0','2','3','4','5','6', '7','8'))
+        {if(type %in% c('0','2','3','4','5','6', '7','8','9'))
              filter(., Measure %in% c('DRIFTCHL_UGPERL.wm','TSS_MGPERL.wm',
                                       'SECCHI_DEPTH.wm','PP.wm','PN.wm','NOx.wm', 'NTU')) 
          else if (type %in% c('1'))
@@ -190,7 +192,7 @@ mmp__qaqc_3 <- function(wq.qaqc, type, ...) {
         ungroup() %>%
         mutate(Subregion=gsub(' ','~',Subregion),
                Subregion=factor(Subregion, levels=unique(Subregion))) %>%
-        {if(type %in% c('0','1','2','8'))
+        {if(type %in% c('0','1','2','8','9'))
              filter(., Year == reportYear)
          else if (type %in% c('3','4'))
              filter(., waterYear == reportYear)
@@ -207,7 +209,7 @@ mmp__qaqc_3 <- function(wq.qaqc, type, ...) {
         arrange(Latitude) %>%
         mutate(Subregion=factor(Subregion, levels=unique(Subregion)),
                MMP_SITE_NAME=factor(MMP_SITE_NAME, levels=unique(MMP_SITE_NAME))) %>%
-        {if(type %in% c('6', '7', '8'))
+        {if(type %in% c('6', '7', '8','9'))
              mutate(., Index = scales::rescale(Score, to = c(-1,1), from = c(0,1)))
          else
              .
@@ -220,7 +222,7 @@ mmp__qaqc_3 <- function(wq.qaqc, type, ...) {
             dplyr::select(Name.graphs.abbr,Subregion,MMP_SITE_NAME,GL) %>%
             distinct() %>%
             mutate(lower=GL/2, upper=GL*2,lower1=GL/4, upper1=GL*4)
-    } else if (type %in% c('4','5','6', '7', '8')) {
+    } else if (type %in% c('4','5','6', '7', '8','9')) {
         GL <- NULL
     } else if (type %in% c('8a')) {
         GL <- wq.qaqc %>%
@@ -239,7 +241,8 @@ mmp__qaqc_3 <- function(wq.qaqc, type, ...) {
            "5" = mmp__qaqc_3_1(wq.qaqc, GL),
            "6" = mmp__qaqc_3_1(wq.qaqc, GL),
            "7" = mmp__qaqc_3_1(wq.qaqc, GL),
-           "8" = mmp__qaqc_3_1(wq.qaqc, GL)
+           "8" = mmp__qaqc_3_1(wq.qaqc, GL),
+           "9" = mmp__qaqc_3_1(wq.qaqc, GL)
            )
 }
 
@@ -454,7 +457,8 @@ mmp__indicator_trends_1 <- function(wq.idx, type = 1, ...) {
            '5' = mmp__indicator_trends_1_4(wq.idx, ...),
            '6' = mmp__indicator_trends_1_6(wq.idx, ...),
            '7' = mmp__indicator_trends_1_6(wq.idx, ...),
-           '8' = mmp__indicator_trends_1_6(wq.idx, ...)
+           '8' = mmp__indicator_trends_1_6(wq.idx, ...),
+           '9' = mmp__indicator_trends_1_6(wq.idx, ...)
            )
 }
 
@@ -568,7 +572,8 @@ mmp__indicator_trends_2 <- function(wq.idx, type = 1, ...) {
            '5' = mmp__indicator_trends_2_4(wq.idx, ...),
            '6' = mmp__indicator_trends_2_6(wq.idx, ...),
            '7' = mmp__indicator_trends_2_6(wq.idx, ...),
-           '8' = mmp__indicator_trends_2_6(wq.idx, ...)
+           '8' = mmp__indicator_trends_2_6(wq.idx, ...),
+           '9' = mmp__indicator_trends_2_6(wq.idx, ...)
            )
 }
 

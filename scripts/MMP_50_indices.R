@@ -119,6 +119,8 @@ source("MMP_57_indices_7.R")  # annual trend
 
 source("MMP_57_indices_8.R")  # long-term (with uncertainty)
 
+source("MMP_57_indices_9.R")  # long-term (with uncertainty, no rolling mean)
+
 source("MMP_58_indices_comp.R")
 
 source("MMP_35_processedData_report.R")

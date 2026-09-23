@@ -9,10 +9,10 @@ reportYear ?= $(shell date +%Y)
 .PHONY: build run code docs
 
 build:
-	docker build . --tag mmp
+	docker build . --tag mmp2
 
 build_singularity:
-	docker save mmp -o mmp.tar 
+	docker save mmp -o mmp.tar
 	singularity build mmp.sif docker-archive://mmp.tar
 
 # Run interactive R session in docker container
@@ -27,7 +27,7 @@ docs_container:
 
 # docker run --rm -v "$(pwd):/home/Project" mmp $(MAKE) -f docs/Makefile
 code_singularity:
-	$(MAKE) -f scripts/Makefile singularity 
+	$(MAKE) -f scripts/Makefile singularity
 
 code_local:
 	$(MAKE) -f scripts/Makefile

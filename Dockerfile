@@ -86,7 +86,7 @@ RUN  wget https://inla.r-inla-download.org/R/stable/src/contrib/INLA_21.02.23.ta
   && rm INLA_21.02.23.tar.gz
 
 ## Install quarto
-    
+
 ARG QUARTO_VERSION="1.2.269"
 RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
 RUN gdebi --non-interactive quarto-linux-amd64.deb
@@ -103,25 +103,25 @@ RUN R -e "options(repos = \
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('kableExtra'))"  
+  install.packages(c('kableExtra'))"
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
   install.packages(c('remotes')); \
-  remotes::install_github('AIMS/reportcards')"  
+  remotes::install_github('AIMS/reportcards')"
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
   install.packages(c('emmeans')); \
   install.packages(c('openxlsx')); \
-  install.packages(c('cowplot'))"  
+  install.packages(c('cowplot'))"
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
   install.packages(c('gdtools')); \
   install.packages(c('officer')); \
   install.packages(c('mgcv')); \
-  install.packages(c('flextable'))"  
+  install.packages(c('flextable'))"
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
@@ -135,6 +135,30 @@ RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
   install.packages(c('officer')); \
   install.packages(c('flextable'))"
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
+  install.packages('rstan');  \
+  remotes::install_github('paul-buerkner/brms'); \
+  install.packages('tidybayes');  \
+  install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos'))); \
+  remotes::install_github('stan-dev/cmdstanr'); \
+  library(cmdstanr); \
+  check_cmdstan_toolchain(); \
+  install_cmdstan(cores = 2); \
+"
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
+  install.packages('posterior');   \
+  install.packages('emmeans');   \
+  install.packages('DT');   \
+  install.packages('brms');   \
+  install.packages('bayesplot');   \
+  install.packages('tidybayes');   \
+  install.packages('posterior');   \
+  install.packages('HDInterval');   \
+"
 
 ## Create project directory in docker image
 RUN mkdir ~/MMP

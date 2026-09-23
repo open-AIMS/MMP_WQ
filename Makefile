@@ -9,7 +9,7 @@ reportYear ?= $(shell date +%Y)
 .PHONY: build run code docs
 
 build:
-	docker build . --tag mmp2
+	docker build --tag mmp2 . 2>&1 | tee build.log
 
 build_singularity:
 	docker save mmp -o mmp.tar

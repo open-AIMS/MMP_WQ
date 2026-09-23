@@ -160,6 +160,44 @@ RUN R -e "options(repos = \
   install.packages('HDInterval');   \
 "
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    libxml2-dev \
+    libglpk-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
+  # install.packages('rstan');  \
+  # install.packages('brms');  \
+  install.packages('igraph');  \
+"
+
+ENV CXXFLAGS="-Wno-unknown-warning-option \
+              -Wno-deprecated-declarations"
+              
+
+
+RUN Rscript --vanilla -e '\
+  pkgs <- c("rstan", "StanHeaders", "RcppEigen"); \
+    installed <- intersect(pkgs, rownames(installed.packages())); \
+      if (length(installed)) remove.packages(installed); \
+        install.packages( \
+            pkgs, \
+                repos = c( \
+                      "https://stan-dev.r-universe.dev", \
+                            "https://cloud.r-project.org" \
+                                ), \
+                                    dependencies = TRUE, \
+                                        Ncpus = 1 \
+                                          )'
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
+  install.packages('brms');  \
+"
+
+
 ## Create project directory in docker image
 RUN mkdir ~/MMP
 

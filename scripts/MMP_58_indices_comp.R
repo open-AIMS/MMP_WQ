@@ -256,6 +256,69 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (long region level 2).', return=TRUE)
     ## ----end
   
+    ## 1d. Regional worms - Long-term (no rolling mean) new vs old
+    ## These differ in index type (AMP vs MAMP) and hierarchy
+    ## ---- Regional worms
+    MMP_tryCatch(
+    {
+        load(file=paste0(DATA_PATH, '/final/wq.historic.idx.region.RData'))
+        load(file=paste0(DATA_PATH, '/final/wq.alt9.idx.region.RData'))
+
+        wq.comb.region.g1<-
+            ggplot(data = wq.historic.idx.region %>%
+                       ## filter(Year>2007) %>%
+                       mutate(Region = factor(Region,
+                                              levels=c('Cape York','Wet Tropics',
+                                                       'Burdekin','Mackay Whitsunday',
+                                                       'Fitzroy'))),
+                   aes(y = Index, x = reportCardYear)) +
+            geom_hline(yintercept = 0, linetype = 'dashed') +
+            geom_line() +
+            geom_point(aes(fill = Grade, shape = '0', color = '0'),
+                       size = 2) +
+            geom_line(data = wq.alt9.idx.region) +
+            geom_point(data = wq.alt9.idx.region,
+                       aes(fill = Grade, shape = '8', color = '8'),
+                       size = 2.5) + 
+            scale_y_continuous('Water Quality Index',
+                               limits = c(-1,1)) +
+            scale_x_date('', limits = c(as.Date('2006-01-01'),
+                                        as.Date(paste0(reportYear,'-01-01')))) +
+            scale_fill_manual('', breaks = c('A','B','C','D','E'),
+                              values = rev(trafficLightPalette),
+                              limits = c('A','B','C','D','E'),
+                              labels = c('Very Good','Good','Moderate','Poor','Very Poor'),
+                              guide = FALSE) +
+            scale_shape_manual('Option', values = c(25,21)) +
+            scale_color_manual('Option',
+                               values = c('black','red')) +
+            theme_mmp + theme(strip.background = element_blank(),
+                              panel.margin.x = unit(1,'line'))
+
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_region_long_new_noroll_old",
+                               Plot = wq.comb.region.g1 + facet_grid(~Region,as.table=FALSE),
+                               units = "in",
+                               fig.width = 10, fig.height = 2.5, pt.size = 10)
+
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index (long old vs new)", fig_name_suffix = "wq_comb_region_long_new_noroll_old",
+                           label_suffix = "_9_idx1bc", tabset_parent = "TABSET_9",
+                           fig.caption = paste0("\nComparison of temporal trends in the water quality index for alt 0 (old) and alt 9 (new, no rolling mean) formulations conditional on Region. \n")) 
+
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_region1_long_new_noroll_old",
+                               Plot = wq.comb.region.g1 + facet_wrap(~Region,as.table=FALSE,nrow=1,scales='free_y'),
+                               units = "in",
+                               fig.width = 10, fig.height = 2.5, pt.size = 10)
+
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index alt. (long old vs new noroll)", fig_name_suffix = "wq_comb_region1_long_new_noroll_old",
+                           label_suffix = "_9_idx1abc", tabset_parent = "TABSET_9",
+                           fig.caption = paste0("\nComparison of temporal trends in the water quality index for the alt 0 (old) and alt 9 (new no rolling mean) formulations conditional on Region.\n")) 
+
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (long noroll region level 2).', return=TRUE)
+    ## ----end
+  
     ## 2. Subregional worms
     ## ---- Subregional worms
     MMP_tryCatch(
@@ -663,6 +726,111 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Region.\n")) 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index).', return=TRUE)
+    ## ----end
+
+    ## 3c. Regional Index no rolling mean
+    ## ---- Regional Index
+    MMP_tryCatch(
+    {
+        load(file=paste0(DATA_PATH, '/indices/wq.historic.idx.RData'))
+        load(file=paste0(DATA_PATH, '/indices/wq.historic.idx.region.RData'))
+        load(file=paste0(DATA_PATH, '/final/wq.alt7.idx.region.RData'))
+        load(file=paste0(DATA_PATH, '/final/wq.alt9.idx.region.RData'))
+
+        wq.alt7.idx.region_restrictedCY <- wq.alt7.idx.region %>%
+            filter(!(Region == 'Cape York' & reportCardYear < as.Date("2021-01-01"))) %>%
+            droplevels()
+
+        point_mult <- 1.5
+
+        ## wq.comb.region.g1 <- ggplot(wq.historic.idx.region %>%
+        wq.comb.region.g1 <- ggplot(wq.alt9.idx.region %>%
+                                    mutate(Year = reneeYear) |> 
+                                    filter(Year>2007, Year < 2016) %>%
+                                    mutate(Region = factor(Region,
+                                                           levels = levels(wq.alt9.idx.region$Region))),
+                                    aes(y = Index, x = reportCardYear)) +
+            geom_hline(yintercept = 0, linetype = 'dashed') +
+            geom_line() +
+            geom_point(aes(fill = Grade,shape = '0'),
+                       size = 2 * point_mult,
+                       show.legend = TRUE) +
+            geom_linerange(aes(ymin = Lower, ymax = Upper, fill = Grade,
+                               shape = '0'),
+                           show.legend = FALSE) + 
+            geom_line(data = wq.alt7.idx.region_restrictedCY##  %>%
+                          ## filter(Region != 'Cape York')
+                      ) +
+            geom_point(data = wq.alt7.idx.region_restrictedCY##  %>%
+                           ## filter(Region != 'Cape York')
+                      ,
+                       aes(fill = Grade, shape = '7'),
+                       size = 2 * point_mult,
+                       show.legend = TRUE) +
+            geom_linerange(data = wq.alt7.idx.region_restrictedCY##  %>%
+                               ## filter(Region != 'Cape York')
+                          ,
+                           aes(ymin = Lower, ymax = Upper, fill = Grade,
+                               shape = '7'),
+                           show.legend = FALSE) + 
+            scale_y_continuous('Water Quality Index', limits = c(-1,1)) +
+            scale_x_date('', limits = c(as.Date('2006-01-01'),
+                                        as.Date(paste0(as.numeric(as.character(reportYear)),
+                                                       '-01-01')))) +
+            scale_fill_manual('', breaks = c('A','B','C','D','E'),
+                              values = rev(trafficLightPalette),
+                              limits = c('A','B','C','D','E'),
+                              labels = c('Very Good','Good','Moderate','Poor','Very Poor'),
+                              guide = "coloursteps") +
+          scale_shape_manual('', values = c(21,24,23,22,25),
+                             labels = c('Long-term trend', 'Annual condition', '3', '4', '5', 'Annual condition')) +
+            theme_mmp +
+            theme(strip.background = element_blank(),
+                  panel.margin.x = unit(1,'line'),
+                  axis.title.x = element_blank(),
+                  legend.position = "bottom",
+                  legend.direction = "horizontal") +
+            guides(shape = guide_legend(keyheight = 0.75,
+                                        keywidth=0.5,
+                                        override.aes = list(stroke=0.25)),
+                   fill = guide_legend(override.aes = list(shape=21,
+                                                           linewidth=1,
+                                                           stroke=0.25),
+                                       keywidth=0.5, keyheight=0.75))
+
+
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region_new_noroll",
+                               Plot = wq.comb.region.g1 + facet_grid(~Region,as.table=FALSE),
+                               units = "in",
+                               fig.width = 10, fig.height = 2.5, pt.size = 10)
+
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index (new)", fig_name_suffix = "wq_worms_comb_region_new_noroll",
+                           label_suffix = "_9_idx3bb", tabset_parent = "TABSET_9",
+                           fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 (no rolling mean) formulations conditional on Region.\n")) 
+
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_new_noroll",
+                               Plot = wq.comb.region.g1 + facet_wrap(~Region,as.table=TRUE,nrow=1,scales='free'),
+                               units = "in",
+                               fig.width = 10, fig.height = 2.5, pt.size = 10)
+
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index alt. (new)", fig_name_suffix = "wq_worms_comb_region1_new_noroll",
+                           label_suffix = "_9_idx3abb", tabset_parent = "TABSET_9",
+                           fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 formulations conditional on Region.\n")) 
+
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region2_new",
+                               Plot = wq.comb.region.g1 +
+                                 facet_wrap(~Region,as.table=TRUE, nrow = 2, scales = "free"),
+                               units = "in",
+                               fig.width = 7, fig.height = 4.5, pt.size = 10)
+
+        MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
+                           Section = "Regional Index alt.2 (new)", fig_name_suffix = "wq_worms_comb_region2_new",
+                           label_suffix = "_9_idx3bbb", tabset_parent = "TABSET_9",
+                           fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 formulations conditional on Region.\n")) 
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index, no rolling mean).', return=TRUE)
     ## ----end
 
   

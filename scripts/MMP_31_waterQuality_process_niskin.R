@@ -121,9 +121,11 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
         ## msg <- file("log/junk.msg", open = "wt"); sink(msg); sink(msg, type = "message")
         load(paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.RData'))
         niskin.aims.reef <- niskin.aims.reef %>%
-            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+            ## MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+            MMP_all_limitDetection() %>%  # parse the new (2026) NOX_STATUS
             MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
              MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
+      
         niskin.aims.reef.av <-
             niskin.aims.reef %>%
             filter(STATION_CLASS != 'V') %>%                        #2020: remove this station class
@@ -141,6 +143,26 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
                     Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
              mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME))
         save(niskin.aims.reef.av, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
+
+
+      ## Now a version for GAMS (no depth weighted average or duplicate averaging (2026)
+      niskin.aims.reef.gam <-
+        niskin.aims.reef %>%
+            filter(STATION_CLASS != 'V') %>%                        #2020: remove this station class
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='Niskin') %>%
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>%
+             mutate(Label = MMP_locationLabels(reef.alias),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
+            mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME)) |>
+            mutate(
+              Month = format(Date,"%b"),
+              Season = factor(ifelse(Month %in% c("Nov","Dec","Jan","Feb","Mar","Apr"), "Wet","Dry"))) 
+        save(niskin.aims.reef.gam, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.gam.RData'))
+      
         ## rm(niskin.aims.reef.agg, niskin.aims.reef, niskin.aims.reef.av)
         ## gc()
     }, LOG_FILE, Category = "Data processing:", msg='Process Water Quality (Niskin) data', return=TRUE)
@@ -156,7 +178,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
 
     ## ----end
 
-    ## ---- AIMS niskin outputs
+    ## ---- AIMS niskin outputs - **note these are based on depth weighted averages**
     MMP_tryCatch(
     {
         load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
@@ -205,7 +227,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
 
     ## ----end
 
-    ## ---- AIMS niskin boxplots
+    ## ---- AIMS niskin boxplots - **note, these are based on depth weighted averages**
     MMP_tryCatch(
     {
         load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
@@ -315,6 +337,7 @@ MMP_openning_banner()
 ## ----end
 
 ## ---- AIMS Cairns Transect process
+## **Note, since the Cairns transect is not part of the GAMS, there is only depth weighted averages**
 CURRENT_ITEM <- "cairnsTransect"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
@@ -417,7 +440,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RDa
     {
         load(paste0(NISKIN_OUTPUT_PATH, 'cairns.reef.RData'))
         cairns.all.reef <- cairns.reef %>%
-            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+          MMP_all_limitDetection() |> 
+            ## MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
             MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
              MMP_derivedChem(type = "Cairns")                                                          #derive a bunch of chemical combinations and ratios
         cairns.reef.av <-
@@ -606,7 +630,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
         load(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef1.RData'))
         niskin.jcu.reef1 <- niskin.jcu.reef1 %>%
             mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
-            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+          MMP_all_limitDetection() |> 
+            ## MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
             MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
              MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
         niskin.jcu.reef.av1 <-
@@ -625,6 +650,26 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
             suppressMessages() %>%
             suppressWarnings()
         save(niskin.jcu.reef.av1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData'))
+
+      ## Now a version for GAMS (no depth weighted average or duplicate averaging (2026)
+      niskin.jcu.reef.gam1 <-
+        niskin.jcu.reef1 %>%
+            filter(STATION_CLASS != 'V') %>%                        #2020: remove this station class
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='Niskin') %>%
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>%
+             mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
+             mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME)) |> 
+            mutate(
+              Month = format(Date,"%b"),
+              Season = factor(ifelse(Month %in% c("Nov","Dec","Jan","Feb","Mar","Apr"), "Wet","Dry")))
+        save(niskin.jcu.reef.gam1, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.gam1.RData'))
+
+        
     }, LOG_FILE, Category = "Data processing:", msg='Process Water Quality (JCU) data', return=TRUE)
 
     MMP_checkData(name = "niskin.jcu.reef.av1.RData",
@@ -916,7 +961,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
         load(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.RData'))
         niskin.cy.reef <- niskin.cy.reef %>%
             mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
-            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+          MMP_all_limitDetection() |> 
+            ## MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
             MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
              MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
         niskin.cy.reef.av <-
@@ -935,6 +981,26 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
              suppressWarnings() %>%
              suppressMessages()
         save(niskin.cy.reef.av, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData'))
+
+        
+      ## Now a version for GAMS (no depth weighted average or duplicate averaging (2026)
+      niskin.cy.reef.gam <-
+        niskin.cy.reef %>%
+            filter(STATION_CLASS != 'V') %>%                        #2020: remove this station class
+             MMP_designLatest(WQ=TRUE) %>%
+             MMP_GBRMPA_specs(WQ=TRUE) %>%
+             MMP_region_subregion(Source='Niskin') %>%
+             MMP_reorderReefs() %>% arrange(MMP_SITE_NAME) %>%
+             mutate(Label = MMP_locationLabels(MMP_SITE_NAME),         #create names for consistency with forams data
+                    Dtt.num = as.integer(Time),
+                    Mnth = as.integer(format(Date, format='%m')),
+                    Subregion=factor(Subregion, levels=unique(Subregion))) %>% droplevels %>%
+             mutate(HistoricReef=MMP_HistoricReef(MMP_SITE_NAME)) |> 
+            mutate(
+              Month = format(Date,"%b"),
+              Season = factor(ifelse(Month %in% c("Nov","Dec","Jan","Feb","Mar","Apr"), "Wet","Dry")))
+        save(niskin.cy.reef.gam, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.gam.RData'))
+
     }, LOG_FILE, Category = "Data processing:", msg='Process Water Quality (CY) data', return=TRUE)
 
     MMP_checkData(name = "niskin.cy.reef.av.RData",
@@ -1198,7 +1264,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
         load(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.event.reef1.RData'))
         niskin.jcu.event.reef1 <- niskin.jcu.event.reef1 %>%
             mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
-            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+          MMP_all_limitDetection() |> 
+            ## MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
             MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
              MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
         niskin.jcu.event.reef.av1 <-
@@ -1380,7 +1447,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.re
         load(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.event.reef1.RData'))
         niskin.cy.event.reef1 <- niskin.cy.event.reef1 %>%
             mutate(PN_UM=PN_SHIM_UM) %>%                                      #2019 now all the good JCU PN data is entered as PN_SHIM_UM (actually PN_SHIM_QAQC)
-            MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
+          MMP_all_limitDetection() |> 
+            ## MMP_limitDetection() %>%                                                           #correct for limit detection for HAND_NH4
             MMP_convertUnits() %>%                                                         #convert units from those used to store data (micro mol) to those  for reporting (micro gram)
              MMP_derivedChem()                                                          #derive a bunch of chemical combinations and ratios
         niskin.cy.event.reef.av1 <-

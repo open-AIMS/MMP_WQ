@@ -1,3 +1,114 @@
+model_data_prep <- function(x, Measure) {
+  if (Measure == "SECCHI") {
+    dat <- x |>
+      filter(!is.na(RESP)) |> 
+      dplyr::select(
+               RESP, LOD,
+               Date, Dt.num,
+               STATION_NAME, MMP_SITE_NAME, DUPLICATE, DEPTH_CODE, DEPTH_CODE
+             ) |>
+      group_by(MMP_SITE_NAME, Date, Dt.num, STATION_NAME) |>
+      ## filter(MMP_SITE_NAME == "Clump Point East", Date == "2023-01-25") |>
+      ## as.data.frame() |> head()
+      summarise(RESP = unique(RESP),
+                LOD = NA,
+                .groups = "drop") |> 
+      ## mutate(sample =  paste(MMP_SITE_NAME)) |>
+      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
+  } else {
+    dat <- x |>
+      filter(!is.na(RESP)) |> 
+      dplyr::select(
+                         RESP, LOD,
+                         Date, Dt.num,
+                         MMP_SITE_NAME, DUPLICATE, DEPTH_CODE, DEPTH_CODE
+                       ) |>
+      mutate(sample =  paste(MMP_SITE_NAME, Date, DEPTH_CODE)) |>
+      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
+  }
+  return(dat)
+}
+
+model_make_formula <- function(x, Measure) {
+  if (Measure == "SECCHI") {
+    dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
+                     (1 | MMP_SITE_NAME),
+                   family =  Gamma(link =  "log"))
+  } else {
+    if (sum(!is.na(x$LOD)) == 0) {  ## No limit of detection values
+      dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
+                       (1 | MMP_SITE_NAME) + (1 | sample), #(1 | DUPLICATE),
+                     family =  Gamma(link =  "log"))
+    } else {
+      dat_form <- bf(RESP | cens(lod_flag, LOD) ~ gp(Dt.num, k =  20, c =  5/4) +
+                       (1 | MMP_SITE_NAME) + (1 | sample), #(1 | DUPLICATE),
+                     family =  Gamma(link =  "log"))
+    }
+  }
+  return(dat_form)
+}
+
+model_make_priors <- function(x) {
+  summ <- x |>
+    summarise(
+      Median =  median(log(RESP), na.rm =  TRUE),
+      MAD =  mad(log(RESP), na.rm =  TRUE)
+    ) |>
+    suppressWarnings() |>
+    suppressMessages()
+  priors <- prior_string(paste0("normal(", summ[1,1], "," , summ[1,2],")"),
+                         class =  "Intercept") +
+    prior_string(paste0("student_t(3, 0, ", summ[1,2],")"),
+                 class =  "sd") +
+    prior_string(paste0("student_t(3, 0, ", summ[1,2],")"),
+                 class =  "sdgp") 
+  return(priors)
+}
+
+
+
+model_fit_model <- function(form, priors, dat) {
+  mod <- brm(
+    formula =  form,
+    prior =  priors,
+    data =  dat,
+    chains =  3, cores =  3,
+    backend =  "cmdstanr",
+    iter =  3000, warmup =  1000,
+    seed = 123,
+    thin =  5,
+    control =  list(adapt_delta =  0.99,
+                    max_treedepth =  15)
+  )
+  return(mod) 
+}
+
+
+
+model_regions_of_change <- function(draws) {
+  step_30d <- 30 / 365.25
+  lag_n <- round(step_30d * 100)
+
+  deriv_draws <-
+    draws |>
+    ungroup() |>
+    dplyr::select(.draw, Dt.num, .epred) |>
+    arrange(.draw, Dt.num) |>
+    group_by(.draw) |>
+    mutate(
+      deriv =  (.epred - lag(.epred, lag_n)) / (Dt.num - lag(Dt.num, lag_n)),
+      Dt.mid =  (Dt.num + lag(Dt.num, lag_n)) / 2          # midpoint where deriv applies
+    ) |>
+    ungroup() |>
+    filter(!is.na(deriv)) |>
+    mutate(Date =  lubridate::date_decimal(Dt.mid))
+  return(deriv_draws)
+}
+
+
+
+
+
 
 WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
                      ignore_new_model_type=TRUE) {

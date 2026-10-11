@@ -106,12 +106,15 @@ all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
 flntu_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
 flntu_files <- str_subset(flntu_files, "FLNTU")
 # Step 4: Get the flntu data exported from oracle
-flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
-            suppressMessages()
+## They are no longer available that way!
+## flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
+##             suppressMessages()
 # Step 5: Read and parse all the ncdf files
 flntu_2 <- MMP_read_flntu_nc(flntu_files)
+
 # Step 6: Bind together the two sources of flntu
-flntu <- bind_rows(flntu, flntu_2)
+## flntu <- bind_rows(flntu, flntu_2)
+flntu <- bind_rows(flntu_2)
 # Step 7: Save as csv file
 data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
 write_csv(flntu, data_file)
@@ -156,12 +159,13 @@ all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
 salinity_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
 salinity_files <- str_subset(salinity_files, "CSTZ")
 # Step 4: Get the salinity data exported from oracle
-waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
-            suppressMessages()
+## waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
+##             suppressMessages()
 # Step 5: Read and parse all the ncdf files
 salinity_2 <- MMP_read_salinity_nc(salinity_files)
 # Step 6: Bind together the two sources of salinity
-waterSalinity <- bind_rows(waterSalinity, salinity_2)
+## waterSalinity <- bind_rows(waterSalinity, salinity_2)
+waterSalinity <- bind_rows(salinity_2)
 # Step 7: Save as csv file
 data_file <- paste0(LOGGER_PATH, "waterSalinity", ".csv") # save data here
 write_csv(waterSalinity, data_file)

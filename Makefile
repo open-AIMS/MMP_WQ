@@ -37,31 +37,31 @@ docs_local:
 
 run_stage_2:
 	rm -f data/reports/*.*
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=2 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=2 --alwaysExtract=TRUE
 
 run_stage_3:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=3 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3 --alwaysExtract=TRUE
 
 run_stage_4:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=4 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=4 --alwaysExtract=TRUE
 
 run_stage_5:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=5 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=5 --alwaysExtract=TRUE
 
 run_stage_6:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=6 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=6 --alwaysExtract=TRUE
 
 run_stage_7:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=7 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=7 --alwaysExtract=TRUE
 
 run_stage_8:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=8 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=8 --alwaysExtract=TRUE
 
 run_stage_9:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=9 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=9 --alwaysExtract=TRUE
 
 run_stage_1_6:
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2025 --runStage=1:6 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=1:6 --alwaysExtract=TRUE
 
 run_stage_1_9:
 	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=$(reportYear) --runStage=1:9 --alwaysExtract=TRUE

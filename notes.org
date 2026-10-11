@@ -9,7 +9,7 @@
 - [X] in the large table that shows the quantiles and GL values for each analyte,
     remove DIN from the table, replace DON with TDN, replace DOP with TDP (Renee via Teams 11:04 26/02/2026)
 - [X] combine the Hist sv Alt7 worm plot in the Compilations section
-
+- [ ] create a version of the historic index (alt9) that does not include the rolling mean
 * Comparing indices
 ** Historic (old)
 *** 4 year rolling average

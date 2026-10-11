@@ -119,6 +119,20 @@ MMP_selectReefs <- function(data,source='niskin') {
 after <- function(x,bp) ifelse(x>bp, x-bp,0)
 before <- function(x,bp) ifelse(x>bp, x, x)
 
+
+mmp_limit_detection <- function(x) {
+  as.numeric(stringr::str_extract(x, "(?<=\\()[0-9.eE+-]+(?=\\))"))
+}
+
+MMP_all_limitDetection <- function(data) {
+  data <- data |>
+    mutate(across(ends_with("_STATUS"),
+                  mmp_limit_detection,
+                  .names =  "{str_remove(.col, '_STATUS$')}_LOD"
+                  )) 
+  return(data)
+}
+
 ###############################################################################
 ## The following function corrects 'HAND_NH4' for minimum detection.         ##
 ## It seems that all the other chemicals have already had this done          ##
@@ -144,26 +158,98 @@ MMP_limitDetection <- function(data) {
 ##    data:   a data frame containing the chemicals in their reporting units ##
 ###############################################################################
 MMP_convertUnits <- function(data) {
-    cols <- colnames(data)
-    if(any(cols == 'DIP_UM'))      data$DIP <- data$DIP_UM*30.97
-    if(any(cols == 'PP_UM'))       data$PP <- data$PP_UM*30.97
-    if(any(cols == 'TDP_UM'))      data$TDP <- data$TDP_UM*30.97
-
-    if(any(cols == 'SI_UM'))       data$SI <- data$SI_UM*28.09
-
-    if(any(cols == 'NH4_UM'))      data$NH4 <- data$NH4_UM*14.001
-    if(any(cols == 'NO2_UM'))      data$NO2 <- data$NO2_UM*14.001
-    if(any(cols == 'NO3_UM'))      data$NO3 <- data$NO3_UM*14.001
-    if(any(cols == 'HAND_NH4_UM')) data$HAND_NH4 <- data$HAND_NH4_UM*14.001
-    if(any(cols == 'PN_UM'))       data$PN <- data$PN_UM*14.001
-    if(any(cols == 'TDN_UM'))      data$TDN <- data$TDN_UM*14.001
-    if(any(cols == 'PN_SHIM_UM'))  data$PN_SHIM<- data$PN_SHIM_UM*14.001
-    
-    if(any(cols == 'DOC_UM'))      data$DOC <- data$DOC_UM*12.011
-    if(any(cols == 'POC_UM'))      data$POC <- data$POC_UM*12.011
-    
-    data
+  cols <- colnames(data)
+  conv <- tribble(
+    ~var,     ~conv,
+    "DIP", 30.97,
+    "PP", 30.97,
+    "TDP", 30.97,
+    "NH4", 14.001,
+    "NO2", 14.001,
+    "NO3", 14.001,
+    "NOX", 14.001,
+    "HAND_NH4", 14.001,
+    "PN", 14.001,
+    "TDN", 14.001,
+    "PN_SHIM", 14.001,
+    "DOC", 12.001,
+    "POC", 12.001,
+    "DRIFTCHL", 1,
+    "TSS", 1,
+    )
+  get_conv <- function(col) {
+    prefix <- str_remove(col, "_(UM|LOD|MGPERL|UGPERL|temp)$")          # TP_UM -> TP, TP_LOD -> TP
+    f <- conv |> filter(var == prefix) |> pull(conv)
+    return(ifelse(length(f)>0, f, NA))
+  }
+  data <- 
+    data |>
+    mutate(
+      ## make a temp
+      across(ends_with("_LOD"),
+             ~ .x,
+             .names =  "{str_replace(.col, '_LOD$', '_temp')}"),
+      ## duplicate _LOD to _UM_LOD
+      across(ends_with("_LOD"),
+             ~ .x,
+             .names =  "{str_replace(.col, '_LOD$', '_UM_LOD')}"),
+      ## convert units of non_UM versions
+      across(ends_with("_UM"),
+             ~ .x * get_conv(cur_column()),
+             .names =  "{str_remove(.col, '_UM$')}"),
+      across(ends_with("_MGPERL"),
+             ~ .x * get_conv(cur_column()),
+             .names =  "{str_remove(.col, '_MGPERL$')}"),
+      across(ends_with("_UGPERL"),
+             ~ .x * get_conv(cur_column()),
+             .names =  "{str_remove(.col, '_UGPERL$')}"),
+      ## convert the _temp versions
+      across(ends_with("_temp"),
+             ~ .x * get_conv(cur_column()),
+             .names = "{str_replace(.col, '_temp$', '_LOD')}"
+             )
+    ) |>
+    dplyr::select(-ends_with("_temp"))
+ return(data) 
 }
+##     if(any(cols == 'DIP_UM')) {
+##       data$DIP_UM_LOD <- data$DIP_LOD
+##       data$DIP <- data$DIP_UM*30.97 
+##       data$DIP_LOD <- data$DIP_UM_LOD*30.97
+##     }
+##     if(any(cols == 'PP_UM')) {
+##       data$PP_UM_LOD <- data$PP_LOD
+##       data$PP <- data$PP_UM*30.97
+##       data$PP_LOD <- data$PP_UM_LOD*30.97
+##     }
+##     if(any(cols == 'TDP_UM')) {
+##       data$TDP_UM_LOD <- data$TDP_LOD
+##       data$TDP <- data$TDP_UM*30.97  
+##       data$TDP_LOD <- data$TDP_UM_LOD*30.97
+##     }
+
+##     ## SI: 28.09
+##     if(any(cols == 'SI_UM')) {
+##       data$SI_UM_LOD <- data$SI_LOD
+##       data$SI <- data$SI_UM*28.09 
+##       data$SI_LOD <- data$SI_UM_LOD*30.97
+##     }
+
+##     ## NH4, NO2, NO3, NOX, HAND_NH4, PN, TDN, PN_SHIM_UM
+##     if(any(cols == 'NH4_UM'))      data$NH4 <- data$NH4_UM*14.001
+##     if(any(cols == 'NO2_UM'))      data$NO2 <- data$NO2_UM*14.001
+##     if(any(cols == 'NO3_UM'))      data$NO3 <- data$NO3_UM*14.001
+##     if(any(cols == 'NOX_UM'))      data$NOX <- data$NOX_UM*14.001
+##     if(any(cols == 'HAND_NH4_UM')) data$HAND_NH4 <- data$HAND_NH4_UM*14.001
+##     if(any(cols == 'PN_UM'))       data$PN <- data$PN_UM*14.001
+##     if(any(cols == 'TDN_UM'))      data$TDN <- data$TDN_UM*14.001
+##     if(any(cols == 'PN_SHIM_UM'))  data$PN_SHIM<- data$PN_SHIM_UM*14.001
+    
+##     if(any(cols == 'DOC_UM'))      data$DOC <- data$DOC_UM*12.011
+##     if(any(cols == 'POC_UM'))      data$POC <- data$POC_UM*12.011
+    
+##     data
+## }
 
 ###############################################################################
 ## The following function generates different combinations of                ##
@@ -185,30 +271,56 @@ MMP_convertUnits <- function(data) {
 ###############################################################################
 MMP_derivedChem <- function(data, type='MMP') {
     cols <- colnames(data)
-    if(type=='MMP' & any(cols == 'NO3') & any(cols == 'NO2') & any(cols == 'NH4')) {
-        data$DIN<- data$NO3+data$NO2+data$NH4
+    ## if(type=='MMP' & any(cols == 'NO3') & any(cols == 'NO2') & any(cols == 'NH4')) {
+    ##     data$DIN<- data$NO3+data$NO2+data$NH4
+    ##     data$DIN[is.na(data$NH4)] <- NA
+    ## }
+    ## if(type=='Cairns' & any(cols == 'NO3') & any(cols == 'NO2') & any(cols == 'HAND_NH4')) {
+    ##     data$DIN<- data$NO3+data$NO2+data$HAND_NH4
+    ##     data$DIN[is.na(data$HAND_NH4)] <- NA
+    ## }
+    ## if(type=='MMP' & any(cols == 'NO3_UM') & any(cols == 'NO2_UM') & any(cols == 'NH4_UM')) {
+    ##     data$DIN_UM<- data$NO3_UM+data$NO2_UM+data$NH4_UM
+    ##     data$DIN_UM[is.na(data$NH4_UM)] <- NA
+    ## }
+    ## if(type=='Cairns' & any(cols == 'NO3_UM') & any(cols == 'NO2_UM') & any(cols == 'HAND_NH4_UM')) {
+    ##     data$DIN_UM<- data$NO3_UM+data$NO2_UM+data$HAND_NH4_UM
+    ##     data$DIN_UM[is.na(data$HAND_NH4_UM)] <- NA
+    ## }
+    ## NOx is not created this way any more (it is directly ingested from database, 2026)
+    ## if(any(cols == 'NO3') & any(cols == 'NO2')) {
+    ##     data$NOx<- data$NO3+data$NO2
+    ##     data$NOx[data$NOx==0] <- 0.01
+    ## }
+    ## if(any(cols == 'NO3_UM') & any(cols == 'NO2_UM')) {
+    ##     data$NOx_UM<- data$NO3_UM+data$NO2_UM
+    ##     data$NOx_UM[data$NOx_UM==0] <- 0.01
+    ## }
+    if (any(cols == "NOX")) {
+      data$NOx <- data$NOX
+      data$NOx_LOD <- data$NOX_LOD
+    }
+    if (any(cols == "NOX_UM")) {
+      data$NOx_UM <- data$NOX_UM
+    }
+
+    if(type=='MMP' & any(cols == 'NOX') & any(cols == 'NH4')) {
+        data$DIN<- data$NOx+data$NH4
         data$DIN[is.na(data$NH4)] <- NA
     }
-    if(type=='Cairns' & any(cols == 'NO3') & any(cols == 'NO2') & any(cols == 'HAND_NH4')) {
-        data$DIN<- data$NO3+data$NO2+data$HAND_NH4
+    if(type=='Cairns' & any(cols == 'NOx') & any(cols == 'HAND_NH4')) {
+        data$DIN<- data$NOx+data$HAND_NH4
         data$DIN[is.na(data$HAND_NH4)] <- NA
     }
-    if(type=='MMP' & any(cols == 'NO3_UM') & any(cols == 'NO2_UM') & any(cols == 'NH4_UM')) {
-        data$DIN_UM<- data$NO3_UM+data$NO2_UM+data$NH4_UM
+    if(type=='MMP' & any(cols == 'NOx_UM') & any(cols == 'NH4_UM')) {
+        data$DIN_UM<- data$NOx_UM+data$NH4_UM
         data$DIN_UM[is.na(data$NH4_UM)] <- NA
     }
-    if(type=='Cairns' & any(cols == 'NO3_UM') & any(cols == 'NO2_UM') & any(cols == 'HAND_NH4_UM')) {
+    if(type=='Cairns' & any(cols == 'NOx_UM') & any(cols == 'HAND_NH4_UM')) {
         data$DIN_UM<- data$NO3_UM+data$NO2_UM+data$HAND_NH4_UM
         data$DIN_UM[is.na(data$HAND_NH4_UM)] <- NA
     }
-    if(any(cols == 'NO3') & any(cols == 'NO2')) {
-        data$NOx<- data$NO3+data$NO2
-        data$NOx[data$NOx==0] <- 0.01
-    }
-    if(any(cols == 'NO3_UM') & any(cols == 'NO2_UM')) {
-        data$NOx_UM<- data$NO3_UM+data$NO2_UM
-        data$NOx_UM[data$NOx_UM==0] <- 0.01
-    }
+
     if(type=='MMP' & any(cols == 'TDN') & any(cols == 'NH4') & any(cols == 'NO3') & any(cols == 'NO2') & any(cols == 'NH4')) {
         data$DON<- data$TDN - data$NH4 - data$NO3 - data$NO2
         if (any(cols=='TDN_UM')) data$DON_UM<- data$TDN_UM- data$NH4_UM- data$NO3_UM- data$NO2_UM
@@ -304,23 +416,33 @@ MMP_derivedChem <- function(data, type='MMP') {
 ###############################################################################
 
 MMP_aggregateWQDuplicates <- function(data) {
-    data.agg <- plyr:::ddply(subset(data),~STATION_NAME, function(x) {
-        a1<-a2<-NULL         
-        if (x$STATION_CLASS[1] == "CR") { ## Aggregate across depths
-            a1<-plyr:::ddply(x, ~DEPTH_CODE, function(x) { ##Aggregate within depths
-                data.frame(Station=unique(x$STATION_NAME),Date=mean(x$Date),Time=mean(x$Time),plyr:::numcolwise(mean,na.rm=TRUE)(x[,-which(colnames(x) %in% c("DUPLICATE"))]),
-                           plyr:::catcolwise(function(x) x[1])(x))
-            })
-            data.frame(Station=unique(a1$Station),Date=mean(a1$Date),Time=mean(x$Time),plyr:::numcolwise(mean,na.rm=TRUE)(a1),
-                       plyr:::catcolwise(function(a1) a1[1])(a1))
-        }else{
-            plyr:::ddply(x, ~DEPTH_CODE, function(x) { ##Aggregate within depths
-                data.frame(Station=unique(x$STATION_NAME),Date=mean(x$Date),Time=mean(x$Time),plyr:::numcolwise(mean,na.rm=TRUE)(x[,-which(colnames(x) %in% c("DUPLICATE"))]),
-                           plyr:::catcolwise(function(x) x[1])(x))
-            })
-        }
-    })
-    data.agg
+  data.agg <- plyr:::ddply(subset(data),~STATION_NAME, function(x) {
+    a1<-a2<-NULL         
+    if (x$STATION_CLASS[1] == "CR") { ## Aggregate across depths
+      a1<-plyr:::ddply(x, ~DEPTH_CODE, function(x) { ##Aggregate within depths
+        data.frame(Station = unique(x$STATION_NAME),
+                   Date = mean(x$Date),
+                   Time = mean(x$Time),
+                   plyr:::numcolwise(mean,na.rm=TRUE)(x[,-which(colnames(x) %in% c("DUPLICATE"))]),
+                   ## plyr:::numcolwise(mean,na.rm=TRUE)(x[,-str_which(colnames(x), "DDUPLICATE")]),
+                   plyr:::catcolwise(function(x) x[1])(x))
+      })
+      data.frame(Station = unique(a1$Station),
+                 Date = mean(a1$Date),
+                 Time = mean(x$Time),
+                 plyr:::numcolwise(mean,na.rm = TRUE)(a1),
+                 plyr:::catcolwise(function(a1) a1[1])(a1))
+    }else{
+      plyr:::ddply(x, ~DEPTH_CODE, function(x) { ##Aggregate within depths
+        data.frame(Station = unique(x$STATION_NAME),
+                   Date = mean(x$Date),
+                   Time = mean(x$Time),
+                   plyr:::numcolwise(mean,na.rm=TRUE)(x[,-which(colnames(x) %in% c("DUPLICATE"))]),
+                   plyr:::catcolwise(function(x) x[1])(x))
+      })
+    }
+  })
+  data.agg
 }
 
 
@@ -384,6 +506,7 @@ MMP_consecutiveDays <- function(data) {
         dtt<-NULL
         dts=dts[!dts %in% dts2]
         for (dd in dts) {
+            if (is.numeric(dd)) dd <- as.Date(dd, origin = "1970-01-01")
             dtt= dtt %>% bind_rows(x %>% filter(between(Date,dd,dd+2)) %>% mutate(Collection=unique(filter(x,Date==dd)$STATION_NAME)[1]))
         }
         
@@ -467,8 +590,8 @@ MMP_depthWeightedAverages <- function(data) {
     data.av <- data %>% group_by(Collection) %>% arrange(DEPTH) %>%
         do({
             x <- .
-            #print(x)
-            #print(x$Collection)
+            ## print(x)
+            ## print(x$Collection)
             numeric_cols <- which(vapply(x, is.numeric, logical(1))==TRUE)
             data.frame(Date=mean(x$Date), Time=mean(x$Time),
                        IntDepthSD= prepare.for.trapez(x$DIP, x$DEPTH,x$SECCHI_DEPTH)$IntDepth,
@@ -486,7 +609,15 @@ MMP_depthWeightedAverages <- function(data) {
     colnames(data.av)<-gsub("(.*)\\.3","\\1.wmad",colnames(data.av))
     data.av$Month <- format(data.av$Date,"%b")
     data.av$Season <- factor(ifelse(data.av$Month %in% c("Nov","Dec","Jan","Feb","Mar","Apr"), "Wet","Dry"))
-    data.av
+
+    ## Ensure that the .wm and .wmm version for LOD are equal to the
+    ## version that only averages and not trapezoidal average
+    lod_cols <- grep("_LOD\\.(wm|wmm)$", names(data.av), value =  TRUE)
+    for (nm in lod_cols) {
+      data.av[[nm]] <- data.av[[ sub("\\.(wm|wmm)$", "", nm) ]]
+    }
+
+data.av
 }
 
 

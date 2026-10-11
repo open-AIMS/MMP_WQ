@@ -1,78 +1,103 @@
-## Get R version 4.2.1
-FROM rocker/r-ver:4.2.1
+FROM rocker/r-ver:4.6.1
 
 ## Install packages
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    libgdal-dev \
-    libproj-dev \
-    libgeos-dev \
-    lbzip2 \
-    libnetcdf-dev \
-    libsqlite3-dev \
-    libssl-dev \
-    libudunits2-dev \
-    netcdf-bin \
-    sqlite3 \
-    imagemagick \
-    pandoc \
-    pandoc-citeproc \
-    make \
-    ghostscript \
-    poppler-utils \
-    zip \
-    wget \
-    fonts-dejavu-extra \
-    libfontconfig1-dev \
-    curl \
-    tk \
-    xtide \
-    openjdk-11-jre \
-    gdebi-core \
-    cmake \
-    libcairo2-dev \
+  libgdal-dev \
+  libproj-dev \
+  libgeos-dev \
+  lbzip2 \
+  libnetcdf-dev \
+  libsqlite3-dev \
+  libssl-dev \
+  libudunits2-dev \
+  netcdf-bin \
+  sqlite3 \
+  imagemagick \
+  pandoc \
+  make \
+  ghostscript \
+  poppler-utils \
+  zip \
+  wget \
+  fonts-dejavu-extra \
+  libfontconfig1-dev \
+  curl \
+  tk \
+  openjdk-11-jre \
+  gdebi-core \
+  cmake \
+  libcairo2-dev \
+  libuv1-dev \
   && rm -rf /var/lib/apt/lists/*
 
-# NOTE: pandoc-citeproc no longer maintained - are packages above 'time-capsuled' in the same way as R and R packages below?
 
-## Install quarto (version 1.2.269)
-ARG QUARTO_VERSION="1.2.269"
+# NOTE: pandoc-citeproc was removed upstream; citeproc is now built into pandoc (use `pandoc --citeproc`).
+
+#################################### XTIDE ##############################
+# NOTE: xtide (and its libtcd dependency) were removed from the Ubuntu archive
+#       (absent from 24.04 "noble"), so we build the `tide` CLI from source.
+#       The project shells out to `tide` in MMP_functions.R / MMP_23_waterQuality_load_other.R.
+#       Build-only deps are installed and purged in the same layer to keep the image small.
+ARG LIBTCD_VERSION=2.2.7-r3
+ARG XTIDE_VERSION=2.15.5
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        libpng-dev; \
+    cd /tmp; \
+    # --- libtcd (tide constituent database library) ---
+    wget -q "https://flaterco.com/files/xtide/libtcd-${LIBTCD_VERSION}.tar.xz"; \
+    tar xf "libtcd-${LIBTCD_VERSION}.tar.xz"; \
+    cd libtcd-*/; \
+    ./configure --prefix=/usr/local; \
+    make -j"$(nproc)"; \
+    make install; \
+    cd /tmp; \
+    # --- xtide (provides the `tide` command-line program) ---
+    wget -q "https://flaterco.com/files/xtide/xtide-${XTIDE_VERSION}.tar.xz"; \
+    tar xf "xtide-${XTIDE_VERSION}.tar.xz"; \
+    cd xtide-*/; \
+    ./configure --prefix=/usr/local --without-x; \
+    make -j"$(nproc)"; \
+    make install; \
+    ldconfig; \
+    # --- cleanup (keep the C/C++ toolchain: needed at runtime to compile
+    #     R packages and Stan models via Rcpp/cmdstanr/brms) ---
+    cd /; \
+    rm -rf /tmp/libtcd-* /tmp/xtide-*; \
+    apt-get purge -y libpng-dev; \
+    apt-get autoremove -y; \
+    rm -rf /var/lib/apt/lists/*
+# At runtime the scripts set `export HFILE_PATH=../parameters/harmonics-2004-06-14.tcd`
+# to point `tide` at the bundled harmonics database.
+
+## Install quarto (version 1.10.19)
+ARG QUARTO_VERSION="1.10.19"
 RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
 RUN gdebi --non-interactive quarto-linux-amd64.deb
 
-## Install R package versions from MRAN (based on a date - YYYY-MM-DD)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+      libfontconfig1-dev \
+      libharfbuzz-dev \
+      libfribidi-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+## Install General Usage R packages
 RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+  install.packages('textshaping'); \
+  install.packages('ragg'); \
   install.packages('tidyverse'); \
-  install.packages('sf'); \
-  install.packages('sp'); \
-  install.packages('foreach'); \
-  install.packages('testthat'); \
-  install.packages('tidybayes'); \
   install.packages('jsonlite'); \
   install.packages('rlang'); \
-  install.packages('bookdown'); \
-  install.packages('rnaturalearth'); \
-  install.packages('rnaturalearthdata'); \
-  install.packages('patchwork'); \
-  install.packages('ggnewscale'); \
-  install.packages('tidybayes'); \
-  install.packages('rgeos'); \
-  install.packages('sn'); \
-  install.packages('tidybayes'); \
-  install.packages('inlabru'); \
   install.packages('cli'); \
   install.packages('Hmisc'); \
-  install.packages('ncmeta'); \
-  install.packages('stars'); \
-  install.packages('geojsonR'); \
-  install.packages('geojsonsf'); \
-  install.packages('s2'); \
   install.packages('R.utils'); \
-  install.packages('quarto'); \
-  install.packages('ggh4x'); \
-  install.packages('furrr'); \
-  install.packages(c('kableExtra')); \
+  install.packages('DT');   \
 "
 #############################################################################
 ## NOTE: we could opt for installing specific versions of packages
@@ -80,123 +105,135 @@ RUN R -e "options(repos = \
 ## RUN R -e "remotes::install_version('dplyr', '1.0.5');"
 #############################################################################
 
-## Install INLA
-RUN  wget https://inla.r-inla-download.org/R/stable/src/contrib/INLA_21.02.23.tar.gz \
-  && R CMD INSTALL --clean --no-multiarch --without-keep.source --byte-compile --resave-data --compact-docs --no-demo INLA_21.02.23.tar.gz \
-  && rm INLA_21.02.23.tar.gz
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+      libgdal-dev \
+          gdal-bin \
+              proj-bin \
+                && rm -rf /var/lib/apt/lists/*
 
-## Install quarto
-
-ARG QUARTO_VERSION="1.2.269"
-RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
-RUN gdebi --non-interactive quarto-linux-amd64.deb
-
+## Install Spatial R packages
 RUN R -e "options(repos = \
-    list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
-  install.packages('quarto'); \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('sf'); \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2022-10-04/'));\
-   install.packages('furrr'); \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('sp'); \
+    install.packages('rnaturalearth'); \
+    install.packages('rnaturalearthdata'); \
+    install.packages('ggnewscale'); \
+    install.packages('rgeos'); \
+    install.packages('sn'); \
+    install.packages('stars'); \
+    install.packages('geojsonR'); \
+    install.packages('geojsonsf'); \
+    install.packages('s2'); \
 "
 
+## Install ncdf4 R package (for netCDF file handling)
 RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('kableExtra'))"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('remotes')); \
-  remotes::install_github('AIMS/reportcards')"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('emmeans')); \
-  install.packages(c('openxlsx')); \
-  install.packages(c('cowplot'))"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('gdtools')); \
-  install.packages(c('officer')); \
-  install.packages(c('mgcv')); \
-  install.packages(c('flextable'))"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('ncdf4'))"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('car'))"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2022-10-11/')); \
-  install.packages(c('officer')); \
-  install.packages(c('flextable'))"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
-  install.packages('rstan');  \
-  remotes::install_github('paul-buerkner/brms'); \
-  install.packages('tidybayes');  \
-  install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos'))); \
-  remotes::install_github('stan-dev/cmdstanr'); \
-  library(cmdstanr); \
-  check_cmdstan_toolchain(); \
-  install_cmdstan(cores = 2); \
-"
-
-RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
-  install.packages('posterior');   \
-  install.packages('emmeans');   \
-  install.packages('DT');   \
-  install.packages('brms');   \
-  install.packages('bayesplot');   \
-  install.packages('tidybayes');   \
-  install.packages('posterior');   \
-  install.packages('HDInterval');   \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('ncmeta'); \
+    install.packages(c('ncdf4')); \
 "
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    libxml2-dev \
-    libglpk-dev \
+    libcairo2-dev \
   && rm -rf /var/lib/apt/lists/*
 
+
+## Install quarto related R packages
 RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
-  # install.packages('rstan');  \
-  # install.packages('brms');  \
-  install.packages('igraph');  \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('quarto'); \
+    install.packages('bookdown'); \
+    install.packages(c('kableExtra')); \
+    install.packages(c('officer')); \
+    install.packages(c('flextable')); \
+    install.packages(c('gdtools')); \
 "
 
-ENV CXXFLAGS="-Wno-unknown-warning-option \
-              -Wno-deprecated-declarations"
-              
-
-
-RUN Rscript --vanilla -e '\
-  pkgs <- c("rstan", "StanHeaders", "RcppEigen"); \
-    installed <- intersect(pkgs, rownames(installed.packages())); \
-      if (length(installed)) remove.packages(installed); \
-        install.packages( \
-            pkgs, \
-                repos = c( \
-                      "https://stan-dev.r-universe.dev", \
-                            "https://cloud.r-project.org" \
-                                ), \
-                                    dependencies = TRUE, \
-                                        Ncpus = 1 \
-                                          )'
-
+## Install flow related R packages
 RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2024-02-20/')); \
-  install.packages('brms');  \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('furrr'); \
+    install.packages('foreach'); \
 "
 
+## Install unit testing related R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('testthat'); \
+"
+
+## Install Modelling related R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('emmeans'); \
+    install.packages('DHARMa'); \
+    install.packages(c('car')); \
+    install.packages(c('mgcv')); \
+"
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('remotes'); \
+    install.packages('rstan');  \
+    remotes::install_github('paul-buerkner/brms'); \
+    install.packages('tidybayes');  \
+    install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos'))); \
+    remotes::install_github('stan-dev/cmdstanr'); \
+    library(cmdstanr); \
+    check_cmdstan_toolchain(); \
+    install_cmdstan(cores = 2); \
+"
+
+## Install Bayesian modelling testing related R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('tidybayes'); \
+    install.packages('posterior'); \
+    install.packages('bayesplot');   \
+    install.packages('HDInterval');   \
+"
+
+## Install ggplot related R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('patchwork'); \
+    install.packages('ggnewscale'); \
+    install.packages('ggh4x'); \
+    install.packages(c('cowplot')); \
+"
+
+# ## Install INLA related R packages
+# RUN R -e "options(repos = \
+#   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+#   install.packages('inlabru'); \
+#     ##install.packages('INLA', repos=c(getOption('repos'), INLA='https
+#     ://inla.r-inla-download.org/R/stable')); \
+# "
+
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages(c('remotes')); \
+    remotes::install_github('AIMS/reportcards'); \
+"
+
+## Install project specific R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('openxlsx'); \
+"
+
+## Install project specific R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('assertthat'); \
+"
 
 ## Create project directory in docker image
 RUN mkdir ~/MMP
@@ -234,3 +271,5 @@ WORKDIR ~/MMP/scripts/
 ## COPY stats_wrapper.sh ~/reefCloud/stats_wrapper.sh
 ## ENTRYPOINT ["~/reefCloud/stats_wrapper.sh"]
 #############################################################################
+
+

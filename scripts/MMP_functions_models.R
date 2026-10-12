@@ -128,7 +128,7 @@ model_deriv_sums <- function(deriv_draws) {
     mutate(Date =  lubridate::date_decimal(Dt.mid))
   return(sum)
 }
-
+ 
 gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_guidelines = FALSE) {
   old.wq.guidelines <- read.csv('../parameters/old.wq.guidelines.csv', strip.white=TRUE) |>
     mutate(Measure = str_replace(Measure, ".wm", "")) |>

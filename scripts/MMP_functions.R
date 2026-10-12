@@ -784,7 +784,8 @@ MMP_download_nc_files <- function(nc_urls, download_dir = LOGGER_PATH) {
       ## Parse the URL
       parsed_url <- httr::parse_url(url)
       ## Construct the base URL
-      full_url <- paste0(parsed_url$scheme, "://", parsed_url$hostname, "/", cntnt_url)
+      ## full_url <- paste0(parsed_url$scheme, "://", parsed_url$hostname, "/", cntnt_url)
+      full_url <- paste0(parsed_url$scheme, "://", parsed_url$hostname, cntnt_url)
       ## print(full_url)
       download.file(full_url, download_path, mode = "wb")
       ##download.file(url, download_path, mode = "w")
@@ -1371,7 +1372,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         temp = temp,
         temp_quality_control = temp_quality_control) %>% 
       dplyr::rename("temperature" = temp) %>%
-      filter(temp_quality_control == 1) %>% 
+      filter(temp_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(temperature, temp_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)
@@ -1384,7 +1385,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         psal = psal,
         psal_quality_control = psal_quality_control) %>% 
       dplyr::rename("salinity" = psal) %>%
-      filter(psal_quality_control == 1) %>% 
+      filter(temp_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(salinity, psal_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)
@@ -1397,7 +1398,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         cndc = cndc,
         cndc_quality_control = cndc_quality_control) %>% 
       dplyr::rename("conductivity" = cndc) %>%
-      filter(cndc_quality_control == 1) %>% 
+      filter(temp_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(conductivity, cndc_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)
@@ -1410,7 +1411,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         pres = pres,
         pres_quality_control = pres_quality_control) %>% 
       dplyr::rename("pres_rel" = pres) %>%
-      filter(pres_quality_control == 1) %>% 
+      filter(temp_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(pres_rel, pres_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)

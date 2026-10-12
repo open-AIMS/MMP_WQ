@@ -18,9 +18,9 @@ mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, 
 MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RData"))) &
-    file.exists(paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData')) &
-    file.exists(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData')) &
-    file.exists(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData')) &
+    file.exists(paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.gam.RData')) &
+    file.exists(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.gam1.RData')) &
+    file.exists(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.gam.RData')) &
     file.exists(paste0(FLNTU_OUTPUT_PATH, 'flntu.all.RData')) 
     ) {
 
@@ -28,9 +28,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RDa
     ## ---- Read in data
     MMP_tryCatch(
     {
-        niskin.aims.reef.av <- get(load(paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData')))
-        niskin.jcu.reef.av <- get(load(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.av1.RData')))
-        niskin.cy.reef.av <- get(load(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.av.RData')))
+        niskin.aims.reef.gam <- get(load(paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.gam.RData')))
+        niskin.jcu.reef.gam <- get(load(paste0(NISKIN_OUTPUT_PATH, 'niskin.jcu.reef.gam1.RData')))
+        niskin.cy.reef.gam <- get(load(paste0(NISKIN_OUTPUT_PATH, 'niskin.cy.reef.gam.RData')))
         flntu.all <- get(load(paste0(FLNTU_OUTPUT_PATH, 'flntu.all.RData')))
 
     },
@@ -41,39 +41,117 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RDa
     ## ---- Join AIMS and JCU data
     MMP_tryCatch(
     {
-        wq.gamdata.all.reef <- niskin.aims.reef.av %>%
-            dplyr::select(ends_with('.wm'),            #select only necessary info
-                          MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
-                          GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
-                          waterYear,reneeYear,cwaterYear,financialYear,cfinancialYear,
-                          Date,Mnth,Dt.num,Dtt.num) %>%
-            mutate(Source = 'AIMS Niskin') %>%
-            full_join(niskin.jcu.reef.av %>%
-                      dplyr::select(ends_with('.wm'),            #select only necessary info
-                                    MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
-                                    GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
-                                    waterYear,reneeYear,cwaterYear,financialYear,
-                                    cfinancialYear,Date,Mnth,Dt.num,Dtt.num) %>%
-                      mutate(Source = 'JCU Niskin')
-                      ) %>%
-            full_join(niskin.cy.reef.av %>%
-                      dplyr::select(ends_with('.wm'),            #select only necessary info
-                                    MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
-                                    GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
-                                    waterYear,reneeYear,cwaterYear,financialYear,
-                                    cfinancialYear,Date,Mnth,Dt.num,Dtt.num) %>%
-                      mutate(Source = 'CY Niskin')
-                      ) %>%
-            dplyr:::rename(LATITUDE=LATITUDE.wm, LONGITUDE=LONGITUDE.wm) %>%
-            dplyr::select(-ACOUSTIC_DEPTH.wm,-oldSamplingYear.wm,-waterYear.wm,
-                          -reneeYear.wm,-financialYear.wm,-SWELL_HEIGHT.wm,-WIND_SPEED.wm,
-                          -WIND_DIR.wm,-Station.wm,
+      niskin.aims.reef.gam <- niskin.aims.reef.gam %>%
+        ## flag the analytes
+        rename_with(
+          ~ paste0(.x, "__RESP"),
+          .cols =  names(niskin.aims.reef.gam)[
+            !str_ends(names(niskin.aims.reef.gam), "_UM|_MGPERL|_UGPERL") &
+            (
+              paste0(names(niskin.aims.reef.gam), "_UM") %in% names(niskin.aims.reef.gam) |
+              paste0(names(niskin.aims.reef.gam), "_MGPERL") %in% names(niskin.aims.reef.gam) |
+              paste0(names(niskin.aims.reef.gam), "_UGPERL") %in% names(niskin.aims.reef.gam) 
+             )
+          ]
+        ) |>
+        rename_with( ~ str_replace(.x, "_LOD", "__LOD"),
+                    .cols = ends_with("_LOD")) |> 
+        mutate(SECCHI__RESP = SECCHI_DEPTH, SECCHI__LOD = NA)
+
+      niskin.jcu.reef.gam <- niskin.jcu.reef.gam %>%
+        ## flag the analytes
+        rename_with(
+          ~ paste0(.x, "__RESP"),
+          .cols =  names(niskin.jcu.reef.gam)[
+            !str_ends(names(niskin.jcu.reef.gam), "_UM|_MGPERL|_UGPERL") &
+            (
+              paste0(names(niskin.jcu.reef.gam), "_UM") %in% names(niskin.jcu.reef.gam) |
+              paste0(names(niskin.jcu.reef.gam), "_MGPERL") %in% names(niskin.jcu.reef.gam) |
+              paste0(names(niskin.jcu.reef.gam), "_UGPERL") %in% names(niskin.jcu.reef.gam) 
+             )
+          ]
+        ) |>
+        rename_with( ~ str_replace(.x, "_LOD", "__LOD"),
+                    .cols = ends_with("_LOD")) |>
+        mutate(SECCHI__RESP = SECCHI_DEPTH, SECCHI__LOD = NA)
+        
+  
+      niskin.cy.reef.gam <- niskin.cy.reef.gam %>%
+        ## flag the analytes
+        rename_with(
+          ~ paste0(.x, "_RESP"),
+          .cols =  names(niskin.cy.reef.gam)[
+            !str_ends(names(niskin.cy.reef.gam), "_UM|_MGPERL|_UGPERL") &
+            (
+              paste0(names(niskin.cy.reef.gam), "_UM") %in% names(niskin.cy.reef.gam) |
+              paste0(names(niskin.cy.reef.gam), "_MGPERL") %in% names(niskin.cy.reef.gam) |
+              paste0(names(niskin.cy.reef.gam), "_UGPERL") %in% names(niskin.cy.reef.gam) 
+             )
+          ]
+        )  |>
+        rename_with( ~ str_replace(.x, "_LOD", "__LOD"),
+                    .cols = ends_with("_LOD")) |> 
+        mutate(SECCHI__RESP = SECCHI_DEPTH, SECCHI__LOD = NA)
+        
+
+
+      wq.gamdata.all.reef <- niskin.aims.reef.gam %>%
+        as_tibble() |> 
+        dplyr::select(
+                 ## ends_with('.wm'),            #select only necessary info
+                 matches(".*__RESP"),              #all flagged analytes
+                 matches(".*__LOD"),
+                     STATION_NAME, LONGITUDE, LATITUDE,
+                 MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
+                 GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
+                 waterYear,reneeYear,cwaterYear,financialYear,cfinancialYear,
+                 Date,Mnth,Dt.num,Dtt.num, DEPTH_CODE, DUPLICATE) %>%
+        mutate(Source = 'AIMS Niskin') %>%
+        full_join(niskin.jcu.reef.gam %>%
+            dplyr::select(
+                     ## ends_with('.wm'),            #select only necessary info
+                     matches(".*__RESP"),              #all flagged analytes
+                     matches(".*__LOD"),
+                     STATION_NAME, LONGITUDE, LATITUDE,
+                     MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
+                     GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
+                     waterYear,reneeYear,cwaterYear,financialYear,
+                     cfinancialYear,Date,Mnth,Dt.num,Dtt.num, DEPTH_CODE, DUPLICATE) %>%
+            mutate(Source = 'JCU Niskin')
+            ) %>%
+         full_join(niskin.cy.reef.gam %>%
+            dplyr::select(
+                     ## ends_with('.wm'),            #select only necessary info
+                     matches(".*__RESP"),              #all flagged analytes
+                     matches(".*__LOD"),
+                     STATION_NAME, LONGITUDE, LATITUDE,
+                     MMP_SITE_NAME,GBRMPA_group,SHORT_NAME,Water_Samples,
+                     GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
+                     waterYear,reneeYear,cwaterYear,financialYear,
+                     cfinancialYear,Date,Mnth,Dt.num,Dtt.num, DEPTH_CODE, DUPLICATE) %>%
+            mutate(Source = 'CY Niskin')
+            ) %>%
+            ## dplyr:::rename(LATITUDE=LATITUDE.wm, LONGITUDE=LONGITUDE.wm) %>%
+            dplyr::select(
+             ## -ACOUSTIC_DEPTH.wm,-oldSamplingYear.wm,-waterYear.wm,
+             ##              -reneeYear.wm,-financialYear.wm,-SWELL_HEIGHT.wm,-WIND_SPEED.wm,
+             ##              -WIND_DIR.wm,-Station.wm,
                           -contains('_UM')) %>%
-            gather(key=Measure,value=Value, -LONGITUDE,-LATITUDE,-MMP_SITE_NAME,
-                   -GBRMPA_group,-SHORT_NAME,-Water_Samples,
-                   -GBRMPA_water_area,-Region,-Reg,-Subregion,-Subreg,-Season,-waterYear,
-                   -reneeYear,-cwaterYear,-financialYear,-cfinancialYear,-Date,-Mnth,-Dt.num,
-                   -Source) %>%
+            ## gather(key=Measure,value=Value, -LONGITUDE,-LATITUDE,-MMP_SITE_NAME,
+            ##        -GBRMPA_group,-SHORT_NAME,-Water_Samples,
+            ##        -GBRMPA_water_area,-Region,-Reg,-Subregion,-Subreg,-Season,-waterYear,
+            ##        -reneeYear,-cwaterYear,-financialYear,-cfinancialYear,-Date,-Mnth,-Dt.num,
+            ##        -Source) %>%
+           pivot_longer(
+             cols = -c(STATION_NAME, LONGITUDE,LATITUDE,MMP_SITE_NAME,
+                       GBRMPA_group,SHORT_NAME,Water_Samples,
+                       GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,waterYear,
+                       reneeYear,cwaterYear,financialYear,cfinancialYear,Date,Mnth,Dt.num,
+                       Source, DEPTH_CODE, DUPLICATE),
+             names_to = c("Measure", ".value"),
+             names_sep = "__"
+             ## names_pattern = "(.*_RESP|.*_LOD)(.*)"
+           ) |>
             suppressMessages() %>%
             suppressWarnings()
     },
@@ -88,7 +166,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RDa
             bind_rows(flntu.all %>%
                       mutate(Source = 'AIMS FLNTU',
                              Mnth=as.integer(format(Date,'%m'))) %>%
-                      dplyr::select(LATITUDE,LONGITUDE,MMP_SITE_NAME,GBRMPA_group,
+                      dplyr::select(STATION_ID, LATITUDE,LONGITUDE,MMP_SITE_NAME,GBRMPA_group,
                                     SHORT_NAME,Water_Samples,
                                     GBRMPA_water_area,Region,Reg,Subregion,Subreg,Season,
                                     waterYear,reneeYear,cwaterYear,financialYear,

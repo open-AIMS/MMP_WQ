@@ -87,7 +87,6 @@ RUN apt-get update \
     libfribidi-dev \
   && rm -rf /var/lib/apt/lists/*
 
-
 ## Install General Usage R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
@@ -119,6 +118,7 @@ RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
   install.packages('sf'); \
 "
+
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
   install.packages('sp'); \
@@ -204,10 +204,10 @@ RUN R -e "options(repos = \
 ## Install ggplot related R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-  install.packages('patchwork'); \
-  install.packages('ggnewscale'); \
-  install.packages('ggh4x'); \
-  install.packages(c('cowplot')); \
+    install.packages('patchwork'); \
+    install.packages('ggnewscale'); \
+    install.packages('ggh4x'); \
+    install.packages(c('cowplot')); \
 "
 
 # ## Install INLA related R packages
@@ -220,14 +220,20 @@ RUN R -e "options(repos = \
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-  install.packages(c('remotes')); \
+    install.packages(c('remotes')); \
     remotes::install_github('AIMS/reportcards'); \
 "
 
 ## Install project specific R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-  install.packages('openxlsx'); \
+    install.packages('openxlsx'); \
+"
+
+## Install project specific R packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
+    install.packages('assertthat'); \
 "
 
 ## Create project directory in docker image
@@ -266,3 +272,5 @@ WORKDIR ~/MMP/scripts/
 ## COPY stats_wrapper.sh ~/reefCloud/stats_wrapper.sh
 ## ENTRYPOINT ["~/reefCloud/stats_wrapper.sh"]
 #############################################################################
+
+

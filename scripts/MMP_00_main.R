@@ -13,7 +13,7 @@ setwd("scripts")
 ## 4. source the functions
 source("MMP_functions.R")
 ## 5. run fakeArgs
-##    MMP_fakeArgs(stage = 1:9, always_extract = TRUE, reportYear = 2025) 
+##    MMP_fakeArgs(stage = 1:9, always_extract = TRUE, reportYear = 2026) 
 
 ## If calling this application interactively, you will need to mimic
 ## the use of command line arguments.  To do so, call the following:
@@ -34,7 +34,8 @@ if (3 %in% runStage) {
 }
 
 if (4 %in% runStage) {
-    source("MMP_40_fit_gams.R")
+    ## source("MMP_40_fit_gams.R")
+    source("MMP_40_fit_gps.R")
 }
 
 if (5 %in% runStage) {

@@ -439,80 +439,75 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.flntu.gams.RData"))
         wq.gamdata.all.reef <- get(load(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')))
         wq.guidelines <- get(load(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')))
 
-        wq.flntu.gams <- wq.gamdata.all.reef %>%
-            filter(Source=='AIMS FLNTU') %>%
-            mutate(Measure=dplyr:::recode(Measure,CHL="DRIFTCHL_UGPERL.wm")) %>%
-            droplevels() %>%
-            group_by(Subregion, Measure) %>%
-            summarise(data = list(cur_data_all()), .groups = "drop") %>%
-            mutate(N = 1:n(),
-                   TotalN = max(N)) %>%
-            mutate(ModelPlus = pmap(.l = list(data, N, TotalN),
-                             .f = ~ {
-                                 .x <- ..1
-                                 N <- ..2
-                                 TotalN <- ..3
-                                 if (nrow(.x)==0 | all(is.na(.x$Value))) {
-                                     next
-                                 }
-                                 fit <- WQfitGAM(.x, k = 5, fx = T,
-                                          fam = Tweedie(2))
-                                 Subregion <- unique(.x$Subregion)
-                                 Measure <- unique(.x$Measure)
-                                 MMP_log(status = "SUCCESS",
-                                         logFile = LOG_FILE,
-                                         Category = str_squish(paste("FLNTU GAMMS", " for ",
-                                                                     Subregion, " subregion (",
-                                                                     Measure, ")")),
-                                         msg=NULL)
-                                 mmp__change_name(stage = paste0("STAGE", CURRENT_STAGE),
-                                                  item = CURRENT_ITEM,
-                                                  name = paste0("fit FLNTU GAMMS [",N, "/",TotalN,"]"))
-                                 MMP_openning_banner()
-                                 fit
-                             }
-                             )
-                   ) %>%
-            ## Isolate the model
-            mutate(model = map(.x = ModelPlus,
-                               .f = ~ .x[[1]])) %>%
-            ## annual trend
-            mutate(year = map2(.x = data, .y = ModelPlus,
-                               .f = ~ {
-                                   dat <- .x %>%
-                                       complete(reneeYear = seq(min(reneeYear), max(reneeYear),
-                                                                by=1)) %>%
-                                       dplyr::group_by(reneeYear) %>%
-                                       summarise(Value=mean(Value, na.rm=TRUE)) %>%
-                                       ungroup() %>%
-                                       mutate(Obs=ifelse(is.na(Value), 0, 1)) %>%
-                                       dplyr::select(reneeYear, Obs) %>%
-                                       suppressWarnings() %>%
-                                       suppressMessages()
-                                   .y[[2]] %>%
-                                       mutate(reneeYear = MMP_reneeYear(Date)) %>%
-                                       left_join(dat) %>%
-                                       suppressWarnings() %>%
-                                       suppressMessages()
+        wq.flntu_gp <- wq.gamdata.all.reef %>%
+          filter(Source=='AIMS FLNTU') %>%
+          droplevels() |>
+          ## mutate(Measure=dplyr:::recode(Measure,CHL="DRIFTCHL_UGPERL.wm")) %>%
+          droplevels() %>%
+          mutate(RESP = Value) |>
+          group_by(Subregion, Measure) %>%
+          nest() |>
+          ungroup() |>
+          mutate(N = 1:n(),
+            TotalN = max(N)) %>%
+          ## Make label
+          mutate(label = map2(.x = Subregion, .y = Measure,
+            .f = ~ {
+              paste0("GP_AIMSFLNTU_all_", .x, "_", .y)
+            })) |>
+          ## Prepare data
+          mutate(dat = map2(data, Measure,
+            .f = ~ {
+              if (nrow(.x) == 0 | all(is.na(.x$Value))) {
+                dat <- NA
+              }
+              model_data_prep(.x, .y)
+            }
+          )) |>
+          ## Prepare formula
+          mutate(form = map2(data, Measure,
+            .f = ~ {
+              model_make_formula(.x, .y)
+            }
+          )) |>
+          ## Prepare priors
+          mutate(priors = map(data,
+            .f = ~ {
+              model_make_priors(.x)
+            }
+          ))
+        ## Fit models
 
-                               })) %>%
-            ## monthly trend
-            mutate(month = map(.x = ModelPlus,
-                               .f = ~ .x[[3]])) %>%
-            ## annual trend residuals
-            mutate(yearResid = map(.x = ModelPlus,
-                                   .f = ~ .x[[4]])) %>%
-            ## monthly trend residuals
-            mutate(monthResid = map(.x = ModelPlus,
-                                   .f = ~ .x[[5]])) %>%
-            ## plot
-            mutate(plot = pmap(.l = list(year, yearResid, Subregion, Measure),
-                               .f = ~ {
-                                   dat <- ..1 %>% mutate(Subregion=..3,Measure=..4)
-                                   resid <- ..2
-                                   chemPlot(dat,resid, Source='AIMS FLNTU')
-                                  }))
-        save(wq.flntu.gams, file = paste0(DATA_PATH, "/models/wq.flntu.gams.RData"))
+        results <- furrr::future_pmap(.l = list(wq.flntu_gp$form, wq.flntu_gp$priors, wq.flntu_gp$dat,
+          wq.flntu_gp$label, wq.flntu_gp$N, wq.flntu_gp$TotalN),
+          .f = ~ {
+            form <- ..1
+            priors <- ..2
+            dat <- ..3
+            label <- ..4
+            N <- ..5
+            TotalN <- ..6
+            cat(paste0("Fit models (FLNTU): ", N, " out of: ", TotalN, " (", label, ")"), "\n")
+            fname <- paste0(GAM_OUTPUT_PATH, "model_", label, ".rds")
+            if (dat |> filter(!is.na(RESP)) |> nrow() < 10 |
+                  sum(dat$RESP == 0) > 0) {
+              fname <- NA
+              return(fname)
+            }
+            if (!file.exists(fname)) {
+              environment(form) <- environment()
+              mod <- model_fit_model(form, priors, dat)
+              saveRDS(mod, file = fname)
+            }
+            return(fname)
+          },
+          .progress = TRUE,
+          .options = furrr::furrr_options(scheduling = Inf)
+        )
+        future::plan(old_plan)
+        wq.flntu_gp <- wq.flntu_gp |> mutate(mod = results)
+
+        save(wq.flntu_gp, file = paste0(DATA_PATH, "/models/wq.flntu_gp.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GAMMS:', msg='Fit AIMS FLNTU GAMMS.', return=TRUE)
     ## ----end

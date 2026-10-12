@@ -33,6 +33,14 @@ docs_container:
 code_singularity:
 	$(MAKE) -f scripts/Makefile singularity
 
+slurm_R:
+	@echo "Compiling analyses"
+	sbatch analysis.slurm
+
+run_R:
+	@echo "Running the script on the HPC"
+	cd scripts; Rscript MMP_40_fit_gps_hpc.R --reportYear=2026 --runStage=4 --alwaysExtract=FALSE
+
 code_local:
 	$(MAKE) -f scripts/Makefile
 

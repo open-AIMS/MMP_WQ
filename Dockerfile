@@ -3,34 +3,33 @@ FROM rocker/r-ver:4.6.1
 ## Install packages
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-  libgdal-dev \
-  libproj-dev \
-  libgeos-dev \
-  lbzip2 \
-  libnetcdf-dev \
-  libsqlite3-dev \
-  libssl-dev \
-  libudunits2-dev \
-  netcdf-bin \
-  sqlite3 \
-  imagemagick \
-  pandoc \
-  make \
-  ghostscript \
-  poppler-utils \
-  zip \
-  wget \
-  fonts-dejavu-extra \
-  libfontconfig1-dev \
-  curl \
-  tk \
-  openjdk-11-jre \
-  gdebi-core \
-  cmake \
-  libcairo2-dev \
-  libuv1-dev \
+    libgdal-dev \
+    libproj-dev \
+    libgeos-dev \
+    lbzip2 \
+    libnetcdf-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libudunits2-dev \
+    netcdf-bin \
+    sqlite3 \
+    imagemagick \
+    pandoc \
+    make \
+    ghostscript \
+    poppler-utils \
+    zip \
+    wget \
+    fonts-dejavu-extra \
+    libfontconfig1-dev \
+    curl \
+    tk \
+    openjdk-11-jre \
+    gdebi-core \
+    cmake \
+    libcairo2-dev \
+    libuv1-dev \
   && rm -rf /var/lib/apt/lists/*
-
 
 # NOTE: pandoc-citeproc was removed upstream; citeproc is now built into pandoc (use `pandoc --citeproc`).
 
@@ -74,6 +73,8 @@ RUN set -eux; \
 # At runtime the scripts set `export HFILE_PATH=../parameters/harmonics-2004-06-14.tcd`
 # to point `tide` at the bundled harmonics database.
 
+#######################################################################
+
 ## Install quarto (version 1.10.19)
 ARG QUARTO_VERSION="1.10.19"
 RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
@@ -81,9 +82,9 @@ RUN gdebi --non-interactive quarto-linux-amd64.deb
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-      libfontconfig1-dev \
-      libharfbuzz-dev \
-      libfribidi-dev \
+    libfontconfig1-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
   && rm -rf /var/lib/apt/lists/*
 
 ## Install General Usage R packages
@@ -107,36 +108,36 @@ RUN R -e "options(repos = \
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-      libgdal-dev \
-          gdal-bin \
-              proj-bin \
-                && rm -rf /var/lib/apt/lists/*
+    libgdal-dev \
+    gdal-bin \
+    proj-bin \
+  && rm -rf /var/lib/apt/lists/*
 
 ## Install Spatial R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('sf'); \
+  install.packages('sf'); \
 "
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('sp'); \
-    install.packages('rnaturalearth'); \
-    install.packages('rnaturalearthdata'); \
-    install.packages('ggnewscale'); \
-    install.packages('rgeos'); \
-    install.packages('sn'); \
-    install.packages('stars'); \
-    install.packages('geojsonR'); \
-    install.packages('geojsonsf'); \
-    install.packages('s2'); \
+  install.packages('sp'); \
+  install.packages('rnaturalearth'); \
+  install.packages('rnaturalearthdata'); \
+  install.packages('ggnewscale'); \
+  install.packages('rgeos'); \
+  install.packages('sn'); \
+  install.packages('stars'); \
+  install.packages('geojsonR'); \
+  install.packages('geojsonsf'); \
+  install.packages('s2'); \
 "
 
 ## Install ncdf4 R package (for netCDF file handling)
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('ncmeta'); \
-    install.packages(c('ncdf4')); \
+  install.packages('ncmeta'); \
+  install.packages(c('ncdf4')); \
 "
 
 RUN apt-get update \
@@ -148,56 +149,56 @@ RUN apt-get update \
 ## Install quarto related R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('quarto'); \
-    install.packages('bookdown'); \
-    install.packages(c('kableExtra')); \
-    install.packages(c('officer')); \
-    install.packages(c('flextable')); \
-    install.packages(c('gdtools')); \
+  install.packages('quarto'); \
+  install.packages('bookdown'); \
+  install.packages(c('kableExtra')); \
+  install.packages(c('officer')); \
+  install.packages(c('flextable')); \
+  install.packages(c('gdtools')); \
 "
 
 ## Install flow related R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('furrr'); \
-    install.packages('foreach'); \
+  install.packages('furrr'); \
+  install.packages('foreach'); \
 "
 
 ## Install unit testing related R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('testthat'); \
+  install.packages('testthat'); \
 "
 
 ## Install Modelling related R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('emmeans'); \
-    install.packages('DHARMa'); \
-    install.packages(c('car')); \
-    install.packages(c('mgcv')); \
+  install.packages('emmeans'); \
+  install.packages('DHARMa'); \
+  install.packages(c('car')); \
+  install.packages(c('mgcv')); \
 "
 
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('remotes'); \
-    install.packages('rstan');  \
-    remotes::install_github('paul-buerkner/brms'); \
-    install.packages('tidybayes');  \
-    install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos'))); \
-    remotes::install_github('stan-dev/cmdstanr'); \
-    library(cmdstanr); \
-    check_cmdstan_toolchain(); \
-    install_cmdstan(cores = 2); \
+  install.packages('remotes'); \
+  install.packages('rstan');  \
+  remotes::install_github('paul-buerkner/brms'); \
+  install.packages('tidybayes');  \
+  install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos'))); \
+  remotes::install_github('stan-dev/cmdstanr'); \
+  library(cmdstanr); \
+  check_cmdstan_toolchain(); \
+  install_cmdstan(cores = 2); \
 "
 
 ## Install Bayesian modelling testing related R packages
 RUN R -e "options(repos = \
   list(CRAN = 'https://packagemanager.posit.co/cran/2026-10-01/')); \
-    install.packages('tidybayes'); \
-    install.packages('posterior'); \
-    install.packages('bayesplot');   \
-    install.packages('HDInterval');   \
+  install.packages('tidybayes'); \
+  install.packages('posterior'); \
+  install.packages('bayesplot');   \
+  install.packages('HDInterval');   \
 "
 
 ## Install ggplot related R packages

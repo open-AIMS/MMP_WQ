@@ -97,7 +97,15 @@ model_fit_model <- function(form, priors, dat) {
   return(mod) 
 }
 
-
+model_draws_sum <- function(draws) {
+  draws_sum <-
+    draws |>
+    ungroup() |>
+    dplyr::select(.draw, .epred, Date) |>
+    group_by(Date) |>
+    median_hdci(.epred)
+  return(draws_sum)
+}
 
 model_regions_of_change <- function(draws) {
   step_30d <- 30 / 365.25
@@ -120,7 +128,76 @@ model_regions_of_change <- function(draws) {
 }
 
 
+model_deriv_sums <- function(deriv_draws) {
+  sum <- deriv_draws |>
+    group_by(Dt.mid) |>
+    median_hdci(deriv, .width =  c(0.8, 0.95)) |>
+    mutate(
+      trend =  case_when(
+        .lower > 0 ~ "increasing",
+        .upper < 0 ~ "decreasing",
+        TRUE ~ "ns"
+      )
+    ) |>
+    mutate(Date =  lubridate::date_decimal(Dt.mid))
+  return(sum)
+}
+ 
+gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_guidelines = FALSE) {
+  old.wq.guidelines <- read.csv('../parameters/old.wq.guidelines.csv', strip.white=TRUE) |>
+    mutate(Measure = str_replace(Measure, ".wm", "")) |>
+    mutate(Measure = str_replace(Measure, "_(UGPERL|MGPERL|DEPTH)", "")) |>
+    filter(Subregion == subregion, Measure == measure) |>
+    droplevels() |>
+    summarise(RESP = mean(GL)) |>
+    pull(RESP)
+  ## wq.guidelines <- get(load(file=paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')))
+  wq.units <- get(load(paste0(DATA_PATH, "/primary/other/wq.units.RData"))) |>
+    mutate(Measure = str_replace(Measure, ".wm", "")) |>
+    mutate(Measure = str_replace(Measure, "_(UGPERL|MGPERL|DEPTH)", "")) |>
+    filter(Measure == measure) |>
+    droplevels() |> 
+    pull(Name.graphs.abbr) |> _[[1]]
+             
+  deriv_draws <-
+    deriv_draws |>
+    left_join(deriv_sums |>
+              dplyr::select(Dt.mid, trend), by =  "Dt.mid")
+  draws_sums <- deriv_draws |>
+    ungroup() |>
+    group_by(Date) |>
+    median_hdci(.epred, width = 0.95) 
+  p <- deriv_draws |>
+    ## filter(.draw < 100) |> 
+    ggplot() 
 
+  if (!is.na(old.wq.guidelines) & include_guidelines) {
+    p <- p +
+      geom_hline(yintercept = old.wq.guidelines, linetype = "dashed")
+  }
+  p <- p +
+    geom_point(data =  dat, aes(y =  RESP, x =  Date), alpha =  0.1, shape = 16, size = 1) +
+    geom_line(aes(y =  .epred, x =  Date, group =  .draw, color =  trend),
+              alpha =  0.01
+              ) +
+    ## geom_line(
+    ##   data =  draws_sums, aes(y =  .epred, x =  Date),
+    ##   color =  "white", linewidth =  1
+    ## ) +
+    geom_line(
+      data =  draws_sums, aes(y =  .epred, x =  Date),
+      color =  "white", linewidth =  1
+    ) +
+    ## scale_x_date("") +
+    scale_y_log10(parse(text = wq.units)) +
+    scale_color_manual(values =  c("increasing" =  "red", "decreasing" =  "blue", "ns" =  "grey")) +
+    theme_classic() +
+    theme(axis.title.x = element_blank(),
+          legend.position = "none") +
+    guides(color =  guide_legend(override.aes =  list(alpha =  1, size =  2)))
+
+  return(p)
+}
 
 
 

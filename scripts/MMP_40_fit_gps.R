@@ -14,7 +14,7 @@ setwd("scripts")
 ## 4. source the functions
 source("MMP_functions.R")
 ## 5. run fakeArgs
-##    MMP_fakeArgs(stage = 4, always_extract = TRUE, reportYear = 2026) 
+##    MMP_fakeArgs(stage = 4, always_extract = TRUE, reportYear = 2026)
 
 ## If calling this application interactively, you will need to mimic
 ## the use of command line arguments.  To do so, call the following:
@@ -23,6 +23,11 @@ source("MMP_functions.R")
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
 
+## If running this locally, ensure you have the following:
+## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/processed/niskin/wq.gamdata.all.reef.RData ../data/processed/niskin/")
+## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.guidelines.RData ../data/primary/other/")
+## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/parameters/old.wq.guidelines.csv ../parameters/")
+## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.units.RData ../data/primary/other/")
 
 
 source("MMP_functions.R")
@@ -51,15 +56,20 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
     file.exists(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')) &
-    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')) 
+    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
     ) {
 
-    ## 1. AIMS niskin only 
+    ## 1. AIMS niskin only
     ## ---- AIMS niskin gamms
     MMP_tryCatch(
     {
         wq.gamdata.all.reef <- get(load(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')))
         wq.guidelines <- get(load(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')))
+
+        ## ## Send these data to the hpc - UNFORTUNATELY the docker image does not have scp
+        ## cmd <- paste0("scp ", GAM_INPUT_PATH, "wq.gamdata.all.reef.RData ",
+        ##               "mlogan@hpc-l001.aims.gov.au:/export/home/l-p/mlogan/Work/AIMS/MMP/WQ/2026/data/processed/niskin/wq.gamdata.all.reeef.RData")
+        ## system(cmd)
 
         wq_gp <- wq.gamdata.all.reef %>%
           filter(Source=='AIMS Niskin') %>%
@@ -70,14 +80,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
           droplevels() %>%
           group_by(Subregion, Measure) %>%
           nest() |>
-          ungroup() |> 
+          ungroup() |>
           mutate(N = 1:n(),
                  TotalN = max(N)) |>
           ## Make label
           mutate(label = map2(.x = Subregion, .y = Measure,
                  .f = ~ {
-                   paste0("GP_AIMSNiskin_all_", .x, "_", .y) 
-                 })) |> 
+                   paste0("GP_AIMSNiskin_all_", .x, "_", .y)
+                 })) |>
           ## Prepare data
           mutate(dat = map2(data, Measure,
                             .f = ~ {
@@ -88,11 +98,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                             }
                            )) |>
           ## Prepare formula
-          mutate(form = map2(data, Measure, 
+          mutate(form = map2(data, Measure,
                             .f = ~ {
                               model_make_formula(.x, .y)
                             }
-                            )) |> 
+                            )) |>
           ## Prepare priors
           mutate(priors = map(data,
                               .f = ~ {
@@ -138,7 +148,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                    sample =  NA
                                  ) |>
                                    mutate(Date =  lubridate::date_decimal(Dt.num))
-                                 })) |> 
+                                 })) |>
           mutate(draws = pmap(.l = list(mod, newdata, label, N, TotalN),
                               .f = ~ {
                                 mod <- ..1
@@ -150,27 +160,89 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                 fname <- paste0(GAM_OUTPUT_PATH, "draws_" ,
                                                 label, ".rds")
                                 if (!file.exists(fname)) {
-                                  mod <- readRDS(mod) 
+                                  mod <- readRDS(mod)
                                   draws <- epred_draws(mod, newdata =  newdata, re_formula =  NA)
                                   saveRDS(draws, file = fname)
                                 }
                                 return(fname)
                               }
                               )) |>
-          mutate(derive_draws = map2(draws, label,
-                                    .f = ~ {
-                                      draws <- .x
-                                      label <- .y
-                                      fname <- paste0(GAM_OUTPUT_PATH, "draws_" ,
-                                                      label, ".rds")
-                                      if (!file.exists(fname)) {
-                                        draws <- readRDS(draws) 
-                                        deriv_draws <- model_regions_of_change(draws)
-                                        saveRDS(deriv_draws, file = fname)
-                                      }
-                                      return(fname)
-                                    }
-                                    ))
+          mutate(draws_sums = pmap(.l = list(draws, label, N, TotalN),
+                                   .f = ~ {
+                                     draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     cat(paste0("Get draws sum: ", N, " out of: ", TotalN), "\n")
+                                     fname <- paste0(GAM_OUTPUT_PATH, "draws_sums_" ,
+                                                     label, ".rds")
+                                     if (!file.exists(fname)) {
+                                       draws <- readRDS(draws)
+                                       draws_sums <- model_draws_sum(draws)
+                                       saveRDS(draws_sums, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(deriv_draws = pmap(.l = list(draws, label, N, TotalN),
+                                     .f = ~ {
+                                       draws <- ..1
+                                       label <- ..2
+                                       N <- ..3
+                                       TotalN <- ..4
+                                       cat(paste0("Get deriv draws: ", N, " out of: ", TotalN), "\n")
+                                       fname <- paste0(GAM_OUTPUT_PATH, "deriv_draws_" ,
+                                                       label, ".rds")
+                                       if (!file.exists(fname)) {
+                                         draws <- readRDS(draws)
+                                         deriv_draws <- model_regions_of_change(draws)
+                                         saveRDS(deriv_draws, file = fname)
+                                       }
+                                       return(fname)
+                                     }
+                                     )) |>
+          mutate(deriv_sums = pmap(.l = list(deriv_draws, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     fname <- paste0(GAM_OUTPUT_PATH, "deriv_sums_", label, ".rds")
+                                       cat(paste0("Get deriv sums: ", N, " out of: ", TotalN), "\n")
+                                     if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- model_deriv_sums(deriv_draws)
+                                       saveRDS(deriv_sums, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(plot = pmap(.l = list(dat, deriv_draws, deriv_sums,
+                                       Measure, Subregion, label, N, TotalN),
+                                   .f = ~ {
+                                     dat <- ..1
+                                     deriv_draws <- ..2
+                                     deriv_sums <- ..3
+                                     measure <- ..4
+                                     subregion <- ..5
+                                     label <- ..6
+                                     N <- ..7
+                                     TotalN <- ..8
+                                     fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
+                                     cat(paste0("Plot: ", N, " out of: ", TotalN), "\n")
+                                     ## if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       p <- gp_plot(dat, deriv_draws, deriv_sums,
+                                                    measure, subregion, include_guidelines = TRUE)
+                                       ggsave(file = str_replace(fname, ".rds", ".png"),
+                                              p, width = 6, height = 4)
+                                       saveRDS(p, file = fname)
+                                     ## }
+                                     return(fname)
+                                   }
+                                   ))
+
         save(wq_gp, file = paste0(DATA_PATH, "/models/wq_gp.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GPs:', msg='Fit AIMS niskin GPs.', return=TRUE)
@@ -191,10 +263,10 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu_gp.RData"))) &
     file.exists(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')) &
-    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')) 
+    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
     ) {
 
-    ## 1. AIMS and JCU niskin only 
+    ## 1. AIMS and JCU niskin only
     ## ---- AIMS and JCU niskin gamms
     MMP_tryCatch(
     {
@@ -211,27 +283,27 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu_gp.RData")
           ## filter(!(Source=='JCU Niskin' & Measure %in% c('PP.wm'))) %>%  #Apparently, as of 2020,  the JCU PN data are good,  so they can go back into the GAMs (but PP should stay out!)
           ## filter(!(Source=='CY Niskin' & Measure %in% c('PP.wm'))) %>%
           ## As of 2025, we should exclude all CY data prior to the reneeYear of 2021
-          filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>% 
+          filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>%
           droplevels() %>%
           group_by(Subregion, Measure) %>%
           ## summarise(data = list(cur_data_all()), .groups = "drop") %>%
           nest() |>
-          ungroup() |> 
+          ungroup() |>
           mutate(N = 1:n(),
                  TotalN = max(N)) %>%
           ## Make label
           mutate(label = map2(.x = Subregion, .y = Measure,
                  .f = ~ {
-                   paste0("GP_AIMSJCUNiskin_all_", .x, "_", .y) 
-                 })) 
+                   paste0("GP_AIMSJCUNiskin_all_", .x, "_", .y)
+                 }))
 
 
 
-        
+
         wq.aims.jcu.gams <- wq.aims.jcu.gams %>%
             mutate(Change = map(.x = model,
                                 .f = ~ MMP_GAMchange(.x, refYear = 2015)))
-        
+
         save(wq.aims.jcu_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu_gp.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GPs:', msg='Fit AIMS/JCU niskin GPs.', return=TRUE)
@@ -252,10 +324,10 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gps.RData"))) &
     file.exists(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')) &
-    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')) 
+    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
     ) {
 
-    ## 1. AIMS and JCU (Open, Mid, Offshore) niskin only 
+    ## 1. AIMS and JCU (Open, Mid, Offshore) niskin only
     ## ---- AIMS and JCU (Open, Mid, Offshore) niskin gamms
     MMP_tryCatch(
     {
@@ -274,19 +346,19 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gps.RD
           ## filter(!(Source=='JCU Niskin' & Measure %in% c('PP.wm'))) %>%  #Apparently, as of 2020,  the JCU PN data are good,  so they can go back into the GAMs (but PP should stay out!)
           ## filter(!(Source=='CY Niskin' & Measure %in% c('PP.wm'))) %>%
           ## As of 2025, we should exclude all CY data prior to the reneeYear of 2021
-          filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>% 
+          filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>%
           droplevels() %>%
           group_by(Subregion, Measure) %>%
           ## summarise(data = list(cur_data_all()), .groups = "drop") %>%
           nest() |>
-          ungroup() |> 
+          ungroup() |>
           mutate(N = 1:n(),
                  TotalN = max(N)) %>%
           ## Make label
           mutate(label = map2(.x = Subregion, .y = Measure,
                  .f = ~ {
-                   paste0("GP_AIMSJCUNiskin_OMO_", .x, "_", .y) 
-                 })) |> 
+                   paste0("GP_AIMSJCUNiskin_OMO_", .x, "_", .y)
+                 })) |>
           ## Prepare data
           mutate(dat = map2(data, Measure,
                             .f = ~ {
@@ -297,11 +369,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gps.RD
                             }
                            )) |>
           ## Prepare formula
-          mutate(form = map2(data, Measure, 
+          mutate(form = map2(data, Measure,
                             .f = ~ {
                               model_make_formula(.x, .y)
                             }
-                            )) |> 
+                            )) |>
           ## Prepare priors
           mutate(priors = map(data,
                               .f = ~ {
@@ -334,7 +406,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gps.RD
                               }
                               return(fname)
                               }
-                            )) 
+                            ))
 
         save(wq.aims.jcu.omo_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo_gp.RData"))
     },
@@ -357,10 +429,10 @@ MMP_openning_banner()
 
 if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.flntu.gams.RData"))) &
     file.exists(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')) &
-    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')) 
+    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
     ) {
 
-    ## 1. AIMS FLNTU only 
+    ## 1. AIMS FLNTU only
     ## ---- AIMS FLNTU gamms
     MMP_tryCatch(
     {

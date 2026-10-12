@@ -529,11 +529,13 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
         MAXDATE=as.Date(paste0(reportYear,'-09-30'))
         MINDATE=MAXDATE-years(1)+days(1)
         
-        waterSalinity <- waterSalinity %>% spread(key=PARAMETER,value=AVG_VALUE_QAQC) %>%
-            mutate(new = coalesce(!!! dplyr::select(., contains('salinity')))) %>%  ##unfortunately, there are numerous salinity fields.  coalesce will combine them all into one
-            dplyr::select(-contains('salinity')) %>% 
-            dplyr::rename(`sal00: Salinity, Practical [PSU]`=new) %>%  ## the code from now on assumes the salinity field is called 'sal00: Salinity, Practical [PSU]'
-            mutate(
+        waterSalinity <- waterSalinity %>%
+          spread(key=PARAMETER,value=AVG_VALUE_QAQC) %>%
+          ## The following is no longer the case
+          ## mutate(new = coalesce(!!! dplyr::select(., contains('salinity')))) %>%  ##unfortunately, there are numerous salinity fields.  coalesce will combine them all into one
+          ## dplyr::select(-contains('salinity')) %>% 
+          ## dplyr::rename(`sal00: Salinity, Practical [PSU]`=new) %>%  ## the code from now on assumes the salinity field is called 'sal00: Salinity, Practical [PSU]'
+          mutate(
                 Date = as.Date(SAMPLE_DAY, format='%Y-%m-%d'),
                 waterYear = MMP_waterYear(Date),
                 reneeYear = MMP_reneeYear(Date),
@@ -581,7 +583,8 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
         waterSalinityAll <- waterSalinity %>%
             mutate(WaterSalinity=T) %>%
             MMP_region_subregion(Source='WaterSalinity') %>%
-            mutate(Month=format(Date,"%b"), Season=factor(ifelse(Month %in% c("Nov","Dec","Jan","Feb","Mar","Apr"), "Wet","Dry"))) %>%
+          mutate(Month=format(Date,"%b"),
+                 Season=factor(ifelse(Month %in% c("Nov","Dec","Jan","Feb","Mar","Apr"), "Wet","Dry"))) %>%
             left_join(wq.sites %>% dplyr:::select(SHORT_NAME, LATITUDE=Latitude)) %>%
             droplevels() %>%
             suppressMessages() %>%
@@ -691,14 +694,19 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
     load(file=paste0(DATA_PATH, '/primary/other/names_lookup.RData'))
     wq.sites <- read_csv(paste0(PARAMS_PATH, '/wq.sites.csv'), trim_ws = TRUE) %>% suppressMessages()
 
+   ## As of 
     waterSalinityAll <- waterSalinityAll %>%
-        dplyr:::select(everything(),cond=contains('cond0S/m: Conductivity [S/m]'),
-                       sal=matches('^sal00: Salinity, Practical \\[PSU\\]$'),
-                       temp=contains('tv268C: Temperature [IPTS-68, deg C]')
-                       ) %>%
-        mutate(Salinity=sal, #ifelse(!is.na(sal),sal,salinity),
-               Temperature=ifelse(!is.na(temp),temp,temperature)
-               )
+      ## This is no longer needed
+      ## dplyr:::select(everything(),
+      ##                cond=contains('cond0S/m: Conductivity [S/m]'),
+      ##                sal=matches('^sal00: Salinity, Practical \\[PSU\\]$'),
+      ##                temp=contains('tv268C: Temperature [IPTS-68, deg C]')
+      ##                ) %>%
+      ## mutate(Salinity=sal, #ifelse(!is.na(sal),sal,salinity),
+      ##        Temperature=ifelse(!is.na(temp),temp,temperature)
+      ##        )
+      mutate(Salinity = salinity,
+             Temperature = temperature) 
     MINx <- as.Date('2015-01-01') #min(wsa$Date, na.rm=TRUE)
     MINx <- as.Date(paste0(reportYear,'-07-01')) - years(5) - days(1)
 

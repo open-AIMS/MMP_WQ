@@ -1385,7 +1385,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         psal = psal,
         psal_quality_control = psal_quality_control) %>% 
       dplyr::rename("salinity" = psal) %>%
-      filter(temp_quality_control %in% c(1, 2)) %>% 
+      filter(psal_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(salinity, psal_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)
@@ -1398,7 +1398,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         cndc = cndc,
         cndc_quality_control = cndc_quality_control) %>% 
       dplyr::rename("conductivity" = cndc) %>%
-      filter(temp_quality_control %in% c(1, 2)) %>% 
+      filter(cndc_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(conductivity, cndc_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)
@@ -1411,7 +1411,7 @@ mmp__read_salinity_nc <- function(nc_file) {
         pres = pres,
         pres_quality_control = pres_quality_control) %>% 
       dplyr::rename("pres_rel" = pres) %>%
-      filter(temp_quality_control %in% c(1, 2)) %>% 
+      filter(pres_quality_control %in% c(1, 2)) %>% 
       pivot_longer(cols = c(pres_rel, pres_quality_control),
                    names_to = "PARAMETER", values_to = "Values")
     df_1 <- df_1 %>% rbind(df_tmp)

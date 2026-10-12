@@ -26,7 +26,8 @@ source("MMP_functions.R")
 ## If running this locally, ensure you have the following:
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/processed/niskin/wq.gamdata.all.reef.RData ../data/processed/niskin/")
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.guidelines.RData ../data/primary/other/")
-
+## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/parameters/old.wq.guidelines.csv ../parameters/")
+## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.units.RData ../data/primary/other/")
 
 
 source("MMP_functions.R")
@@ -176,13 +177,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                      fname <- paste0(GAM_OUTPUT_PATH, "draws_sums_" ,
                                                      label, ".rds")
                                      if (!file.exists(fname)) {
-                                       draws <- readRDS(draws) 
+                                       draws <- readRDS(draws)
                                        draws_sums <- model_draws_sum(draws)
                                        saveRDS(draws_sums, file = fname)
                                      }
                                      return(fname)
                                    }
-                                   )) |> 
+                                   )) |>
           mutate(deriv_draws = pmap(.l = list(draws, label, N, TotalN),
                                      .f = ~ {
                                        draws <- ..1
@@ -193,7 +194,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                        fname <- paste0(GAM_OUTPUT_PATH, "deriv_draws_" ,
                                                        label, ".rds")
                                        if (!file.exists(fname)) {
-                                         draws <- readRDS(draws) 
+                                         draws <- readRDS(draws)
                                          deriv_draws <- model_regions_of_change(draws)
                                          saveRDS(deriv_draws, file = fname)
                                        }
@@ -209,13 +210,13 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                      fname <- paste0(GAM_OUTPUT_PATH, "deriv_sums_", label, ".rds")
                                        cat(paste0("Get deriv sums: ", N, " out of: ", TotalN), "\n")
                                      if (!file.exists(fname)) {
-                                       deriv_draws <- readRDS(deriv_draws) 
+                                       deriv_draws <- readRDS(deriv_draws)
                                        deriv_sums <- model_deriv_sums(deriv_draws)
                                        saveRDS(deriv_sums, file = fname)
                                      }
                                      return(fname)
                                    }
-                                   )) |> 
+                                   )) |>
           mutate(plot = pmap(.l = list(dat, deriv_draws, deriv_sums,
                                        Measure, Subregion, label, N, TotalN),
                                    .f = ~ {
@@ -230,8 +231,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                      fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
                                      cat(paste0("Plot: ", N, " out of: ", TotalN), "\n")
                                      ## if (!file.exists(fname)) {
-                                       deriv_draws <- readRDS(deriv_draws) 
-                                       deriv_sums <- readRDS(deriv_sums) 
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- readRDS(deriv_sums)
                                        p <- gp_plot(dat, deriv_draws, deriv_sums,
                                                     measure, subregion, include_guidelines = TRUE)
                                        ggsave(file = str_replace(fname, ".rds", ".png"),

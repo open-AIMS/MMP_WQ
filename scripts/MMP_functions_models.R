@@ -15,6 +15,16 @@ model_data_prep <- function(x, Measure) {
                 .groups = "drop") |> 
       ## mutate(sample =  paste(MMP_SITE_NAME)) |>
       mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
+  } else if (Measure %in% c("CHL", "NTU")) {
+    dat <- x |>
+      filter(!is.na(RESP)) |> 
+      dplyr::select(
+                         RESP, LOD,
+                         Date, Dt.num,
+                         MMP_SITE_NAME, DUPLICATE, DEPTH_CODE, DEPTH_CODE
+                       ) |>
+      mutate(sample =  paste(MMP_SITE_NAME, Date, DEPTH_CODE)) |>
+      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
   } else {
     dat <- x |>
       filter(!is.na(RESP)) |> 
@@ -34,6 +44,10 @@ model_make_formula <- function(x, Measure) {
     dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
                      (1 | MMP_SITE_NAME),
                    family =  Gamma(link =  "log"))
+  } else if (Measure %in% c("CHL", "NTU")) {
+      dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
+                       (1 | MMP_SITE_NAME), #(1 | DUPLICATE),
+                     family =  Gamma(link =  "log"))
   } else {
     if (sum(!is.na(x$LOD)) == 0) {  ## No limit of detection values
       dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +

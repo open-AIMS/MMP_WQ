@@ -18,7 +18,7 @@ source("MMP_functions.R")
 
 ## If calling this application interactively, you will need to mimic
 ## the use of command line arguments.  To do so, call the following:
-## MMP_fakeArgs(stage = 4, always_extract = TRUE, reportYear = 2025)
+## MMP_fakeArgs(stage = 4, always_extract = TRUE, reportYear = 2026)
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
@@ -225,4 +225,89 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gp.RDa
 
   save(wq.aims.jcu.omo_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo_gp.RData"))
    
+}
+
+CURRENT_ITEM <- "fitFLNTUGAMM"
+mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
+MMP_openning_banner()
+
+if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.flntu.gams.RData"))) &
+      file.exists(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')) &
+      file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')) 
+) {
+
+  ## 1. AIMS FLNTU only 
+  ## ---- AIMS FLNTU gamms
+  wq.gamdata.all.reef <- get(load(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')))
+  wq.guidelines <- get(load(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')))
+
+  wq.flntu_gp <- wq.gamdata.all.reef %>%
+    filter(Source=='AIMS FLNTU') %>%
+    droplevels() |> 
+    ## mutate(Measure=dplyr:::recode(Measure,CHL="DRIFTCHL_UGPERL.wm")) %>%
+    droplevels() %>%
+    mutate(RESP = Value) |> 
+    group_by(Subregion, Measure) %>%
+    nest() |>
+    ungroup() |> 
+    mutate(N = 1:n(),
+      TotalN = max(N)) %>%
+    ## Make label
+    mutate(label = map2(.x = Subregion, .y = Measure,
+      .f = ~ {
+        paste0("GP_AIMSFLNTU_all_", .x, "_", .y) 
+      })) |> 
+    ## Prepare data
+    mutate(dat = map2(data, Measure,
+      .f = ~ {
+        if (nrow(.x) == 0 | all(is.na(.x$Value))) {
+          dat <- NA
+        }
+        model_data_prep(.x, .y)
+      }
+    )) |> 
+    ## Prepare formula
+    mutate(form = map2(data, Measure, 
+      .f = ~ {
+        model_make_formula(.x, .y)
+      }
+    )) |> 
+    ## Prepare priors
+    mutate(priors = map(data,
+      .f = ~ {
+        model_make_priors(.x)
+      }
+    )) 
+  ## Fit models
+
+  results <- furrr::future_pmap(.l = list(wq.flntu_gp$form, wq.flntu_gp$priors, wq.flntu_gp$dat,
+    wq.flntu_gp$label, wq.flntu_gp$N, wq.flntu_gp$TotalN),
+    .f = ~ {
+      form <- ..1
+      priors <- ..2
+      dat <- ..3
+      label <- ..4
+      N <- ..5
+      TotalN <- ..6
+      cat(paste0("Fit models (FLNTU): ", N, " out of: ", TotalN, " (", label, ")"), "\n")
+      fname <- paste0(GAM_OUTPUT_PATH, "model_", label, ".rds")
+      if (dat |> filter(!is.na(RESP)) |> nrow() < 10 |
+            sum(dat$RESP == 0) > 0) {
+        fname <- NA
+        return(fname)
+      }
+      if (!file.exists(fname)) {
+        environment(form) <- environment()
+        mod <- model_fit_model(form, priors, dat)
+        saveRDS(mod, file = fname)
+      }
+      return(fname)
+    },
+    .progress = TRUE,
+    .options = furrr::furrr_options(scheduling = Inf)
+  )
+  future::plan(old_plan) 
+  wq.flntu_gp <- wq.flntu_gp |> mutate(mod = results)
+  
+  save(wq.flntu_gp, file = paste0(DATA_PATH, "/models/wq.flntu_gp.RData"))
 }

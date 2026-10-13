@@ -13,6 +13,13 @@
 setwd("scripts")
 ## 4. source the functions
 source("MMP_functions.R")
+library(tidyverse)
+library(brms)
+library(tidybayes)
+library(posterior)
+
+source("MMP_functions.R")
+source("MMP_functions_models.R")
 ## 5. run fakeArgs
 ##    MMP_fakeArgs(stage = 4, always_extract = TRUE, reportYear = 2026)
 
@@ -30,12 +37,6 @@ source("MMP_functions.R")
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.units.RData ../data/primary/other/")
 
 
-source("MMP_functions.R")
-source("MMP_functions_models.R")
-
-library(brms)
-library(tidybayes)
-library(posterior)
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
@@ -139,9 +140,14 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
           mutate(newdata = map(.x = dat,
                                .f =  ~ {
                                  dat <- .x
+                                 n_out <- max(
+                                   200,
+                                   ceiling((max(dat$Dt.num) - min(dat$Dt.num)) /
+                                             (30.25 / 365.25)) + 1
+                                 )
                                 data.frame(
                                    Dt.num =  seq(min(dat$Dt.num), max(dat$Dt.num),
-                                                 length.out =  200),
+                                                 length.out =  n_out),
                                    MMP_SITE_NAME =  NA,
                                    DUPLICATE =  NA,
                                    DEPTH_CODE =  NA,

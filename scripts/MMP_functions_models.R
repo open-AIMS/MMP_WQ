@@ -1,7 +1,7 @@
 model_data_prep <- function(x, Measure) {
   if (Measure == "SECCHI") {
     dat <- x |>
-      filter(!is.na(RESP)) |> 
+      filter(!is.na(RESP)) |>
       dplyr::select(
                RESP, LOD,
                Date, Dt.num,
@@ -12,12 +12,12 @@ model_data_prep <- function(x, Measure) {
       ## as.data.frame() |> head()
       summarise(RESP = unique(RESP),
                 LOD = NA,
-                .groups = "drop") |> 
+                .groups = "drop") |>
       ## mutate(sample =  paste(MMP_SITE_NAME)) |>
       mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
   } else if (Measure %in% c("CHL", "NTU")) {
     dat <- x |>
-      filter(!is.na(RESP)) |> 
+      filter(!is.na(RESP)) |>
       dplyr::select(
                          RESP, LOD,
                          Date, Dt.num,
@@ -27,7 +27,7 @@ model_data_prep <- function(x, Measure) {
       mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
   } else {
     dat <- x |>
-      filter(!is.na(RESP)) |> 
+      filter(!is.na(RESP)) |>
       dplyr::select(
                          RESP, LOD,
                          Date, Dt.num,
@@ -75,7 +75,7 @@ model_make_priors <- function(x) {
     prior_string(paste0("student_t(3, 0, ", summ[1,2],")"),
                  class =  "sd") +
     prior_string(paste0("student_t(3, 0, ", summ[1,2],")"),
-                 class =  "sdgp") 
+                 class =  "sdgp")
   return(priors)
 }
 
@@ -94,7 +94,7 @@ model_fit_model <- function(form, priors, dat) {
     control =  list(adapt_delta =  0.99,
                     max_treedepth =  15)
   )
-  return(mod) 
+  return(mod)
 }
 
 model_draws_sum <- function(draws) {
@@ -109,7 +109,10 @@ model_draws_sum <- function(draws) {
 
 model_regions_of_change <- function(draws) {
   step_30d <- 30 / 365.25
-  lag_n <- round(step_30d * 100)
+  n_out <- draws |> filter(.draw == 1) |> nrow()
+  step_len <- (max(draws$Dt.num) - min(draws$Dt.num)) / (n_out - 1)
+  lag_n <- round(step_30d / step_len)
+## lag_n <- 1
 
   deriv_draws <-
     draws |>
@@ -123,15 +126,17 @@ model_regions_of_change <- function(draws) {
     ) |>
     ungroup() |>
     filter(!is.na(deriv)) |>
-    mutate(Date =  lubridate::date_decimal(Dt.mid))
+    ## mutate(Date =  lubridate::date_decimal(Dt.mid))
+    mutate(Date =  lubridate::date_decimal(Dt.num))
   return(deriv_draws)
 }
 
 
 model_deriv_sums <- function(deriv_draws) {
   sum <- deriv_draws |>
-    group_by(Dt.mid) |>
-    median_hdci(deriv, .width =  c(0.8, 0.95)) |>
+    ## group_by(Dt.mid) |>
+    group_by(Dt.num) |>
+    median_hdci(deriv, .width =  c(0.95)) |>
     mutate(
       trend =  case_when(
         .lower > 0 ~ "increasing",
@@ -139,10 +144,11 @@ model_deriv_sums <- function(deriv_draws) {
         TRUE ~ "ns"
       )
     ) |>
-    mutate(Date =  lubridate::date_decimal(Dt.mid))
+    ## mutate(Date =  lubridate::date_decimal(Dt.mid))
+    mutate(Date =  lubridate::date_decimal(Dt.num))
   return(sum)
 }
- 
+
 gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_guidelines = FALSE) {
   old.wq.guidelines <- read.csv('../parameters/old.wq.guidelines.csv', strip.white=TRUE) |>
     mutate(Measure = str_replace(Measure, ".wm", "")) |>
@@ -156,20 +162,20 @@ gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_gu
     mutate(Measure = str_replace(Measure, ".wm", "")) |>
     mutate(Measure = str_replace(Measure, "_(UGPERL|MGPERL|DEPTH)", "")) |>
     filter(Measure == measure) |>
-    droplevels() |> 
+    droplevels() |>
     pull(Name.graphs.abbr) |> _[[1]]
-             
+
   deriv_draws <-
     deriv_draws |>
     left_join(deriv_sums |>
-              dplyr::select(Dt.mid, trend), by =  "Dt.mid")
+              dplyr::select(Dt.num, trend), by =  "Dt.num")
   draws_sums <- deriv_draws |>
     ungroup() |>
     group_by(Date) |>
-    median_hdci(.epred, width = 0.95) 
+    median_hdci(.epred, width = 0.95)
   p <- deriv_draws |>
-    ## filter(.draw < 100) |> 
-    ggplot() 
+    ## filter(.draw < 100) |>
+    ggplot()
 
   if (!is.na(old.wq.guidelines) & include_guidelines) {
     p <- p +
@@ -186,10 +192,17 @@ gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_gu
     ## ) +
     geom_line(
       data =  draws_sums, aes(y =  .epred, x =  Date),
-      color =  "white", linewidth =  1
+      color =  "black", linewidth =  1
+    ) +
+    geom_line(
+      data =  draws_sums, aes(y =  .epred, x =  Date),
+      color =  "white", linewidth =  0.8
     ) +
     ## scale_x_date("") +
-    scale_y_log10(parse(text = wq.units)) +
+    ## scale_y_log10(parse(text = wq.units)) +
+    scale_y_continuous(parse(text = wq.units),
+      trans=scales::log_trans(),
+      breaks=base_breaks(n=5), labels=prettyNum) +
     scale_color_manual(values =  c("increasing" =  "red", "decreasing" =  "blue", "ns" =  "grey")) +
     theme_classic() +
     theme(axis.title.x = element_blank(),
@@ -214,7 +227,7 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         data=data %>% filter(Value>0)
     }
     data$Value = ifelse(is.infinite(data$Value), NA,data$Value)
-    
+
     data = data %>% filter(!is.na(Value))
     if (nrow(data)==0) return(0)
     stable_outcome = FALSE
@@ -222,7 +235,7 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         err=0
         ## New for 2020
         tryCatch(model <- gam(Value ~ s(Dt.num, bs=bs)+s(Mnth,bs='cc',k=5,fx=F) + s(MMP_SITE_NAME, bs='re'),
-                              method='REML', 
+                              method='REML',
                               correlation=corCAR1(form=~Dt.num|MMP_SITE_NAME), knots=list(Mnth=seq(1,12,length=5)),
                               data=data, family=fam),
                  error=function(x) err<<-0.5)
@@ -272,7 +285,7 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         if (err==5) {
             print('FAILED')
             nms = unique(data$MMP_SITE_NAME[data$Source=='AIMS Niskin'])
-            data = data %>% filter(MMP_SITE_NAME==nms)                    
+            data = data %>% filter(MMP_SITE_NAME==nms)
         }
         if (err<5) stable_outcome=TRUE
     }
@@ -293,8 +306,8 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         fv.terms <- predict(model$gam, newdata=ndf, type = "iterms",se.fit=TRUE)
         pp.fit <- fv.terms$fit[, 1] + coefficients(model$lme)[[1]][1]
     }
-    pp.se <- fv.terms$se.fit[, 1] 
-    
+    pp.se <- fv.terms$se.fit[, 1]
+
     if (err==0) {
         q=qt(0.975, df=model$df.resid)
         ndf$pred<-model$family$linkinv(pp.fit) #pp$fit
@@ -313,7 +326,7 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
     ndf$variable=unique(data$Measure)
                                         #print(ndf)
     ndf = ndf %>% left_join(wq.units %>% dplyr:::select(variable=Measure,Name.graphs,Name.graphs.abbr))
-    
+
     ##partial residuals for long term trend
     if (err==0) {
         fv.terms <- predict(model, type = "iterms")
@@ -321,9 +334,9 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         centre <- predict(model, newdata=data.frame(Dt.num=decimal_date(mean(data$Date)),
                                                     Mnth=6, MMP_SITE_NAME=NA), exclude='s(MMP_SITE_NAME)', newdata.guaranteed = TRUE)
         p.resid <- model$family$linkinv(fv.terms[, 1] + w.resid + coefficients(model)[[1]][1]) #centre) #coefficients(model$lme)[[1]][1])
-        
+
         ndf_resid=expand.grid(Dt.num=model$model$Dt.num,Mnth=0)
-        ndf_resid$pred<-p.resid #as.vector(pp)+res 
+        ndf_resid$pred<-p.resid #as.vector(pp)+res
         ndf_resid$variable <- unique(data$Measure)
         ndf_resid$Date<-date_decimal(ndf_resid$Dt.num)
         ndf_resid = ndf_resid %>% left_join(wq.units %>% dplyr:::select(variable=Measure,Name.graphs,Name.graphs.abbr)) %>%
@@ -334,15 +347,15 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         centre <- predict(model$gam, newdata=data.frame(Dt.num=decimal_date(mean(data$Date)),
                                                         Mnth=6))
         p.resid <- model$gam$family$linkinv(fv.terms[, 1] + w.resid + coefficients(model$lme)[[1]][1]) #centre) #coefficients(model$lme)[[1]][1])
-        
+
         ndf_resid=expand.grid(Dt.num=model$gam$model$Dt.num,Mnth=0)
-        ndf_resid$pred<-p.resid #as.vector(pp)+res 
+        ndf_resid$pred<-p.resid #as.vector(pp)+res
         ndf_resid$variable <- unique(data$Measure)
         ndf_resid$Date<-date_decimal(ndf_resid$Dt.num)
         ndf_resid = ndf_resid %>% left_join(wq.units %>% dplyr:::select(variable=Measure,Name.graphs,Name.graphs.abbr)) %>%
             mutate(Source=data$Source)
     }
-    
+
     ## Now for the seasonal trend
     ndf1=expand.grid(Dt.num=decimal_date(mean(Date)),
                      Mnth=seq(0,12,l=100), MMP_SITE_NAME=NA)
@@ -371,16 +384,16 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
     ndf1$variable=unique(data$Measure)
                                         #print(ndf)
     ndf1 = ndf1 %>% left_join(wq.units %>% dplyr:::select(variable=Measure,Name.graphs,Name.graphs.abbr))
-    
+
     ## Seasonal residuals
     if (err==0) {
         fv.terms <- predict(model, type = "iterms")
         w.resid <- model$residuals * sqrt(model$weights)
         centre <- predict(model, newdata=expand.grid(Dt.num=mean(model$model$Dt.num),Mnth=model$model$Mnth, MMP_SITE_NAME=NA), exclude = 's(MMP_SITE_NAME)', newdata.guaranteed = TRUE)
         p.resid1 <- model$family$linkinv(fv.terms[, 2] + w.resid + coefficients(model)[[1]][1]) #centre) #coefficients(model$lme)[[1]][1])
-        
+
         ndf1_resid=expand.grid(Dt.num=0,Mnth=model$model$Mnth)
-        ndf1_resid$pred<-p.resid1 #as.vector(pp)+res 
+        ndf1_resid$pred<-p.resid1 #as.vector(pp)+res
         ndf1_resid$variable <- unique(data$Measure)
         ndf1_resid = ndf1_resid %>% left_join(wq.units %>% dplyr:::select(variable=Measure,Name.graphs,Name.graphs.abbr)) %>%
             mutate(Source=data$Source)
@@ -389,9 +402,9 @@ WQfitGAM <- function(data, bs='tp', k=5,fx=T, fam=quasipoisson(link='log'),
         w.resid <- model$gam$residuals * sqrt(model$gam$weights)
         centre <- predict(model$gam, newdata=expand.grid(Dt.num=mean(model$gam$model$Dt.num),Mnth=model$gam$model$Mnth))
         p.resid1 <- model$gam$family$linkinv(fv.terms[, 2] + w.resid + coefficients(model$lme)[[1]][1]) #centre) #coefficients(model$lme)[[1]][1])
-        
+
         ndf1_resid=expand.grid(Dt.num=0,Mnth=model$gam$model$Mnth)
-        ndf1_resid$pred<-p.resid1 #as.vector(pp)+res 
+        ndf1_resid$pred<-p.resid1 #as.vector(pp)+res
         ndf1_resid$variable <- unique(data$Measure)
         ndf1_resid = ndf1_resid %>% left_join(wq.units %>% dplyr:::select(variable=Measure,Name.graphs,Name.graphs.abbr)) %>%
             mutate(Source=data$Source)
@@ -439,18 +452,18 @@ chemPlot <- function(data, resid, y.title=TRUE, guideline=TRUE, transform=TRUE,
         } else {
             p = p+geom_point(data=resid, size=0.5)
         }
-        
+
         p = p+geom_ribbon(aes(ymin=lower2, ymax=upper2), alpha=0.1, fill='blue',color=NA) +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=0.3, fill='blue',color=NA) +
             geom_line(color='blue')
-        
+
     } else if (Source=='AIMS FLNTU') {
         p = p+#geom_point(data=resid, size=0.5) +
-            geom_ribbon(aes(ymin=lower2, ymax=upper2), alpha=0.1, fill='red',color=NA) + 
+            geom_ribbon(aes(ymin=lower2, ymax=upper2), alpha=0.1, fill='red',color=NA) +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=0.3, fill='red',color=NA) +
             geom_line(color='red')
     }
-    
+
     p=p+ theme_classic() + theme_mmp + theme(axis.title.x=element_blank())
     if (transform) {
         if (y.title==TRUE) {
@@ -497,7 +510,7 @@ MMP_GAMchange <- function(mod, yrs=5, refYear = NULL) {
         ## fv.terms <- predict(mod$gam, newdata=ndf, type = "iterms",se.fit=TRUE)
         ## pp.fit <- fv.terms$fit[, 1] + coefficients(mod$lme)[[1]][1]
 
-        ## pp.se <- fv.terms$se.fit[, 1] 
+        ## pp.se <- fv.terms$se.fit[, 1]
         ## q=qt(0.975, df=mod$gam$df.resid)
         ## ndf$pred<-mod$gam$family$linkinv(pp.fit) #pp$fit
         ## ndf$lower <- mod$gam$family$linkinv(pp.fit - pp.se) #pp$fit - 1*pp$se.fit
@@ -523,7 +536,7 @@ MMP_GAMchange <- function(mod, yrs=5, refYear = NULL) {
             pairs() %>%
             confint() %>%
             as.data.frame()
-    } else {             #fitted with GAM 
+    } else {             #fitted with GAM
         ndf.list = list(Dt.num=c(max(mod$model$Dt.num),  max(mod$model$Dt.num)-yrs))
         cont1 <- emmeans(mod, ~Dt.num,
                          at=ndf.list,
@@ -561,10 +574,10 @@ MMP__worm_historic_and_alt <- function(hist.idx, alt.idx, minDate, MAXDATE) {
     if (nrow(hist.idx) > 0) {
         g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
             geom_hline(yintercept = 0, linetype = 'dashed') +
-            geom_line() 
+            geom_line()
         if ("Lower" %in% colnames(hist.idx)) {
-          g <- g +  
-            geom_linerange(aes(ymin = Lower, ymax = Upper)) 
+          g <- g +
+            geom_linerange(aes(ymin = Lower, ymax = Upper))
         }
         g <- g +
             geom_point(aes(fill = Grade), shape = 21,
@@ -611,11 +624,11 @@ MMP__worm_historic_and_alt <- function(hist.idx, alt.idx, minDate, MAXDATE) {
 }
 
 MMP__gam_chl_niskin_flntu <- function(niskin, flntu, subr) {
-    
+
     pp <- niskin %>%
-        MMP__gam_extract(subregion = subr, measure = 'DRIFTCHL_UGPERL.wm', field = "plot") 
+        MMP__gam_extract(subregion = subr, measure = 'DRIFTCHL_UGPERL.wm', field = "plot")
     pt <- flntu %>%
-        MMP__gam_extract(subregion = subr, measure = 'DRIFTCHL_UGPERL.wm', field = "year") 
+        MMP__gam_extract(subregion = subr, measure = 'DRIFTCHL_UGPERL.wm', field = "year")
 
     if (!is.null(pt)) {
         GeomRibbon$handle_na <- function(data, params) { data }  # handle gaps in data range by a gap in ribbons
@@ -633,52 +646,52 @@ MMP__gam_chl_niskin_flntu <- function(niskin, flntu, subr) {
 }
 
 theme_nothing <- function (font_size = 14, font_family = "", rel_small = 12/14) {
-    theme_void(base_size = font_size, base_family = font_family) %+replace% 
-        theme(line = element_blank(), rect = element_blank(), 
-            text = element_text(family = font_family, face = "plain", 
-                color = "black", size = font_size, lineheight = 0.9, 
-                hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
-                debug = FALSE), axis.line = element_blank(), 
-            axis.line.x = NULL, axis.line.y = NULL, axis.text = element_blank(), 
-            axis.text.x = NULL, axis.text.x.top = NULL, axis.text.y = NULL, 
-            axis.text.y.right = NULL, axis.ticks = element_blank(), 
-            axis.ticks.length = unit(0, "pt"), axis.title = element_blank(), 
-            axis.title.x = NULL, axis.title.x.top = NULL, axis.title.y = NULL, 
-            axis.title.y.right = NULL, legend.background = element_blank(), 
-            legend.spacing = unit(font_size, "pt"), legend.spacing.x = NULL, 
-            legend.spacing.y = NULL, legend.margin = margin(0, 
-                0, 0, 0), legend.key = element_blank(), legend.key.size = unit(1.1 * 
-                font_size, "pt"), legend.key.height = NULL, legend.key.width = NULL, 
-            legend.text = element_text(size = rel(rel_small)), 
-            legend.text.align = NULL, legend.title = element_text(hjust = 0), 
-            legend.title.align = NULL, legend.position = "none", 
-            legend.direction = NULL, legend.justification = "center", 
-            legend.box = NULL, legend.box.margin = margin(0, 
-                0, 0, 0), legend.box.background = element_blank(), 
-            legend.box.spacing = unit(font_size, "pt"), panel.background = element_blank(), 
-            panel.border = element_blank(), panel.grid = element_blank(), 
-            panel.grid.major = NULL, panel.grid.minor = NULL, 
-            panel.spacing = unit(font_size/2, "pt"), panel.spacing.x = NULL, 
-            panel.spacing.y = NULL, panel.ontop = FALSE, strip.background = element_blank(), 
-            strip.text = element_blank(), strip.text.x = NULL, 
-            strip.text.y = NULL, strip.placement = "inside", 
-            strip.placement.x = NULL, strip.placement.y = NULL, 
-            strip.switch.pad.grid = unit(0, "cm"), strip.switch.pad.wrap = unit(0, 
-                "cm"), plot.background = element_blank(), plot.title = element_blank(), 
-            plot.subtitle = element_blank(), plot.caption = element_blank(), 
-            plot.tag = element_text(face = "bold", hjust = 0, 
-                vjust = 0.7), plot.tag.position = c(0, 1), plot.margin = margin(0, 
+    theme_void(base_size = font_size, base_family = font_family) %+replace%
+        theme(line = element_blank(), rect = element_blank(),
+            text = element_text(family = font_family, face = "plain",
+                color = "black", size = font_size, lineheight = 0.9,
+                hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(),
+                debug = FALSE), axis.line = element_blank(),
+            axis.line.x = NULL, axis.line.y = NULL, axis.text = element_blank(),
+            axis.text.x = NULL, axis.text.x.top = NULL, axis.text.y = NULL,
+            axis.text.y.right = NULL, axis.ticks = element_blank(),
+            axis.ticks.length = unit(0, "pt"), axis.title = element_blank(),
+            axis.title.x = NULL, axis.title.x.top = NULL, axis.title.y = NULL,
+            axis.title.y.right = NULL, legend.background = element_blank(),
+            legend.spacing = unit(font_size, "pt"), legend.spacing.x = NULL,
+            legend.spacing.y = NULL, legend.margin = margin(0,
+                0, 0, 0), legend.key = element_blank(), legend.key.size = unit(1.1 *
+                font_size, "pt"), legend.key.height = NULL, legend.key.width = NULL,
+            legend.text = element_text(size = rel(rel_small)),
+            legend.text.align = NULL, legend.title = element_text(hjust = 0),
+            legend.title.align = NULL, legend.position = "none",
+            legend.direction = NULL, legend.justification = "center",
+            legend.box = NULL, legend.box.margin = margin(0,
+                0, 0, 0), legend.box.background = element_blank(),
+            legend.box.spacing = unit(font_size, "pt"), panel.background = element_blank(),
+            panel.border = element_blank(), panel.grid = element_blank(),
+            panel.grid.major = NULL, panel.grid.minor = NULL,
+            panel.spacing = unit(font_size/2, "pt"), panel.spacing.x = NULL,
+            panel.spacing.y = NULL, panel.ontop = FALSE, strip.background = element_blank(),
+            strip.text = element_blank(), strip.text.x = NULL,
+            strip.text.y = NULL, strip.placement = "inside",
+            strip.placement.x = NULL, strip.placement.y = NULL,
+            strip.switch.pad.grid = unit(0, "cm"), strip.switch.pad.wrap = unit(0,
+                "cm"), plot.background = element_blank(), plot.title = element_blank(),
+            plot.subtitle = element_blank(), plot.caption = element_blank(),
+            plot.tag = element_text(face = "bold", hjust = 0,
+                vjust = 0.7), plot.tag.position = c(0, 1), plot.margin = margin(0,
                 0, 0, 0), complete = TRUE)
 }
 
 MMP__gam_ntu_flntu <- function(niskin, flntu, subr) {
 
     pt <- flntu %>%
-        MMP__gam_extract(subregion = subr, measure = 'NTU', field = "plot") 
+        MMP__gam_extract(subregion = subr, measure = 'NTU', field = "plot")
     if(is.null(pt)) {
         pp.ntu <- ggplot() + theme_nothing()
     } else {
-        pp.ntu <- pt 
+        pp.ntu <- pt
     }
     pp.ntu
 }
@@ -732,7 +745,7 @@ MMP__gam_plot1 <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
             annotate(geom = 'text',
                      x = as.POSIXct(paste0(minDate,' 12:00:00')),
                      y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-            
+
             wq.gams %>% MMP__gam_extract(subregion = subr,
                                          measure = "PP.wm", field = "plot") +
             annotate(geom = 'text',
@@ -781,7 +794,7 @@ MMP__gam_plot1 <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
             annotate(geom = 'text',
                      x = as.POSIXct(paste0(minDate,' 12:00:00')),
                      y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-            
+
             wq.gams %>% MMP__gam_extract(subregion = subr,
                                          measure = "PP.wm", field = "plot") +
             annotate(geom = 'text',
@@ -848,7 +861,7 @@ MMP__worm_historic <- function(hist.idx, minDate, MAXDATE) {
 MMP__worm_hist_2 <- function(hist.idx, subregion.worm, minDate, MAXDATE) {
     if (nrow(hist.idx) > 0) {
         g <- ggplot(data = hist.idx, aes(y = Index, x = reportCardYear)) +
-            geom_hline(yintercept = 0, linetype = 'dashed') 
+            geom_hline(yintercept = 0, linetype = 'dashed')
         if ("Lower" %in% colnames(hist.idx)) {
           g <- g +
             geom_linerange(aes(ymin = Lower, ymax = Upper))
@@ -905,14 +918,14 @@ MMP__worm_alt_2026 <- function(hist.idx, subregion.worm, alt.idx, subregion.worm
     hist.idx <- hist.idx |>
       filter(Year < 2016)
     subregion.worm <- subregion.worm |>
-      filter(reportCardYear < as.Date("2016-01-01")) |> 
+      filter(reportCardYear < as.Date("2016-01-01")) |>
       mutate(Measure = forcats::fct_recode(Measure,
                                            "Chlorophyll*'-'*italic(a)" = "Chl-a",
                                            "Nitrate/Nitrite" = "NOx",
                                            "Particulate~phosphorus" = "PP",
                                            "Particulate~nitrogen" =  "PN")) |>
       mutate(Indicator = Measure) |>
-      ## mutate(Indicator = str_replace_all(Indicator, " ", "~")) |> 
+      ## mutate(Indicator = str_replace_all(Indicator, " ", "~")) |>
       filter(reportCardYear > as.Date("2007-12-30")) |>
       droplevels()
 
@@ -923,7 +936,7 @@ MMP__worm_alt_2026 <- function(hist.idx, subregion.worm, alt.idx, subregion.worm
       geom_line(show.legend=FALSE) +
       geom_linerange(aes(ymin = Lower, ymax = Upper)) +
       geom_point(aes(fill = Grade), shape = 21,
-                 size = 3, show.legend = FALSE)  
+                 size = 3, show.legend = FALSE)
   } else {
     g <- ggplot(data = NULL, aes(y = Index, x = reportCardYear)) +
       geom_hline(yintercept = 0, linetype = 'dashed') +
@@ -961,7 +974,7 @@ MMP__worm_alt_2026 <- function(hist.idx, subregion.worm, alt.idx, subregion.worm
     ##          y=Inf, label = 'a)', vjust = 1) +
     guides(fill = "none")
   return(g)
-  
+
 }
 
 
@@ -1004,7 +1017,7 @@ MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
             annotate(geom = 'text',
                      x = as.POSIXct(paste0(minDate,' 12:00:00')),
                      y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-            
+
             wq.gams %>% MMP__gam_extract(subregion = subr,
                                          measure = "PP.wm", field = "plot") +
             annotate(geom = 'text',
@@ -1054,7 +1067,7 @@ MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
             annotate(geom = 'text',
                      x = as.POSIXct(paste0(minDate,' 12:00:00')),
                      y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-            
+
             wq.gams %>% MMP__gam_extract(subregion = subr,
                                          measure = "PP.wm", field = "plot") +
             annotate(geom = 'text',
@@ -1072,7 +1085,7 @@ MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
                      y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
         )
     }
-    patchwork::wrap_plots(p.list, ncol = 2) 
+    patchwork::wrap_plots(p.list, ncol = 2)
 }
 
 MMP__gam_plot3a <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
@@ -1140,7 +1153,7 @@ MMP__gam_plot3b <- function(subr, wq.gams) {
                    annotate(geom = 'text',
                             x = as.POSIXct(paste0(minDate,' 12:00:00')),
                             y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-                   
+
                    wq.gams %>% MMP__gam_extract(subregion = subr,
                                                 measure = "PP.wm", field = "plot") +
                    annotate(geom = 'text',
@@ -1232,7 +1245,7 @@ MMP__gam_plot2023 <- function(subr, chl_plot, ntu_plot, wq.gams) {
                        ntu_plot + annotate(geom = 'text',
                                            x = as.POSIXct(paste0(minDate,' 12:00:00')),
                                            y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-                       
+
                        wq.gams %>% MMP__gam_extract(subregion = subr,
                                                     measure = "NOx.wm", field = "plot") +
                        annotate(geom = 'text',
@@ -1281,7 +1294,7 @@ MMP__gam_plot2023 <- function(subr, chl_plot, ntu_plot, wq.gams) {
                        annotate(geom = 'text',
                                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
                                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
-                       
+
                        wq.gams %>% MMP__gam_extract(subregion = subr,
                                                     measure = "NOx.wm", field = "plot") +
                        annotate(geom = 'text',
@@ -1373,7 +1386,7 @@ GeomRugRect <- ggproto("GeomRugRect", Geom,
                        optional_aes = c("x", "y"),
                        required_aes = c("xmin", "xmax"),
                        draw_panel = function(data, panel_params, coord, sides = "bl", outside = FALSE, length = unit(0.03, "npc")) {
-                           require('grid')  
+                           require('grid')
                            if (!inherits(length, "unit")) {
                                abort("'length' must be a 'unit' object.")
                            }
@@ -1406,7 +1419,7 @@ GeomRugRect <- ggproto("GeomRugRect", Geom,
                                                          width=data$xmax-data$xmin,
                                                          height=rug_length$min,
                                                          default.units='native',
-                                                         just=c('left', 'bottom'), 
+                                                         just=c('left', 'bottom'),
                                                          gp = gp
                                                      )
                                }

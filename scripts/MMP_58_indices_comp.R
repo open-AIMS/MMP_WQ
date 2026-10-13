@@ -56,6 +56,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
         load(file=paste0(DATA_PATH, '/final/wq.alt5.idx.region.RData'))
         load(file=paste0(DATA_PATH, '/final/wq.alt6.idx.region.RData'))
         load(file=paste0(DATA_PATH, '/final/wq.alt7.idx.region.RData'))
+        load(file=paste0(DATA_PATH, '/final/wq.alt8.idx.region.RData'))
 
         wq.comb.region.g1<-
             ggplot(data = wq.historic.idx.region %>%

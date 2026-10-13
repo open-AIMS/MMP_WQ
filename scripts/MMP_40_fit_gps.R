@@ -143,7 +143,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                  n_out <- max(
                                    200,
                                    ceiling((max(dat$Dt.num) - min(dat$Dt.num)) /
-                                             (30.25 / 365.25)) + 1
+                                             (30 / 365.25)) + 1
                                  )
                                 data.frame(
                                    Dt.num =  seq(min(dat$Dt.num), max(dat$Dt.num),
@@ -215,11 +215,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                      TotalN <- ..4
                                      fname <- paste0(GAM_OUTPUT_PATH, "deriv_sums_", label, ".rds")
                                        cat(paste0("Get deriv sums: ", N, " out of: ", TotalN), "\n")
-                                     if (!file.exists(fname)) {
+                                     ## if (!file.exists(fname)) {
                                        deriv_draws <- readRDS(deriv_draws)
                                        deriv_sums <- model_deriv_sums(deriv_draws)
                                        saveRDS(deriv_sums, file = fname)
-                                     }
+                                     ## }
                                      return(fname)
                                    }
                                    )) |>
@@ -236,7 +236,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                      TotalN <- ..8
                                      fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
                                      cat(paste0("Plot: ", N, " out of: ", TotalN), "\n")
-                                     ## if (!file.exists(fname)) {
+                                     if (!file.exists(fname)) {
                                        deriv_draws <- readRDS(deriv_draws)
                                        deriv_sums <- readRDS(deriv_sums)
                                        p <- gp_plot(dat, deriv_draws, deriv_sums,
@@ -244,8 +244,24 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                        ggsave(file = str_replace(fname, ".rds", ".png"),
                                               p, width = 6, height = 4)
                                        saveRDS(p, file = fname)
-                                     ## }
+                                     }
                                      return(fname)
+                                   }
+                                   )) |>
+          mutate(periods_of_change = pmap(.l = list(deriv_sums, mod, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_sums <- ..1
+                                     mod <- ..2
+                                     label <- ..3
+                                     N <- ..4
+                                     TotalN <- ..5
+                                     ## if (!file.exists(fname)) {
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       mod <- readRDS(mod)
+                                       periods <- periods_of_change(deriv_sums, mod)
+                                       ## saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(periods)
                                    }
                                    ))
 

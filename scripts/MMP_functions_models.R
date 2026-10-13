@@ -121,6 +121,7 @@ model_regions_of_change <- function(draws) {
     arrange(.draw, Dt.num) |>
     group_by(.draw) |>
     mutate(
+      .epred2 = lag(.epred, lag_n),
       deriv =  (.epred - lag(.epred, lag_n)) / (Dt.num - lag(Dt.num, lag_n)),
       Dt.mid =  (Dt.num + lag(Dt.num, lag_n)) / 2          # midpoint where deriv applies
     ) |>
@@ -136,7 +137,8 @@ model_deriv_sums <- function(deriv_draws) {
   sum <- deriv_draws |>
     ## group_by(Dt.mid) |>
     group_by(Dt.num) |>
-    median_hdci(deriv, .width =  c(0.95)) |>
+    median_hdci(deriv, .epred, .epred2, .width =  c(0.95)) |>
+    dplyr::rename(.lower = deriv.lower, .upper = deriv.upper) |>
     mutate(
       trend =  case_when(
         .lower > 0 ~ "increasing",
@@ -211,6 +213,95 @@ gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_gu
 
   return(p)
 }
+
+
+periods_of_change <- function(deriv_sums, mod) {
+  conv <- 30
+  periods <- deriv_sums |>
+    arrange(Dt.num) |>
+    mutate(
+      run_id = cumsum(trend != lag(trend, default = first(trend)))
+    ) |>
+    group_by(run_id, trend) |>
+    summarise(
+      start   = min(Dt.num),
+      ## start_val = .epred[which.min(Dt.num)],
+      end     = max(Dt.num),
+      ## end_val = .epred2[which.max(Dt.num)],
+      ## change_abs = end_val - start_val,
+      ## change_frac = change_abs / start_val,
+      ## change_frac2 = exp(log(start_val) - log(end_val)),
+      n_ints   = n(),
+      n_days   = n() * conv,
+      .groups = "drop"
+    ) |>
+    arrange(start) |>
+    # butt each period's start up against the previous period's end
+    mutate(start = coalesce(lag(end), start)) |>
+    mutate(across(c(start, end), ~ lubridate::date_decimal(.x),
+      .names = "{col}_dt")) |>
+    mutate(across(c(start_dt, end_dt), ~ format(.x, "%Y-%m-%d"))) |>
+    dplyr::select(-run_id)
+
+  ## Get the list of start dates
+  change_stats <- change_stats(periods, mod)
+  ## Combine them with periods
+  periods <-
+    periods |>
+    left_join(
+      change_stats |>
+        dplyr::select(Dt.num,
+          start_val = .epred,
+          start_lower = .epred.lower,
+          start_upper = .epred.upper
+        ),
+      by = c("start" = "Dt.num")
+    ) |>
+    left_join(
+      change_stats |>
+        dplyr::select(Dt.num,
+          start_val = .epred,
+          start_lower = .epred.lower,
+          start_upper = .epred.upper,
+          diff,
+          diff_lower = diff.lower,
+          diff_upper = diff.upper,
+          diff_frac,
+          diff_frac_lower = diff_frac.lower,
+          diff_frac_upper = diff_frac.upper
+        ),
+      by = c("end" = "Dt.num")
+    )
+  return(periods)
+}
+
+change_stats <- function(periods, mod) {
+  newdata <- data.frame(
+    Dt.num = periods$start,
+    MMP_SITE_NAME = NA,
+    DUPLICATE = NA,
+    DEPTH_CODE = NA,
+    sample = NA
+  )
+  draws <- epred_draws(mod, newdata = newdata, re_formula = NA)
+  draws |> median_hdci(.epred)
+  change_stats <- draws |>
+    ## filter(.draw == 1) |>
+    ungroup() |>
+    group_by(.draw) |>
+    mutate(
+      diff = c(NA, diff(.epred)),
+      diff_frac = c(NA, (exp(diff(log(.epred))) - 1) * 100)
+    ) |>
+    ungroup() |>
+    dplyr::select(Dt.num, .epred, diff, diff_frac) |>
+    group_by(Dt.num) |>
+    median_hdci(.epred, diff, diff_frac)
+  return(change_stats)
+}
+## Alternatively, might be better to get a set of dates (start and end)
+## and then predict for these sets
+
 
 
 

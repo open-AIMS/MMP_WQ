@@ -37,7 +37,7 @@ source("MMP_functions_models.R")
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/parameters/old.wq.guidelines.csv ../parameters/")
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.units.RData ../data/primary/other/")
 
-## If running on tsv-proc-wrkstn01
+## If running on tsv-proc-wrkstn01 (unfortunately, since scp is not in docker image, the following wont work directly)
 ## 1. transfer data to the hpc
 ## system("scp data/primary/other/wq.guidelines.RData mlogan@hpc-l001.aims.gov.au:/export/home/l-p/mlogan/Work/AIMS/MMP/WQ/2026/data/primary/other/wq.guidelines.RData")
 ## system("scp data/processed/niskin/wq.gamdata.all.reef.RData mlogan@hpc-l001.aims.gov.au:/export/home/l-p/mlogan/Work/AIMS/MMP/WQ/2026/data/processed/niskin/wq.gamdata.all.reef.RData")
@@ -205,11 +205,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                        cat(paste0("Get deriv draws: ", N, " out of: ", TotalN), "\n")
                                        fname <- paste0(GAM_OUTPUT_PATH, "deriv_draws_" ,
                                                        label, ".rds")
-                                       if (!file.exists(fname)) {
+                                       ## if (!file.exists(fname)) {
                                          draws <- readRDS(draws)
                                          deriv_draws <- model_regions_of_change(draws)
                                          saveRDS(deriv_draws, file = fname)
-                                       }
+                                       ## }
                                        return(fname)
                                      }
                                      )) |>
@@ -271,7 +271,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
                                    }
                                    ))
 
-        save(wq_gp, file = paste0(DATA_PATH, "/models/wq_gp.RData"))
+        saveRDS(wq_gp, file = paste0(DATA_PATH, "/models/wq_gp.rds"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GPs:', msg='Fit AIMS niskin GPs.', return=TRUE)
     ## ----end
@@ -732,7 +732,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gps.RD
                                    ))
 
 
-        save(wq.aims.jcu.omo_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo_gp.RData"))
+        saveRDS(wq.aims.jcu.omo_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo_gp.rds"))
+        ## save(wq.aims.jcu.omo_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo_gp.RData"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Fit GAMMS:', msg='Fit AIMS/JCU OMO niskin GPs.', return=TRUE)
     ## ----end

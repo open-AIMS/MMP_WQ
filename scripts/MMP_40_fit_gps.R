@@ -1,3 +1,4 @@
+## **NOTE - the grunt work here is done on the hpc via MMP_40_fit_gps_hpc.R**
 
 ## Starting instructions
 
@@ -36,7 +37,12 @@ source("MMP_functions_models.R")
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/parameters/old.wq.guidelines.csv ../parameters/")
 ## system("scp mlogan@tsv-proc-wrkstn01:~/Projects/MMP/WQ/2026/data/primary/other/wq.units.RData ../data/primary/other/")
 
-
+## If running on tsv-proc-wrkstn01
+## 1. transfer data to the hpc
+## system("scp data/primary/other/wq.guidelines.RData mlogan@hpc-l001.aims.gov.au:/export/home/l-p/mlogan/Work/AIMS/MMP/WQ/2026/data/primary/other/wq.guidelines.RData")
+## system("scp data/processed/niskin/wq.gamdata.all.reef.RData mlogan@hpc-l001.aims.gov.au:/export/home/l-p/mlogan/Work/AIMS/MMP/WQ/2026/data/processed/niskin/wq.gamdata.all.reef.RData")
+## 2. transfer models from the hpc
+## system("scp mlogan@hpc-l001.aims.gov.au:/export/home/l-p/mlogan/Work/AIMS/MMP/WQ/2026/data/modelled/GAMMS/model_*.rds data/modelled/GAMMS/")
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
@@ -317,14 +323,182 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu_gp.RData")
           mutate(label = map2(.x = Subregion, .y = Measure,
                  .f = ~ {
                    paste0("GP_AIMSJCUNiskin_all_", .x, "_", .y)
-                 }))
-
-
-
-
-        wq.aims.jcu.gams <- wq.aims.jcu.gams %>%
-            mutate(Change = map(.x = model,
-                                .f = ~ MMP_GAMchange(.x, refYear = 2015)))
+                 })) |> 
+          ## Prepare data
+          mutate(dat = map2(data, Measure,
+                            .f = ~ {
+                              if (nrow(.x) == 0 | all(is.na(.x$Value))) {
+                                dat <- NA
+                              }
+                              model_data_prep(.x, .y)
+                            }
+                           )) |>
+          ## Prepare formula
+          mutate(form = map2(data, Measure,
+                            .f = ~ {
+                              model_make_formula(.x, .y)
+                            }
+                            )) |>
+          ## Prepare priors
+          mutate(priors = map(data,
+                              .f = ~ {
+                                model_make_priors(.x)
+                              }
+                              )) |>
+          ## Fit models
+          mutate(mod = pmap(.l = list(form, priors, dat,
+                                      label,
+                                      N, TotalN),
+                            .f = ~ {
+                              form <- ..1
+                              priors <- ..2
+                              dat <- ..3
+                              label <- ..4
+                              N <- ..5
+                              TotalN <- ..6
+                              cat(paste0("Fit models: ", N, " out of: ", TotalN, " (", label, ")"), "\n")
+                              fname <- paste0(GAM_OUTPUT_PATH, "model_" ,
+                                              label, ".rds")
+                              if (dat |> filter(!is.na(RESP)) |> nrow() < 10 |
+                                  sum(dat$RESP == 0) > 0) {
+                                fname <- NA
+                                return(fname)
+                              }
+                              if (!file.exists(fname)) {
+                                environment(form) <- environment()
+                                mod <- model_fit_model(form, priors, dat)
+                                saveRDS(mod, file = fname)
+                              }
+                              return(fname)
+                              }
+                            )) |>
+          mutate(newdata = map(.x = dat,
+                               .f =  ~ {
+                                 dat <- .x
+                                 n_out <- max(
+                                   200,
+                                   ceiling((max(dat$Dt.num) - min(dat$Dt.num)) /
+                                             (30 / 365.25)) + 1
+                                 )
+                                data.frame(
+                                   Dt.num =  seq(min(dat$Dt.num), max(dat$Dt.num),
+                                                 length.out =  n_out),
+                                   MMP_SITE_NAME =  NA,
+                                   DUPLICATE =  NA,
+                                   DEPTH_CODE =  NA,
+                                   sample =  NA
+                                 ) |>
+                                   mutate(Date =  lubridate::date_decimal(Dt.num))
+                                 })) |>
+          mutate(draws = pmap(.l = list(mod, newdata, label, N, TotalN),
+                              .f = ~ {
+                                mod <- ..1
+                                newdata <- ..2
+                                label <- ..3
+                                N <- ..4
+                                TotalN <- ..5
+                                cat(paste0("Get draws: ", N, " out of: ", TotalN), "\n")
+                                fname <- paste0(GAM_OUTPUT_PATH, "draws_" ,
+                                                label, ".rds")
+                                if (!file.exists(fname)) {
+                                  mod <- readRDS(mod)
+                                  draws <- epred_draws(mod, newdata =  newdata, re_formula =  NA)
+                                  saveRDS(draws, file = fname)
+                                }
+                                return(fname)
+                              }
+                              )) |>
+          mutate(draws_sums = pmap(.l = list(draws, label, N, TotalN),
+                                   .f = ~ {
+                                     draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     cat(paste0("Get draws sum: ", N, " out of: ", TotalN), "\n")
+                                     fname <- paste0(GAM_OUTPUT_PATH, "draws_sums_" ,
+                                                     label, ".rds")
+                                     if (!file.exists(fname)) {
+                                       draws <- readRDS(draws)
+                                       draws_sums <- model_draws_sum(draws)
+                                       saveRDS(draws_sums, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(deriv_draws = pmap(.l = list(draws, label, N, TotalN),
+                                     .f = ~ {
+                                       draws <- ..1
+                                       label <- ..2
+                                       N <- ..3
+                                       TotalN <- ..4
+                                       cat(paste0("Get deriv draws: ", N, " out of: ", TotalN), "\n")
+                                       fname <- paste0(GAM_OUTPUT_PATH, "deriv_draws_" ,
+                                                       label, ".rds")
+                                       if (!file.exists(fname)) {
+                                         draws <- readRDS(draws)
+                                         deriv_draws <- model_regions_of_change(draws)
+                                         saveRDS(deriv_draws, file = fname)
+                                       }
+                                       return(fname)
+                                     }
+                                     )) |>
+          mutate(deriv_sums = pmap(.l = list(deriv_draws, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     fname <- paste0(GAM_OUTPUT_PATH, "deriv_sums_", label, ".rds")
+                                       cat(paste0("Get deriv sums: ", N, " out of: ", TotalN), "\n")
+                                     ## if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- model_deriv_sums(deriv_draws)
+                                       saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(plot = pmap(.l = list(dat, deriv_draws, deriv_sums,
+                                       Measure, Subregion, label, N, TotalN),
+                                   .f = ~ {
+                                     dat <- ..1
+                                     deriv_draws <- ..2
+                                     deriv_sums <- ..3
+                                     measure <- ..4
+                                     subregion <- ..5
+                                     label <- ..6
+                                     N <- ..7
+                                     TotalN <- ..8
+                                     fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
+                                     cat(paste0("Plot: ", N, " out of: ", TotalN), "\n")
+                                     if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       p <- gp_plot(dat, deriv_draws, deriv_sums,
+                                                    measure, subregion, include_guidelines = TRUE)
+                                       ggsave(file = str_replace(fname, ".rds", ".png"),
+                                              p, width = 6, height = 4)
+                                       saveRDS(p, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(periods_of_change = pmap(.l = list(deriv_sums, mod, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_sums <- ..1
+                                     mod <- ..2
+                                     label <- ..3
+                                     N <- ..4
+                                     TotalN <- ..5
+                                     ## if (!file.exists(fname)) {
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       mod <- readRDS(mod)
+                                       periods <- periods_of_change(deriv_sums, mod)
+                                       ## saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(periods)
+                                   }
+                                   ))
 
         save(wq.aims.jcu_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu_gp.RData"))
     },
@@ -428,7 +602,135 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gps.RD
                               }
                               return(fname)
                               }
-                            ))
+                            )) |> 
+          mutate(newdata = map(.x = dat,
+                               .f =  ~ {
+                                 dat <- .x
+                                 n_out <- max(
+                                   200,
+                                   ceiling((max(dat$Dt.num) - min(dat$Dt.num)) /
+                                             (30 / 365.25)) + 1
+                                 )
+                                data.frame(
+                                   Dt.num =  seq(min(dat$Dt.num), max(dat$Dt.num),
+                                                 length.out =  n_out),
+                                   MMP_SITE_NAME =  NA,
+                                   DUPLICATE =  NA,
+                                   DEPTH_CODE =  NA,
+                                   sample =  NA
+                                 ) |>
+                                   mutate(Date =  lubridate::date_decimal(Dt.num))
+                                 })) |>
+          mutate(draws = pmap(.l = list(mod, newdata, label, N, TotalN),
+                              .f = ~ {
+                                mod <- ..1
+                                newdata <- ..2
+                                label <- ..3
+                                N <- ..4
+                                TotalN <- ..5
+                                cat(paste0("Get draws: ", N, " out of: ", TotalN), "\n")
+                                fname <- paste0(GAM_OUTPUT_PATH, "draws_" ,
+                                                label, ".rds")
+                                if (!file.exists(fname)) {
+                                  mod <- readRDS(mod)
+                                  draws <- epred_draws(mod, newdata =  newdata, re_formula =  NA)
+                                  saveRDS(draws, file = fname)
+                                }
+                                return(fname)
+                              }
+                              )) |>
+          mutate(draws_sums = pmap(.l = list(draws, label, N, TotalN),
+                                   .f = ~ {
+                                     draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     cat(paste0("Get draws sum: ", N, " out of: ", TotalN), "\n")
+                                     fname <- paste0(GAM_OUTPUT_PATH, "draws_sums_" ,
+                                                     label, ".rds")
+                                     if (!file.exists(fname)) {
+                                       draws <- readRDS(draws)
+                                       draws_sums <- model_draws_sum(draws)
+                                       saveRDS(draws_sums, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(deriv_draws = pmap(.l = list(draws, label, N, TotalN),
+                                     .f = ~ {
+                                       draws <- ..1
+                                       label <- ..2
+                                       N <- ..3
+                                       TotalN <- ..4
+                                       cat(paste0("Get deriv draws: ", N, " out of: ", TotalN), "\n")
+                                       fname <- paste0(GAM_OUTPUT_PATH, "deriv_draws_" ,
+                                                       label, ".rds")
+                                       if (!file.exists(fname)) {
+                                         draws <- readRDS(draws)
+                                         deriv_draws <- model_regions_of_change(draws)
+                                         saveRDS(deriv_draws, file = fname)
+                                       }
+                                       return(fname)
+                                     }
+                                     )) |>
+          mutate(deriv_sums = pmap(.l = list(deriv_draws, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     fname <- paste0(GAM_OUTPUT_PATH, "deriv_sums_", label, ".rds")
+                                       cat(paste0("Get deriv sums: ", N, " out of: ", TotalN), "\n")
+                                     ## if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- model_deriv_sums(deriv_draws)
+                                       saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(plot = pmap(.l = list(dat, deriv_draws, deriv_sums,
+                                       Measure, Subregion, label, N, TotalN),
+                                   .f = ~ {
+                                     dat <- ..1
+                                     deriv_draws <- ..2
+                                     deriv_sums <- ..3
+                                     measure <- ..4
+                                     subregion <- ..5
+                                     label <- ..6
+                                     N <- ..7
+                                     TotalN <- ..8
+                                     fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
+                                     cat(paste0("Plot: ", N, " out of: ", TotalN), "\n")
+                                     if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       p <- gp_plot(dat, deriv_draws, deriv_sums,
+                                                    measure, subregion, include_guidelines = TRUE)
+                                       ggsave(file = str_replace(fname, ".rds", ".png"),
+                                              p, width = 6, height = 4)
+                                       saveRDS(p, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(periods_of_change = pmap(.l = list(deriv_sums, mod, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_sums <- ..1
+                                     mod <- ..2
+                                     label <- ..3
+                                     N <- ..4
+                                     TotalN <- ..5
+                                     ## if (!file.exists(fname)) {
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       mod <- readRDS(mod)
+                                       periods <- periods_of_change(deriv_sums, mod)
+                                       ## saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(periods)
+                                   }
+                                   ))
+
 
         save(wq.aims.jcu.omo_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu.omo_gp.RData"))
     },
@@ -497,37 +799,162 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.flntu.gams.RData"))
             .f = ~ {
               model_make_priors(.x)
             }
-          ))
+          )) |> 
         ## Fit models
+          mutate(mod = pmap(.l = list(form, priors, dat,
+                                      label,
+                                      N, TotalN),
+                            .f = ~ {
+                              form <- ..1
+                              priors <- ..2
+                              dat <- ..3
+                              label <- ..4
+                              N <- ..5
+                              TotalN <- ..6
+                              cat(paste0("Fit models: ", N, " out of: ", TotalN, " (", label, ")"), "\n")
+                              fname <- paste0(GAM_OUTPUT_PATH, "model_" ,
+                                              label, ".rds")
+                              if (dat |> filter(!is.na(RESP)) |> nrow() < 10 |
+                                  sum(dat$RESP == 0) > 0) {
+                                fname <- NA
+                                return(fname)
+                              }
+                              if (!file.exists(fname)) {
+                                environment(form) <- environment()
+                                mod <- model_fit_model(form, priors, dat)
+                                saveRDS(mod, file = fname)
+                              }
+                              return(fname)
+                              }
+                            )) |>
+          mutate(newdata = map(.x = dat,
+                               .f =  ~ {
+                                 dat <- .x
+                                 n_out <- max(
+                                   200,
+                                   ceiling((max(dat$Dt.num) - min(dat$Dt.num)) /
+                                             (30 / 365.25)) + 1
+                                 )
+                                data.frame(
+                                   Dt.num =  seq(min(dat$Dt.num), max(dat$Dt.num),
+                                                 length.out =  n_out),
+                                   MMP_SITE_NAME =  NA,
+                                   DUPLICATE =  NA,
+                                   DEPTH_CODE =  NA,
+                                   sample =  NA
+                                 ) |>
+                                   mutate(Date =  lubridate::date_decimal(Dt.num))
+                                 })) |>
+          mutate(draws = pmap(.l = list(mod, newdata, label, N, TotalN),
+                              .f = ~ {
+                                mod <- ..1
+                                newdata <- ..2
+                                label <- ..3
+                                N <- ..4
+                                TotalN <- ..5
+                                cat(paste0("Get draws: ", N, " out of: ", TotalN), "\n")
+                                fname <- paste0(GAM_OUTPUT_PATH, "draws_" ,
+                                                label, ".rds")
+                                if (!file.exists(fname)) {
+                                  mod <- readRDS(mod)
+                                  draws <- epred_draws(mod, newdata =  newdata, re_formula =  NA)
+                                  saveRDS(draws, file = fname)
+                                }
+                                return(fname)
+                              }
+                              )) |>
+          mutate(draws_sums = pmap(.l = list(draws, label, N, TotalN),
+                                   .f = ~ {
+                                     draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     cat(paste0("Get draws sum: ", N, " out of: ", TotalN), "\n")
+                                     fname <- paste0(GAM_OUTPUT_PATH, "draws_sums_" ,
+                                                     label, ".rds")
+                                     if (!file.exists(fname)) {
+                                       draws <- readRDS(draws)
+                                       draws_sums <- model_draws_sum(draws)
+                                       saveRDS(draws_sums, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(deriv_draws = pmap(.l = list(draws, label, N, TotalN),
+                                     .f = ~ {
+                                       draws <- ..1
+                                       label <- ..2
+                                       N <- ..3
+                                       TotalN <- ..4
+                                       cat(paste0("Get deriv draws: ", N, " out of: ", TotalN), "\n")
+                                       fname <- paste0(GAM_OUTPUT_PATH, "deriv_draws_" ,
+                                                       label, ".rds")
+                                       if (!file.exists(fname)) {
+                                         draws <- readRDS(draws)
+                                         deriv_draws <- model_regions_of_change(draws)
+                                         saveRDS(deriv_draws, file = fname)
+                                       }
+                                       return(fname)
+                                     }
+                                     )) |>
+          mutate(deriv_sums = pmap(.l = list(deriv_draws, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_draws <- ..1
+                                     label <- ..2
+                                     N <- ..3
+                                     TotalN <- ..4
+                                     fname <- paste0(GAM_OUTPUT_PATH, "deriv_sums_", label, ".rds")
+                                       cat(paste0("Get deriv sums: ", N, " out of: ", TotalN), "\n")
+                                     ## if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- model_deriv_sums(deriv_draws)
+                                       saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(plot = pmap(.l = list(dat, deriv_draws, deriv_sums,
+                                       Measure, Subregion, label, N, TotalN),
+                                   .f = ~ {
+                                     dat <- ..1
+                                     deriv_draws <- ..2
+                                     deriv_sums <- ..3
+                                     measure <- ..4
+                                     subregion <- ..5
+                                     label <- ..6
+                                     N <- ..7
+                                     TotalN <- ..8
+                                     fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
+                                     cat(paste0("Plot: ", N, " out of: ", TotalN), "\n")
+                                     if (!file.exists(fname)) {
+                                       deriv_draws <- readRDS(deriv_draws)
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       p <- gp_plot(dat, deriv_draws, deriv_sums,
+                                                    measure, subregion, include_guidelines = TRUE)
+                                       ggsave(file = str_replace(fname, ".rds", ".png"),
+                                              p, width = 6, height = 4)
+                                       saveRDS(p, file = fname)
+                                     }
+                                     return(fname)
+                                   }
+                                   )) |>
+          mutate(periods_of_change = pmap(.l = list(deriv_sums, mod, label, N, TotalN),
+                                   .f = ~ {
+                                     deriv_sums <- ..1
+                                     mod <- ..2
+                                     label <- ..3
+                                     N <- ..4
+                                     TotalN <- ..5
+                                     ## if (!file.exists(fname)) {
+                                       deriv_sums <- readRDS(deriv_sums)
+                                       mod <- readRDS(mod)
+                                       periods <- periods_of_change(deriv_sums, mod)
+                                       ## saveRDS(deriv_sums, file = fname)
+                                     ## }
+                                     return(periods)
+                                   }
+                                   ))
 
-        results <- furrr::future_pmap(.l = list(wq.flntu_gp$form, wq.flntu_gp$priors, wq.flntu_gp$dat,
-          wq.flntu_gp$label, wq.flntu_gp$N, wq.flntu_gp$TotalN),
-          .f = ~ {
-            form <- ..1
-            priors <- ..2
-            dat <- ..3
-            label <- ..4
-            N <- ..5
-            TotalN <- ..6
-            cat(paste0("Fit models (FLNTU): ", N, " out of: ", TotalN, " (", label, ")"), "\n")
-            fname <- paste0(GAM_OUTPUT_PATH, "model_", label, ".rds")
-            if (dat |> filter(!is.na(RESP)) |> nrow() < 10 |
-                  sum(dat$RESP == 0) > 0) {
-              fname <- NA
-              return(fname)
-            }
-            if (!file.exists(fname)) {
-              environment(form) <- environment()
-              mod <- model_fit_model(form, priors, dat)
-              saveRDS(mod, file = fname)
-            }
-            return(fname)
-          },
-          .progress = TRUE,
-          .options = furrr::furrr_options(scheduling = Inf)
-        )
-        future::plan(old_plan)
-        wq.flntu_gp <- wq.flntu_gp |> mutate(mod = results)
 
         save(wq.flntu_gp, file = paste0(DATA_PATH, "/models/wq.flntu_gp.RData"))
     },

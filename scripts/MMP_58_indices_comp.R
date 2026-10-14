@@ -37,12 +37,12 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
     ) {
     
     MMP_add_to_report_list(CURRENT_STAGE, "calculate indices",
-                           SUBSECTION_9 = structure(paste0("## Comparisons\n"),
+                           SUBSECTION_10 = structure(paste0("## Comparisons\n"),
                                                     parent = 'TABSET'),
-                           TABSET_9 = structure(paste0("\n:::: panel-tabset\n"),
-                                                   parent = 'SUBSECTION_9'),
-                           TABSET_9_END = structure(paste0("\n:::: \n"),
-                                                       parent = 'SUBSECTION_9')
+                           TABSET_10 = structure(paste0("\n:::: panel-tabset\n"),
+                                                   parent = 'SUBSECTION_10'),
+                           TABSET_10_END = structure(paste0("\n:::: \n"),
+                                                       parent = 'SUBSECTION_10')
                            )
 
     ## 1. Regional worms
@@ -114,7 +114,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (comp)", fig_name_suffix = "wq_comb_region",
-                           label_suffix = "_9_idx1", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Region. NOTE, this is the old annual index.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_region1",
@@ -124,7 +124,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt. (comp)", fig_name_suffix = "wq_comb_region1",
-                           label_suffix = "_9_idx1a", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1a", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Region. NOTE, this is the old annual index.\n")) 
 
     },
@@ -177,7 +177,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (old vs new)", fig_name_suffix = "wq_comb_region_new_old",
-                           label_suffix = "_9_idx1b", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1b", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for alt 6 (old) and alt 7 (new) formulations conditional on Region. \n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_region1_new_old",
@@ -187,7 +187,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt. (old vs new)", fig_name_suffix = "wq_comb_region1_new_old",
-                           label_suffix = "_9_idx1ab", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1ab", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the alt 6 (old) and alt 7 (new) formulations conditional on Region.\n")) 
 
     },
@@ -240,7 +240,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (long old vs new)", fig_name_suffix = "wq_comb_region_long_new_old",
-                           label_suffix = "_9_idx1bc", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1bc", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for alt 0 (old) and alt 8 (new) formulations conditional on Region. \n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_region1_long_new_old",
@@ -250,7 +250,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt. (long old vs new)", fig_name_suffix = "wq_comb_region1_long_new_old",
-                           label_suffix = "_9_idx1abc", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1abc", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the alt 0 (old) and alt 8 (new) formulations conditional on Region.\n")) 
 
     },
@@ -303,7 +303,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (long old vs new)", fig_name_suffix = "wq_comb_region_long_new_noroll_old",
-                           label_suffix = "_9_idx1bc", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1bd", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for alt 0 (old) and alt 9 (new, no rolling mean) formulations conditional on Region. \n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_region1_long_new_noroll_old",
@@ -313,7 +313,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt. (long old vs new noroll)", fig_name_suffix = "wq_comb_region1_long_new_noroll_old",
-                           label_suffix = "_9_idx1abc", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx1abd", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the alt 0 (old) and alt 9 (new no rolling mean) formulations conditional on Region.\n")) 
 
     },
@@ -379,7 +379,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index", fig_name_suffix = "wq_comb_subregion",
-                           label_suffix = "_9_idx2", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx2", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_comb_subregion1",
@@ -389,7 +389,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index alt.", fig_name_suffix = "wq_comb_subregion1",
-                           label_suffix = "_9_idx2a", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx2a", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         ## pdf(file=paste0(FIGURE_OUTPUT_PATH, 'wq_comb_subregion.pdf'), width=18, height=2)
@@ -597,7 +597,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index", fig_name_suffix = "wq_worms_comb_region",
-        ##                    label_suffix = "_9_idx3", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx3", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Region.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1",
@@ -607,7 +607,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index alt.", fig_name_suffix = "wq_worms_comb_region1",
-        ##                    label_suffix = "_9_idx3a", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx3a", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Region.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region2",
@@ -618,7 +618,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index alt.2", fig_name_suffix = "wq_worms_comb_region2",
-        ##                    label_suffix = "_9_idx3b", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx3b", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Region.\n")) 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index).', return=TRUE)
@@ -702,7 +702,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (new)", fig_name_suffix = "wq_worms_comb_region_new",
-                           label_suffix = "_9_idx3bb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx3bb", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Region.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_new",
@@ -712,7 +712,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt. (new)", fig_name_suffix = "wq_worms_comb_region1_new",
-                           label_suffix = "_9_idx3abb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx3abb", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Region.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region2_new",
@@ -723,7 +723,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt.2 (new)", fig_name_suffix = "wq_worms_comb_region2_new",
-                           label_suffix = "_9_idx3bbb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx3bbb", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Region.\n")) 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index).', return=TRUE)
@@ -807,7 +807,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (new)", fig_name_suffix = "wq_worms_comb_region_new_noroll",
-                           label_suffix = "_9_idx3bb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx3bbt", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 (no rolling mean) formulations conditional on Region.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_new_noroll",
@@ -817,7 +817,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt. (new)", fig_name_suffix = "wq_worms_comb_region1_new_noroll",
-                           label_suffix = "_9_idx3abb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx3abbt", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 formulations conditional on Region.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region2_new",
@@ -828,7 +828,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index alt.2 (new)", fig_name_suffix = "wq_worms_comb_region2_new",
-                           label_suffix = "_9_idx3bbb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx3bbbt", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 formulations conditional on Region.\n")) 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index, no rolling mean).', return=TRUE)
@@ -892,7 +892,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index (No CY)", fig_name_suffix = "wq_worms_comb_region_NoCapeYork",
-        ##                    label_suffix = "_9_idx4", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx4", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_NoCapeYork",
@@ -902,7 +902,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index (No CY) alt.", fig_name_suffix = "wq_worms_comb_region1_NoCapeYork",
-        ##                    label_suffix = "_9_idx4a", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx4a", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
     },
@@ -974,7 +974,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (No CY, new)", fig_name_suffix = "wq_worms_comb_region_NoCapeYork_new",
-                           label_suffix = "_9_idx4b", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx4b", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_NoCapeYork_new",
@@ -984,7 +984,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (No CY, new) alt.", fig_name_suffix = "wq_worms_comb_region1_NoCapeYork_new",
-                           label_suffix = "_9_idx4ab", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx4ab", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
     },
@@ -1060,7 +1060,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index (No Ftz)", fig_name_suffix = "wq_worms_comb_region_NoFitzroy",
-        ##                    label_suffix = "_9_idx5", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx5", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_NoFitzroy",
@@ -1070,7 +1070,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Regional Index (No Ftz) alt.", fig_name_suffix = "wq_worms_comb_region1_NoFitzroy",
-        ##                    label_suffix = "_9_idx5a", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx5a", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
     },
@@ -1152,7 +1152,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (No Ftz, new)", fig_name_suffix = "wq_worms_comb_region_NoFitzroy_new",
-                           label_suffix = "_9_idx5b", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx5b", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region1_NoFitzroy_new",
@@ -1162,7 +1162,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Regional Index (No Ftz, new) alt.", fig_name_suffix = "wq_worms_comb_region1_NoFitzroy_new",
-                           label_suffix = "_9_idx5ab", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx5ab", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
     },
@@ -1223,7 +1223,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Subregional Index", fig_name_suffix = "wq_worms_comb_subregion",
-        ##                    label_suffix = "_9_idx6", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx6", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_subregion1",
@@ -1233,7 +1233,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Subregional Index alt.", fig_name_suffix = "wq_worms_comb_subregion1",
-        ##                    label_suffix = "_9_idx6a", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx6a", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_subregion2",
@@ -1244,7 +1244,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Subregional Index alt.2", fig_name_suffix = "wq_worms_comb_subregion2",
-        ##                    label_suffix = "_9_idx6b", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx6b", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
     },
@@ -1311,7 +1311,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index (new)", fig_name_suffix = "wq_worms_comb_subregion_new",
-                           label_suffix = "_9_idx6bb2", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx6bb2", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_subregion1_new",
@@ -1321,7 +1321,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index alt. (new)", fig_name_suffix = "wq_worms_comb_subregion1_new",
-                           label_suffix = "_9_idx6bba2", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx6bba2", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_subregion2_new",
@@ -1332,7 +1332,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index alt.2 (new)", fig_name_suffix = "wq_worms_comb_subregion2_new",
-                           label_suffix = "_9_idx6bbb", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx6bbb", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
     },
@@ -1401,7 +1401,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Subregional Index (No CY)", fig_name_suffix = "wq_worms_comb_subregion_NoCapeYork",
-        ##                    label_suffix = "_9_idx7", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx7", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_subregion1_NoCapeYork",
@@ -1411,7 +1411,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         ## MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
         ##                    Section = "Subregional Index (No CY) alt.", fig_name_suffix = "wq_worms_comb_subregion1_NoCapeYork",
-        ##                    label_suffix = "_9_idx7a", tabset_parent = "TABSET_9",
+        ##                    label_suffix = "_10_idx7a", tabset_parent = "TABSET_10",
         ##                    fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 6 formulations conditional on Subregion.\n")) 
         
     },
@@ -1487,7 +1487,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index (No CY, new)", fig_name_suffix = "wq_worms_comb_subregion_NoCapeYork_new",
-                           label_suffix = "_9_idx7b", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx7b", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
 
         MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_subregion1_NoCapeYork_new",
@@ -1497,7 +1497,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
                            Section = "Subregional Index (No CY, new) alt.", fig_name_suffix = "wq_worms_comb_subregion1_NoCapeYork_new",
-                           label_suffix = "_9_idx7ab", tabset_parent = "TABSET_9",
+                           label_suffix = "_10_idx7ab", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 7 formulations conditional on Subregion.\n")) 
         
     },

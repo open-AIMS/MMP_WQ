@@ -14,7 +14,8 @@ model_data_prep <- function(x, Measure) {
                 LOD = NA,
                 .groups = "drop") |>
       ## mutate(sample =  paste(MMP_SITE_NAME)) |>
-      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
+      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none")) |>
+      mutate(RESP = ifelse(RESP == 0, 0.1, RESP))  ## This is a temp while the real values in the data base a fixed
   } else if (Measure %in% c("CHL", "NTU")) {
     dat <- x |>
       filter(!is.na(RESP)) |>

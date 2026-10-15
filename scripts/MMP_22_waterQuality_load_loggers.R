@@ -157,7 +157,7 @@ subfolder_urls <- str_subset(subfolder_urls, "20[0-9]{2}")
 all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
 # Step 3: Download .nc files
 salinity_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
-salinity_files <- str_subset(salinity_files, "CSTZ")
+## salinity_files <- str_subset(salinity_files, "CSTZ")
 # Step 4: Get the salinity data exported from oracle
 ## waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
 ##             suppressMessages()

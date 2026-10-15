@@ -14,9 +14,12 @@ MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                        TABSET_END = paste0("::: \n\n")
                        )
 
-source("MMP_61_compilation_plots_gams.R")
+## plots for Angus
+## source("MMP_61_compilation_plots_gams.R")
+source("MMP_61_compilation_plots_gps.R")
 
-source("MMP_62_compilation_plots_gam_pages.R")
+## source("MMP_62_compilation_plots_gam_pages.R")
+source("MMP_62_compilation_plots_gp_pages.R")
 
 source("MMP_63_compilation_plots_zips.R")
 

@@ -79,7 +79,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RDa
       niskin.cy.reef.gam <- niskin.cy.reef.gam %>%
         ## flag the analytes
         rename_with(
-          ~ paste0(.x, "_RESP"),
+          ~ paste0(.x, "__RESP"),
           .cols =  names(niskin.cy.reef.gam)[
             !str_ends(names(niskin.cy.reef.gam), "_UM|_MGPERL|_UGPERL") &
             (

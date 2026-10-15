@@ -35,7 +35,8 @@ model_data_prep <- function(x, Measure) {
                          MMP_SITE_NAME, DUPLICATE, DEPTH_CODE, DEPTH_CODE
                        ) |>
       mutate(sample =  paste(MMP_SITE_NAME, Date, DEPTH_CODE)) |>
-      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
+      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none")) |>
+      filter(RESP > 0)   ## take this out once Renee fixes the database
   }
   return(dat)
 }
@@ -715,6 +716,12 @@ MMP__worm_historic_and_alt <- function(hist.idx, alt.idx, minDate, MAXDATE) {
     g
 }
 
+MMP__gp_chl_niskin_flntu <- function(niskin, subr) {
+    niskin |> 
+      MMP__gam_extract(subregion = subr, measure = 'DRIFTCHL', field = "plot") |>
+      readRDS()
+}
+
 MMP__gam_chl_niskin_flntu <- function(niskin, flntu, subr) {
 
     pp <- niskin %>%
@@ -776,6 +783,19 @@ theme_nothing <- function (font_size = 14, font_family = "", rel_small = 12/14) 
                 0, 0, 0), complete = TRUE)
 }
 
+MMP__gp_ntu_flntu <- function(niskin, flntu, subr) {
+
+    pt <- flntu %>%
+        MMP__gam_extract(subregion = subr, measure = 'NTU', field = "plot")
+    if (length(pt) > 0) if (is.na(pt)) pt <- NULL
+    if(is.null(pt)) {
+        pp.ntu <- ggplot() + theme_nothing()
+    } else {
+        pp.ntu <- pt |> readRDS()
+    }
+    pp.ntu
+}
+
 MMP__gam_ntu_flntu <- function(niskin, flntu, subr) {
 
     pt <- flntu %>%
@@ -798,6 +818,80 @@ inc.ltr <- function(x) {
 }
 
 inc <- function(x) eval.parent(substitute(x <-x +1))
+
+MMP__gp_plot1 <- function(subr, index_plot, chl_plot, ntu_plot, wq_gp) {
+    cnt <- 1
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
+      p.list <- list(
+        index_plot,
+        chl_plot +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "NOx", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PO4", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        ntu_plot + annotate(geom = 'text',
+                            x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                            y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PN", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PP", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "POC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "DOC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    } else {
+        p.list <- list(
+            index_plot,
+            chl_plot +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+          )
+    }
+    patchwork::wrap_plots(p.list, ncol = 2)
+}
 
 MMP__gam_plot1 <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 1

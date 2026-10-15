@@ -133,6 +133,94 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq_gp.RData"))) &
    
 }
 
+## ---- AIMS and JCU niskin process
+CURRENT_ITEM <- "fitAIMSJCUGAMM"
+
+if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu_gp.RData"))) &
+    file.exists(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')) &
+    file.exists(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData'))
+    ) {
+
+  ## 1. AIMS and JCU niskin only
+  ## ---- AIMS and JCU niskin gamms
+  wq.gamdata.all.reef <- get(load(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')))
+  wq.guidelines <- get(load(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')))
+
+  options(future.globals.maxSize = 2 * 1024^3)
+  old_plan <- future::plan(future::multisession, workers = 18)
+
+  wq.aims.jcu_gp <- wq.gamdata.all.reef %>%
+    droplevels() |> 
+    filter(!(Source == 'CY Niskin' & reneeYear < 2021)) %>% 
+    ## filter(!Measure %in% c('SI_NOx','NOx_PO4','SI_PO4','Dt.num',
+    ##                        'CDOM_443','Dtt.num', 'HAND_NH4')) %>%
+    filter(Measure %in% c('DRIFTCHL','SECCHI', 'TSS', 'NOx', 'PO4',
+      'PN', 'PP', 'POC', 'DOC')) %>%
+    droplevels() %>%
+    group_by(Subregion, Measure) %>%
+    nest() |>
+    ungroup() |> 
+    mutate(N = 1:n(),
+      TotalN = max(N)) |>
+    ## Make label
+    mutate(label = map2(.x = Subregion, .y = Measure,
+      .f = ~ {
+        paste0("GP_AIMSJCUNiskin_all_", .x, "_", .y) 
+      })) |> 
+    ## Prepare data
+    mutate(dat = map2(data, Measure,
+      .f = ~ {
+        if (nrow(.x) == 0 | all(is.na(.x$Value))) {
+          dat <- NA
+        }
+        model_data_prep(.x, .y)
+      }
+    )) |>
+    ## Prepare formula
+    mutate(form = map2(data, Measure, 
+      .f = ~ {
+        model_make_formula(.x, .y)
+      }
+    )) |> 
+    ## Prepare priors
+    mutate(priors = map(data,
+      .f = ~ {
+        model_make_priors(.x)
+      }
+    )) 
+  ## Fit models
+
+  results <- furrr::future_pmap(.l = list(wq.aims.jcu_gp$form, wq.aims.jcu_gp$priors, wq.aims.jcu_gp$dat,
+    wq.aims.jcu_gp$label, wq.aims.jcu_gp$N, wq.aims.jcu_gp$TotalN),
+    .f = ~ {
+      form <- ..1
+      priors <- ..2
+      dat <- ..3
+      label <- ..4
+      N <- ..5
+      TotalN <- ..6
+      cat(paste0("Fit models: ", N, " out of: ", TotalN, " (", label, ")"), "\n")
+      fname <- paste0(GAM_OUTPUT_PATH, "model_", label, ".rds")
+      if (dat |> filter(!is.na(RESP)) |> nrow() < 10 |
+            sum(dat$RESP == 0) > 0) {
+        fname <- NA
+        return(fname)
+      }
+      if (!file.exists(fname)) {
+        environment(form) <- environment()
+        mod <- model_fit_model(form, priors, dat)
+        saveRDS(mod, file = fname)
+      }
+      return(fname)
+    },
+    .progress = FALSE,
+    .options = furrr::furrr_options(scheduling = Inf)
+  )
+  future::plan(old_plan) 
+  wq.aims.jcu_gp <- wq.aims.jcu_gp |> mutate(mod = results)
+
+  save(wq.aims.jcu_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu_gp.RData"))
+}
 
 
 ## ---- AIMS niskin process
@@ -217,7 +305,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gp.RDa
       }
       return(fname)
     },
-    .progress = TRUE,
+    .progress = FALSE,
     .options = furrr::furrr_options(scheduling = Inf)
   )
   future::plan(old_plan) 
@@ -240,6 +328,10 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.flntu.gams.RData"))
   ## ---- AIMS FLNTU gamms
   wq.gamdata.all.reef <- get(load(paste0(GAM_INPUT_PATH, 'wq.gamdata.all.reef.RData')))
   wq.guidelines <- get(load(paste0(DATA_PATH, '/primary/other/wq.guidelines.RData')))
+
+  options(future.globals.maxSize = 2 * 1024^3)
+  old_plan <- future::plan(future::multisession, workers = 18)
+  
 
   wq.flntu_gp <- wq.gamdata.all.reef %>%
     filter(Source=='AIMS FLNTU') %>%
@@ -303,7 +395,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.flntu.gams.RData"))
       }
       return(fname)
     },
-    .progress = TRUE,
+    .progress = FALSE,
     .options = furrr::furrr_options(scheduling = Inf)
   )
   future::plan(old_plan) 

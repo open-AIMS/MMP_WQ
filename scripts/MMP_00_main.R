@@ -13,7 +13,7 @@ setwd("scripts")
 ## 4. source the functions
 source("MMP_functions.R")
 ## 5. run fakeArgs
-##    MMP_fakeArgs(stage = 1:9, always_extract = TRUE, reportYear = 2026) 
+##    MMP_fakeArgs(stage = 1:9, always_extract = TRUE, reportYear = 2026, clear_dirs = TRUE) 
 
 ## If calling this application interactively, you will need to mimic
 ## the use of command line arguments.  To do so, call the following:
@@ -21,6 +21,7 @@ source("MMP_functions.R")
 
 ## if the calling application has landed on this script as the running
 ## script, then start initialisations
+  
 if (MMP_isParent()) {
     MMP_startMatter()
 }
@@ -61,3 +62,4 @@ if (9 %in% runStage) {
     source("MMP_81_word_exports.R")
 }
 ## MMP_test()
+

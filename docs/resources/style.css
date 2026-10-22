@@ -223,7 +223,7 @@ table>caption {
 }
 
 pre>code {
-    height: 200px;
+    /* height: 200px; */
 }
 
 .btn {

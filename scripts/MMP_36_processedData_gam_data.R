@@ -14,6 +14,7 @@ MINDATE=MAXDATE-years(1)+days(1)
 
 ## ---- AIMS niskin process
 CURRENT_ITEM <- "gamData"
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -181,7 +182,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RDa
         save(wq.gamdata.all.reef,
              file=paste0(NISKIN_OUTPUT_PATH, 'wq.gamdata.all.reef.RData'))
 
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -194,7 +195,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"wq.gam.all.reef.RDa
                                                               parent = 'TABSET'),
                                TAB = structure(mmp__add_table(mmp__glimpse_like(wq.gamdata.all.reef)),
                                                parent = 'SUBSECTION_GLIMPSE'),
-                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the prepared gamm input data. {#tbl-gam}\n\n"),
+                               TAB.CAP = structure(paste0("\n:Extraction of the first five records in each field from the prepared GAMM/GP input data. {#tbl-gam}\n\n"),
                                                    parent = 'SUBSECTION_GLIMPSE')
                               )
     },

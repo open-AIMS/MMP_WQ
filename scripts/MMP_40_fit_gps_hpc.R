@@ -44,6 +44,8 @@ GAM_OUTPUT_PATH <- paste0(DATA_PATH, "/modelled/GAMMS/")
 
 assign("CURRENT_STAGE", 4, env = globalenv())
 
+if (1 == 2) {
+  
 ## ---- AIMS niskin process
 CURRENT_ITEM <- "fitGAMM"
 
@@ -222,6 +224,7 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu_gp.RData")
   save(wq.aims.jcu_gp, file = paste0(DATA_PATH, "/models/wq.aims.jcu_gp.RData"))
 }
 
+}
 
 ## ---- AIMS niskin process
 CURRENT_ITEM <- "fitAIMSJCUOMOGAMM"
@@ -298,11 +301,11 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.aims.jcu.omo_gp.RDa
         fname <- NA
         return(fname)
       }
-      if (!file.exists(fname)) {
+      ## if (!file.exists(fname)) {
         environment(form) <- environment()
         mod <- model_fit_model(form, priors, dat)
         saveRDS(mod, file = fname)
-      }
+      ## }
       return(fname)
     },
     .progress = FALSE,

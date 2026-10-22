@@ -95,30 +95,39 @@ for (item in logger_items) {
 ##   2024
 ##   2025
 
-## ---- Get data FLNTU 2025
-base_catalog_url <- "https://thredds.aodn.org.au/thredds/catalog/AIMS/Marine_Monitoring_Program/FLNTU_timeseries/catalog.html"
-# Step 1: Get subfolder URLs (e.g., 2023, 2024, 2025)
-subfolder_urls <- MMP_get_subfolder_urls(base_catalog_url)
-subfolder_urls <- str_subset(subfolder_urls, "20[0-9]{2}")
-# Step 2: Get .nc file URLs from each subfolder
-all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
-# Step 3: Download .nc files
-flntu_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
-flntu_files <- str_subset(flntu_files, "FLNTU")
-# Step 4: Get the flntu data exported from oracle
-## They are no longer available that way!
-## flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
-##             suppressMessages()
-# Step 5: Read and parse all the ncdf files
-flntu_2 <- MMP_read_flntu_nc(flntu_files)
 
-# Step 6: Bind together the two sources of flntu
-## flntu <- bind_rows(flntu, flntu_2)
-flntu <- bind_rows(flntu_2)
-# Step 7: Save as csv file
-data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
-write_csv(flntu, data_file)
-## ----
+CURRENT_ITEM <- "flntuthreds"
+MMP_tryCatch(
+{
+  ## ---- Get data FLNTU 2025
+  base_catalog_url <- "https://thredds.aodn.org.au/thredds/catalog/AIMS/Marine_Monitoring_Program/FLNTU_timeseries/catalog.html"
+  # Step 1: Get subfolder URLs (e.g., 2023, 2024, 2025)
+  subfolder_urls <- MMP_get_subfolder_urls(base_catalog_url)
+  subfolder_urls <- str_subset(subfolder_urls, "20[0-9]{2}")
+  # Step 2: Get .nc file URLs from each subfolder
+  all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
+  # Step 3: Download .nc files
+  flntu_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
+  flntu_files <- str_subset(flntu_files, "FLNTU")
+  # Step 4: Get the flntu data exported from oracle
+  ## They are no longer available that way!
+  ## flntu <- read_csv(paste0(LOGGER_PATH, 'flntu.csv')) %>%
+  ##             suppressMessages()
+  # Step 5: Read and parse all the ncdf files
+  flntu_2 <- MMP_read_flntu_nc(flntu_files)
+
+  # Step 6: Bind together the two sources of flntu
+  ## flntu <- bind_rows(flntu, flntu_2)
+  flntu <- bind_rows(flntu_2)
+  # Step 7: Save as csv file
+  data_file <- paste0(LOGGER_PATH, "flntu", ".csv") # save data here
+  write_csv(flntu, data_file)
+  ## ----
+},
+LOG_FILE, item = CURRENT_ITEM, Category = 'FLNTU', msg='Reading in Water Quality (flntu) data from Threds', return=TRUE)
+## ----end
+
+
 
 
 ## FLNTU data is currently being moved from the AIMS oracle database
@@ -157,7 +166,7 @@ subfolder_urls <- str_subset(subfolder_urls, "20[0-9]{2}")
 all_nc_urls <- unlist(lapply(subfolder_urls, MMP_get_nc_urls))
 # Step 3: Download .nc files
 salinity_files <- MMP_download_nc_files(all_nc_urls, LOGGER_PATH)
-## salinity_files <- str_subset(salinity_files, "CSTZ")
+salinity_files <- str_subset(salinity_files, "CSTZ|CTZ")
 # Step 4: Get the salinity data exported from oracle
 ## waterSalinity <- read_csv(paste0(LOGGER_PATH, 'waterSalinity.csv')) %>%
 ##             suppressMessages()

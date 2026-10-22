@@ -14,6 +14,7 @@ MINDATE=MAXDATE-years(1)+days(1)
 
 ## ---- AIMS Disturbance table 
 CURRENT_ITEM <- "disturbances"
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -27,7 +28,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"disturbance.reef.RDa
         disturbance_mmp <- read_csv(paste0(OTHER_INPUT_PATH, 'disturbance_mmp.csv')) %>%
             suppressMessages()
         save(disturbance_mmp, file=paste0(OTHER_OUTPUT_PATH, 'disturbance_mmp.RData'))
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
 
         include_disturbance <- FALSE
         if (include_disturbance) {
@@ -343,16 +344,18 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"tides.daily.RData"))
         load(file=paste0(OTHER_OUTPUT_PATH, 'tides.daily.RData'))
 
         tides.sum <-
-            tides.daily %>%
-            imap(~ .x %>% mutate(MMP_SITE_NAME = .y)) %>%
-            bind_rows() %>%
-            left_join(lookup, by = c("MMP_SITE_NAME" = "reef.alias")) %>%
-            left_join(wq.sites %>%
+          tides.daily %>%
+          imap(~ .x %>% mutate(MMP_SITE_NAME = .y)) %>%
+          bind_rows() %>%
+          dplyr::filter(!is.na(MMP_SITE_NAME)) |> 
+          left_join(lookup, by = c("MMP_SITE_NAME" = "reef.alias")) %>%
+          left_join(wq.sites %>%
                       dplyr::select(reef.alias, Latitude),
-                      by = c("MMP_SITE_NAME" = "reef.alias")) %>%
-            mutate(MMP_SITE_NAME = forcats::fct_reorder(MMP_SITE_NAME, Latitude, min, .desc = TRUE)) %>%
-            group_by(Subregion) %>%
-            nest()
+            by = c("MMP_SITE_NAME" = "reef.alias")) %>%
+          dplyr::filter(!is.na(SHORT_NAME)) |> 
+          mutate(MMP_SITE_NAME = forcats::fct_reorder(MMP_SITE_NAME, .x = Latitude, .fun = min, .desc = TRUE)) %>%
+          group_by(Subregion) %>%
+          nest()
         ## generate the figures
         tides.sum <- tides.sum %>%
             mutate(g = map(.x = data,
@@ -387,7 +390,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"tides.daily.RData"))
                )
 
         ## output the doc list initial structure        
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -457,7 +460,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"bom.weather.RData"))
     {
         bom <- read_csv(paste0(OTHER_INPUT_PATH, 'bom.csv')) %>%
             suppressMessages()
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -715,7 +718,7 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     {
         discharge <- read_csv(paste0(OTHER_INPUT_PATH, 'discharge.csv')) %>%
             suppressMessages()
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -758,12 +761,32 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
     ## ---- discharge process level 2
     MMP_tryCatch(
     {
-        load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
-        discharge<-discharge %>%
-            left_join(river.lookup) %>%
-            mutate(Year=ifelse(month(Date) > 9, year(Date)+1, year(Date))) %>%
-            suppressWarnings() %>%
-            suppressMessages()
+      load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
+##       discharge1 <-
+##         discharge %>%
+##         filter(RIVER_NAME == "Herbert River") |> 
+##         mutate(RIVER_NAME = ifelse(RIVER_NAME == "Carmila", "Carmila Creek", RIVER_NAME)) |> 
+##         mutate(RIVER_NAME = ifelse(RIVER_NAME == "Waterpark", "Waterpark Creek", RIVER_NAME)) |> 
+##         mutate(RIVER_NAME = ifelse(RIVER_NAME == "Sandy", "Sandy Creek", RIVER_NAME)) |> 
+##         filter(RIVER_NAME != "Gregory River") |> 
+##         left_join(river.lookup |> filter(RIVER_NAME == "Herbert River")) |> 
+##         filter(!is.na(Region))  
+##         ## left_join(river.lookup) 
+## discharge1 |> filter(RIVER_NAME == "Herbert River") |> as.data.frame() |> head()
+## discharge1 |> filter(RIVER_NAME == "Herbert River", waterYear == 2005) |> as.data.frame() |> head()
+## discharge |> filter(RIVER_NAME == "Herbert River", waterYear == 2005) |> as.data.frame() |> head()
+      
+      discharge <-
+        discharge %>%
+        mutate(RIVER_NAME = ifelse(RIVER_NAME == "Carmila", "Carmila Creek", RIVER_NAME)) |> 
+        mutate(RIVER_NAME = ifelse(RIVER_NAME == "Waterpark", "Waterpark Creek", RIVER_NAME)) |> 
+        mutate(RIVER_NAME = ifelse(RIVER_NAME == "Sandy", "Sandy Creek", RIVER_NAME)) |> 
+        filter(RIVER_NAME != "Gregory River") |> 
+        left_join(river.lookup) %>%
+        filter(!is.na(Region)) |>   ## this will remove any that dont have matching stations_ids in the gauge lookup
+        mutate(Year=ifelse(month(Date) > 9, year(Date)+1, year(Date))) %>%
+        suppressWarnings() %>%
+        suppressMessages()
     }, LOG_FILE, Category = 'Data processing', msg='Discharge gauge correction factors', return=TRUE)
 
     ## ----end
@@ -992,7 +1015,8 @@ if ((alwaysExtract | !file.exists(paste0(OTHER_OUTPUT_PATH,"discharge.annual.RDa
             ## generate a lookup of shortened river names (this is for
             ## arranging the rivers in order from North to South as
             ## per the arrangement in the river.lookup file)
-            RIVERS <- river.lookup %>% pull(River) %>% unique %>% str_replace('\\ River', '') %>%
+            RIVERS <- river.lookup %>%
+              pull(River) %>% unique %>% str_replace('\\ River', '') %>%
                 str_replace('-','|') %>%
                 str_replace('Water Park Creek','Waterpark') %>%
                 str_subset("^$", negate = TRUE)

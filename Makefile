@@ -39,7 +39,7 @@ slurm_R:
 
 run_R:
 	@echo "Running the script on the HPC"
-	cd scripts; Rscript MMP_40_fit_gps_hpc.R --reportYear=2026 --runStage=4 --alwaysExtract=FALSE
+	cd scripts; Rscript MMP_40_fit_gps_hpc.R --reportYear=2026 --runStage=4 --alwaysExtract=FALSE --clearDirs=FALSE --reportOnly=FALSE
 
 code_local:
 	$(MAKE) -f scripts/Makefile
@@ -47,9 +47,69 @@ code_local:
 docs_local:
 	$(MAKE) -f docs/Makefile
 
+singularity_stage_1:
+	rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=1 --alwaysExtract=FALSE --clearDirs=FALSE
+
+singularity_stage_2:
+	# rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=2 --alwaysExtract=TRUE --clearDirs=FALSE
+
+singularity_stage_3:
+	# rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3 --alwaysExtract=TRUE --clearDirs=FALSE
+
+singularity_stage_3_4:
+	rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3:4 --alwaysExtract=TRUE --clearDirs=FALSE
+
+singularity_stage_4:
+	rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=4 --alwaysExtract=FALSE --clearDirs=FALSE
+
+singularity_stage_5:
+	rm -f data/reports/STAGE5.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=5 --alwaysExtract=TRUE --clearDirs=FALSE
+
+singularity_stage_3_5:
+	rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3:5 --alwaysExtract=TRUE --clearDirs=FALSE
+
+singularity_stage_6:
+	# rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=6 --alwaysExtract=TRUE --clearDirs=FALSE --reportOnly=FALSE
+
+singularity_stage_3_6:
+	rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3:6 --alwaysExtract=TRUE --clearDirs=FALSE
+
+singularity_stage_7:
+	# rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=7 --alwaysExtract=TRUE --clearDirs=FALSE --reportOnly=FALSE
+
+singularity_stage_8:
+	# rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=8 --alwaysExtract=TRUE --clearDirs=FALSE --reportOnly=FALSE
+
+singularity_stage_9:
+	# rm -f data/reports/*.*
+	#module load singularity
+	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=9 --alwaysExtract=TRUE --clearDirs=FALSE --reportOnly=FALSE
+
 run_stage_2:
 	rm -f data/reports/*.*
-	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=2 --alwaysExtract=TRUE
+	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=2 --alwaysExtract=TRUE --clearDirs=TRUE
 
 run_stage_3:
 	docker run --workdir /home/Project --rm -it -v .:/home/Project mmp Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3 --alwaysExtract=TRUE

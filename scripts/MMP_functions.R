@@ -13,7 +13,7 @@ MMP_isParent <- function() {
    ifelse(sys.nframe()==1, TRUE, FALSE) 
 }
 
-MMP_fakeArgs <- function(stage = 1, always_extract = FALSE, reportYear = NULL) {
+MMP_fakeArgs <- function(stage = 1, always_extract = FALSE, reportYear = NULL, clear_dirs = FALSE, report_only = FALSE) {
   if (length(stage) > 1) {
     ## Collapse the vector into a literal range
     stage_str <- paste0(stage[1], ":", stage[length(stage)])
@@ -24,7 +24,10 @@ MMP_fakeArgs <- function(stage = 1, always_extract = FALSE, reportYear = NULL) {
   MMP_startMatter(args = c('','','','','',
                            paste0('--reportYear=', reportYear),
                            paste0('--runStage=', paste0(stage_str)),
-                           paste0('--alwaysExtract=', always_extract)))
+                           paste0('--alwaysExtract=', always_extract),
+                           paste0('--clearDirs=', clear_dirs),
+                           paste0('--reportOnly=', report_only))
+    )
 }
 
 #########################################################################
@@ -39,9 +42,9 @@ MMP_startMatter <- function(args = commandArgs()) {
     MMP_parseCLA(args)         ## parse command line arguments
     if (CURRENT_STAGE == 1) {
         ## clear data and outputs from previous runs
-        MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH'))      
+        if (clearDirs) MMP_clear_paths(paths = c('DATA_PATH', 'OUTPUT_PATH'))      
         ## clear DOCS_PATH files
-        unlink(paste0(DOCS_PATH, paste0("/MMP_processData_report", c(".qmd", ".html"))))
+        if (clearDirs) unlink(paste0(DOCS_PATH, paste0("/MMP_processData_report", c(".qmd", ".html"))))
         MMP_prepare_paths()    ## prepare file strjucture
     }
     MMP_openning_banner()
@@ -74,15 +77,32 @@ MMP_initialise_status <- function() {
                       items = c("aimsNiskin","cairnsTransect","jcuNiskin","jcuCYNiskin",
                                 "jcuEventNiskin","jcuCYEventNiskin",
                                 "flntu", 
-                                "waterTemp","salinity","dhd","disturbances", "tides","BOM","discharge",
+                                "waterTemp",
+                                "salinity",
+                                "flntuthreds",
+                                "dhd",
+                                "disturbances",
+                                "tides",
+                                "BOM",
+                                "discharge",
                                 "DataReport"),
-                      names = c("AIMS niskin data","Cairns transect data","JCU niskin data","JCY CY niskin data",
-                                "JCU Event niskin data","JCU CY Event niskin data",
-                                "AIMS FLNTU loggers",
-                                "Water temperaturej loggers","Salinity loggers",
-                                "Degree heating weeks","Disturbance table", "Harmonic tides","BOM weather", "River discharge",
-                                "Data report"),
-                      status = c("pending","pending","pending","pending","pending",
+                      names = c("AIMS niskin data",
+                        "Cairns transect data",
+                        "JCU niskin data",
+                        "JCY CY niskin data",
+                        "JCU Event niskin data",
+                        "JCU CY Event niskin data",
+                        "AIMS FLNTU loggers",
+                        "Water temperature loggers",
+                        "Salinity loggers",
+                        "FLNTU (threds)",
+                        "Degree heating weeks",
+                        "Disturbance table",
+                        "Harmonic tides",
+                        "BOM weather",
+                        "River discharge",
+                        "Data report"),
+                      status = c("pending","pending","pending","pending","pending","pending",
                                  "pending","pending","pending","pending","pending","pending","pending","pending","pending","pending")
                       ),
         STAGE3 = list(title = "Stage 3 - process data",
@@ -99,7 +119,7 @@ MMP_initialise_status <- function() {
                                 "Degree heating weeks","Disturbance tables", "Harmonic tides",
                                 "BOM weather", "River discharge",
                                 "Compilation timeseries", "Prepare Indices data",
-                                "Prepare GAMM data", "Package data"),
+                                "Prepare GAMM/GP data", "Package data"),
                       status = c("pending","pending","pending",
                                  "pending","pending","pending",
                                  "pending","pending","pending",
@@ -118,11 +138,11 @@ MMP_initialise_status <- function() {
                       ),
         STAGE5 = list(title = "Stage 5 - calculate indices",
                       items = c("Type0", "Type1", "Type2", "Type3",
-                                "Type4", "Type5", "Type6", "Type7", "Type8", "Comp"),
+                                "Type4", "Type5", "Type6", "Type7", "Type8", "Type9", "Comp"),
                       names = c("Type 0", "Type 1", "Type 2", "Type 3",
-                                "Type 4", "Type 5", "Type 6", "Type 7", "Type 8", "Comparisons"),
+                                "Type 4", "Type 5", "Type 6", "Type 7", "Type 8", "Type 9", "Comparisons"),
                       status = c("pending", "pending", "pending", "pending",
-                                 "pending", "pending", "pending", "pending", "pending", "pending")
+                                 "pending", "pending", "pending", "pending", "pending", "pending", "pending")
                       ),
         STAGE6 = list(title = "Stage 6 - compilations",
                       items = c("GAMS", "GAMPages"),
@@ -168,7 +188,7 @@ MMP_parseCLA <- function(args) {
         MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
         mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
         MMP_openning_banner()
-        stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers> --alwaysExtract=<TRUE>'),
+        stop(paste('This project must be run with command line arguments\nUsage: Rscript MMP_00_main.R --reportYear=<YEAR> --runStage=<vector of stage numbers> --alwaysExtract=<TRUE> --clearDirs=<FALSE> --reportOnly=<FALSE>'),
              call. = FALSE)
     }
     ## args <- commandArgs()
@@ -246,6 +266,53 @@ MMP_parseCLA <- function(args) {
     }
     assign("alwaysExtract", alwaysExtract, env = globalenv()) # create global always extract variable
     mmp__add_status(stage = "SETTINGS", item = "alwaysExtract", name = "Always extract", status = "success") # update status
+    
+    ## clearDirs =======================================================
+    clearDirs <- grep('--clearDirs.*', args) # see if always extract was specified
+    if (length(clearDirs) == 0) {# ... if not, default to FALSE
+        clearDirs <- FALSE
+    } else { # if so, set to TRUE or FALSE as appropriate, otherwise error
+        clearDirs <- args[clearDirs]
+        clearDirs <- gsub('--clearDirs=(.*)','\\1', clearDirs)
+        if(clearDirs %in% c("FALSE", "false", "F", "f")) {
+            clearDirs <- FALSE
+        } 
+        else if(clearDirs %in% c("TRUE", "true", "T", "t")) {
+            clearDirs <- TRUE
+        }
+        else {
+            MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+            mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+            MMP_openning_banner()
+            stop('Always clear must be either TRUE or FALSE (default = TRUE), such as: Rscript <script.R> --clearDirs=FALSE', call. = FALSE)
+        }
+    }
+    assign("clearDirs", clearDirs, env = globalenv()) # create global always extract variable
+    mmp__add_status(stage = "SETTINGS", item = "clearDirs", name = "Always clear dirs", status = "success") # update status
+
+    ## reportOnly =======================================================
+    reportOnly <- grep('--reportOnly.*', args) # see if always extract was specified
+    if (length(reportOnly) == 0) {# ... if not, default to FALSE
+        reportOnly <- FALSE
+    } else { # if so, set to TRUE or FALSE as appropriate, otherwise error
+        reportOnly <- args[reportOnly]
+        reportOnly <- gsub('--reportOnly=(.*)','\\1', reportOnly)
+        if(reportOnly %in% c("FALSE", "false", "F", "f")) {
+            reportOnly <- FALSE
+        } 
+        else if(reportOnly %in% c("TRUE", "true", "T", "t")) {
+            reportOnly <- TRUE
+        }
+        else {
+            MMP_log(status = "FAILURE", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
+            mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "failure")
+            MMP_openning_banner()
+            stop('Report only must be either TRUE or FALSE (default = TRUE), such as: Rscript <script.R> --reportOnly=FALSE', call. = FALSE)
+        }
+    }
+    assign("reportOnly", reportOnly, env = globalenv()) # create global always extract variable
+    mmp__add_status(stage = "SETTINGS", item = "reportOnly", name = "Report only", status = "success") # update status
+
     
     mmp__change_status(stage = "STAGE1", item = "Parse command line args", status = "success")
     MMP_log(status = "SUCCESS", logFile = LOG_FILE, Category = "Parsing the command line arguments", msg=NULL) 
@@ -589,7 +656,7 @@ MMP_tryCatch <- function(expr, logFile, item, Category, expectedClass=NULL, msg=
     W <- NULL
     w.handler <- function(w) { # warning handler                                                                          
         m<-w$message
-        if ((warnings < max.warnings) && (grepl ('MMP_WARNING', m)>0)) {
+        if ((warnings < max.warnings) && any(grepl('MMP_WARNING', m, fixed = TRUE))) {
             MMP_log('WARNING', logFile, Category, paste(warnings, msg, m))
             warnings<<-warnings+1
         }
@@ -815,9 +882,12 @@ MMP_add_to_report <- function(report_list, content) {
 
 mmp__sql <- function(file) {
     paste0("```{sql}\n",
-           "#| filename: ", file,"\n",
-           "#| eval: false\n",
-           "#| code-fold: false\n\n",
+           ## "#| filename: ", file,"\n",
+           ## "#| eval: false\n",
+           ## "#| code-fold: false\n\n",
+           "--| filename: ", file,"\n",
+           "--| eval: false\n",
+           "--| code-fold: false\n\n",
            readr::read_file(file),
            "```\n\n")
 }
@@ -1155,6 +1225,47 @@ MMP__gam_table_quarto <- function(CURRENT_STAGE, Subregion,label_suffix,
     MMP_add_to_report_list(CURRENT_STAGE, "compilations", a)
 }
 
+
+MMP__gp_table_quarto <- function(CURRENT_STAGE, Subregion,label_suffix,
+                                 gam.tbl, Cnt, tabset_parent,
+                                 tbl.caption) {
+  ## Make the quarto list
+  SUFFIX <- paste0(label_suffix, Cnt) 
+  suffix <- gsub("_", "-", SUFFIX) 
+
+  remove_units <- function(x) {
+    str_remove(x, ".\\(.*\\)")
+  }
+  a <- list()
+  a[[paste0("SUBSECTION",SUFFIX)]] <-
+    structure(paste0("### ", Subregion, "\n"), parent = tabset_parent)
+    a[[paste0("TABSET_", Subregion)]] <- structure(paste0("\n:::: panel-tabset\n"),
+      parent = paste0("SUBSECTION",SUFFIX))
+  ## a[[paste0("TBL_REF",SUFFIX)]] <-
+  ##     structure(paste0("\n::::: {#tbl",suffix,"}\n"),
+  ##               parent = paste0('SUBSECTION',SUFFIX)) 
+  for (meas in unique(gam.tbl$Measure)) {
+    meas_tbl <- gam.tbl |> filter(Measure == meas) |> droplevels() |>
+      dplyr::select(-Measure, -n_ints)
+    a[[paste0("SUBSUBSECTION",SUFFIX, remove_units(meas))]] <-
+      structure(paste0("#### ", meas, "\n"), parent = paste0("SUBSECTION",SUFFIX))
+  ## a[[paste0("TABSET_", remove_units(meas))]] <- structure(paste0("\n:::: panel-tabset\n"),
+    ##   parent = paste0("SUBSECTION",SUFFIX))
+    a[[paste0("TBL",SUFFIX, remove_units(meas))]] <-
+      structure(mmp__add_table(meas_tbl),
+        parent = paste0("SUBSUBSECTION",SUFFIX, remove_units(meas)))
+  }
+  a[[paste0("TABSET_", Subregion, "_END")]] <- structure(paste0("\n:::: \n"),
+    parent = paste0("SUBSECTION",SUFFIX))
+
+  ## a[[paste0("TBL_CAP", SUFFIX)]] <-
+  ##     structure(paste0(tbl.caption," {#tbl",suffix,"}\n\n"),
+  ##               parent = paste0('TBL', SUFFIX))
+  ## ## a[[paste0("TBL_REF",SUFFIX,"END")]] <-
+  ## ##     structure(paste0("\n::::: \n"), parent = paste0('SUBSECTION',SUFFIX)) 
+  
+  MMP_add_to_report_list(CURRENT_STAGE, "compilations", a)
+}
 
 #########################################################################
 ## The following function reads in a netcdf file and standardises the  ##

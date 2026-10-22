@@ -1,3 +1,6 @@
+## MMP_fakeArgs(stage = 5, always_extract = TRUE, reportYear = 2026)
+
+
 source("MMP_functions.R")
 source("MMP_functions_indices.R")
 
@@ -9,6 +12,8 @@ if (MMP_isParent()) {
 
 assign("CURRENT_STAGE", 5, env = globalenv())
 CURRENT_ITEM <- "calculate indices"
+
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 
 MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                        SECTION = paste0("# ", str_to_title(CURRENT_ITEM), "\n\n"),
@@ -115,12 +120,28 @@ source("MMP_56_indices_5.R")
 
 source("MMP_57_indices_6.R")
 
-source("MMP_57_indices_7.R")  # annual trend
+source("MMP_57_indices_7.R")  # annual trend  **
 
 source("MMP_57_indices_8.R")  # long-term (with uncertainty)
 
-source("MMP_57_indices_9.R")  # long-term (with uncertainty, no rolling mean)
+source("MMP_57_indices_9.R")  # long-term (with uncertainty, no rolling mean) **
 
 source("MMP_58_indices_comp.R")
 
 source("MMP_35_processedData_report.R")
+
+if (length(list.files("../data/reports", pattern = "STAGE5", full.names = TRUE)) == 0) {
+  if (length(list.files("../data/reports/backup", pattern = "STAGE5", full.names = TRUE)) != 0) {
+    report_files <- list.files("../data/reports/backup", pattern = "STAGE5", full.names = TRUE)
+    fname <- basename(report_files)
+    for (f in 1:length(fname))
+      file.copy(from = report_files[f], paste0("../data/reports/", fname[f]),
+        recursive = TRUE)
+    }
+} else {
+  report_files <- list.files("../data/reports", pattern = "STAGE5", full.names = TRUE)
+  fname <- basename(report_files)
+  for (f in 1:length(fname))
+    file.copy(from = report_files[f], paste0("../data/reports/backup/", fname[f]),
+      recursive = TRUE)
+}

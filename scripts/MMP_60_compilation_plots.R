@@ -4,9 +4,11 @@ source("MMP_functions.R")
 if (MMP_isParent()) {
     MMP_startMatter()
 }
-
+  
 assign("CURRENT_STAGE", 6, env = globalenv())
 CURRENT_ITEM <- "compilations"
+
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 
 MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                        SECTION = paste0("# ", str_to_title(CURRENT_ITEM), "\n\n"),
@@ -16,11 +18,13 @@ MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
 
 ## plots for Angus
 ## source("MMP_61_compilation_plots_gams.R")
-source("MMP_61_compilation_plots_gps.R")
+## source("MMP_61_compilation_plots_gps.R")
 
 ## source("MMP_62_compilation_plots_gam_pages.R")
+  
 source("MMP_62_compilation_plots_gp_pages.R")
 
-source("MMP_63_compilation_plots_zips.R")
+## source("MMP_63_compilation_plots_zips.R")
 
 source("MMP_35_processedData_report.R")
+

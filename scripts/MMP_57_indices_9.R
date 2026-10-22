@@ -24,7 +24,7 @@ CURRENT_ITEM <- "Type9"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
-if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RData"))) &
+if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.alt9.idx.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.all.reef.RData')) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.historic.RData')) &
     ## file.exists(paste0(PARAMS_INPUT_PATH, '/old.wq.guidelines.RData')) &
@@ -94,8 +94,8 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.historic.idx.RD
                     Measure,GL,DirectionOfFailure) %>%
            arrange(MMP_SITE_NAME,Source,Measure,reneeYear) %>%
            filter(!is.na(MMP_SITE_NAME)) %>% 
-           summarise(Year = unique(reneeYear),
-                     Value = tapply(Value, reneeYear, FUN = "mean")
+           reframe(Year = unique(reneeYear),
+                     Value = tapply(Value, reneeYear, FUN = "mean", na.rm = TRUE)
                      ## Value = rollAv(Value, reneeYear, location = 'Mean')
                      ) |> 
            mutate(reneeYear = Year)

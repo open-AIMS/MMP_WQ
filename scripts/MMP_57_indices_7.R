@@ -24,7 +24,7 @@ CURRENT_ITEM <- "Type7"
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
-if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.alt6.idx.RData"))) &
+if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.alt7.idx.RData"))) &
     file.exists(paste0(NISKIN_INPUT_PATH, 'wq.all.reef.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, '/wq.guidelines.RData')) &
     file.exists(paste0(PARAMS_INPUT_PATH, '/wq.units.RData')) &

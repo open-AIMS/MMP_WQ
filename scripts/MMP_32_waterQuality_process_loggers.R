@@ -18,6 +18,7 @@ TRIMDATE <- c(TRIMDATE - years(5) - days(2), TRIMDATE)
 
 ## ---- AIMS flntu process
 CURRENT_ITEM <- "flntu"
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -195,9 +196,9 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"flntu.all.daily.RDa
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/flntu.all.daily.png'),
                p,
@@ -404,9 +405,9 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterTempWAll.RData
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free',space='free') +
             ## theme_mmp +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
 
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterTempWAll.png'),
                p,
@@ -641,9 +642,9 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free',space='free') +
             ## theme_mmp +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                               strip.text.x=element_blank(),
-                              panel.border=element_rect(fill=NA,color='black',size=0.5))
+                              panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
 
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/waterSalinityAll.png'),
                p,
@@ -726,7 +727,8 @@ if ((alwaysExtract | !file.exists(paste0(LOGGER_OUTPUT_PATH,"waterSalinityAll.RD
         suppressWarnings()
     
     wsa.limits <- wsa %>%
-        summarise(Range = range(c(Temperature), na.rm = TRUE)) %>%
+        ## summarise(Range = range(c(Temperature), na.rm = TRUE)) %>%
+        reframe(Range = range(c(Temperature), na.rm = TRUE)) %>%
         pull(Range) %>%
         pretty() %>%
         range()

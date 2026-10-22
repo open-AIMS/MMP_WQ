@@ -16,6 +16,7 @@ MINDATE=MAXDATE-years(1)+days(1)
 
 ## ---- Indices data
 CURRENT_ITEM <- "indicesData"
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 

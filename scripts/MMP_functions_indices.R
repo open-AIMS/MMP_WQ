@@ -1,3 +1,26 @@
+## Override the version that is in reportcards
+RC_boot_accumulate <- function (boot = NULL, size = 10, seed = 123, grouping_cols = colnames(df)[!colnames(df) %in% 
+    c("Score", "Grade")]) 
+{
+  set.seed(seed)
+  x2 = boot %>% group_by(!!!syms(grouping_cols)) %>% do({
+    x = .
+    xx = replicate(n = size, sample(x$Score, prob = x$Weight, 
+      replace = TRUE))
+    if (is.null(dim(xx))) 
+      data.frame(Score = rep(x$Score, size))
+    else data.frame(Score = colMeans(xx, na.rm = TRUE))
+  }) %>% ungroup
+  x3 = x2 %>%
+    ## group_by(.dots = grouping_cols) %>%
+    group_by(across(all_of(grouping_cols))) %>%
+    summarize(Lower = quantile(Score, 
+      p = 0.025, na.rm = TRUE), Upper = quantile(Score, p = 0.975, 
+        na.rm = TRUE), Boot.mean = mean(Score, na.rm = TRUE)) %>% 
+    ungroup
+  list(dist = x2, sum = x3)
+}
+
 rollAv <- function(Val, Year, span.yrs=4,location='Mean') {
     nc = length(unique(Year))
     Xmat=matrix(unlist(lapply(unique(Year), function(x) {
@@ -22,10 +45,10 @@ theme_mmp <- ggplot2::theme_classic(10) +
                    axis.line.y = ggplot2::element_line())
 theme_mmp_qaqc <- ggplot2::theme_gray(12) +
     ggplot2::theme(text = ggplot2::element_text(size=8),
-                   panel.border=ggplot2::element_rect(fill=NA, size=0.5),
+                   panel.border=ggplot2::element_rect(fill=NA, linewidth=0.5),
                    panel.spacing=unit(1,'pt'),
                    axis.text.x=ggplot2::element_text(angle=45, hjust=1),
-                   strip.background=ggplot2::element_rect(fill=NA,color=NA,size=0.5),
+                   strip.background=ggplot2::element_rect(fill=NA,color=NA,linewidth=0.5),
                    strip.text.y=element_text(angle=0))
 
 trafficLightPalette <- (c('#FF0000','#FFC000','#FFFF00','#92D050','#00B050'))

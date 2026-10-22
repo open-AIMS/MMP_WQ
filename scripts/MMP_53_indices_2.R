@@ -88,7 +88,7 @@ if ((alwaysExtract | !file.exists(paste0(INDICES_OUTPUT_PATH,"wq.alt2.idx.RData"
                                Measure,GL,DirectionOfFailure,Location) %>%
                       arrange(MMP_SITE_NAME,Source,Measure,reneeYear) %>%
                       filter(!is.na(MMP_SITE_NAME)) %>%
-                      summarise(Year = unique(reneeYear),
+                      reframe(Year = unique(reneeYear),
                                 Value.Mean = rollAv(Value, reneeYear, location = 'Mean'),
                                 Value.Median = rollAv(Value, reneeYear, location = 'Median')
                                 ) %>%

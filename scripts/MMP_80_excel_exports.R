@@ -296,7 +296,6 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 0.4 indices', return=TRUE)
     ## ----end
 
-  }
 
     ## 9. excel - indicators (version 8.1)
     ## ---- excel - indicators (version 8.1)
@@ -390,13 +389,107 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
     LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 8.6 indices', return=TRUE)
     ## ----end
 
+  }
 
+    ## 15. excel - indicators (version 9.1)
+    ## ---- excel - indicators (version 9.1)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.site.measure_9.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.site.measure, type = 9, level = 1)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 9.1 indices', return=TRUE)
+    ## ----end
+
+    ## 16. excel - indicators (version 9.2)
+    ## ---- excel - indicators (version 9.2)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.measure_9.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.measure, type = 9, level = 2)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 9.2 indices', return=TRUE)
+    ## ----end
+
+    ## 17. excel - indicators (version 9.3)
+    ## ---- excel - indicators (version 9.3)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.region.measure_9.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.measure, type = 9, level = 3)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 9.3 indices', return=TRUE)
+    ## ----end
+
+    ## 18. excel - indicators (version 9.4)
+    ## ---- excel - indicators (version 9.4)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.subindicator_9.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.subindicator, type = 9, level = 4)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 9.4 indices', return=TRUE)
+    ## ----end
+
+    ## 19. excel - indicators (version 9.5)
+    ## ---- excel - indicators (version 9.5)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.subregion.indicator_9.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.subregion.indicator, type = 9, level = 5)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 9.5 indices', return=TRUE)
+    ## ----end
+
+    ## 20. excel - indicators (version 9.6)
+    ## ---- excel - indicators (version 9.6)
+    MMP_tryCatch(
+    {
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
+        load(file = paste0(DATA_PATH, '/final/reneeYear.region.indicator_9.RData'))
+        wb <- MMP_version6_index_spreadsheet(wb, idx.df = reneeYear.region.indicator, type = 9, level = 6)
+        
+    },
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export version 9.6 indices', return=TRUE)
+    ## ----end
+
+  
   
     ## 15. excel - indicators (version 7.1)
     ## ---- excel - indicators (version 7.1)
     MMP_tryCatch(
     {
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.sites.RData'))
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'names_lookup.RData'))
         load(file=paste0(PARAMS_INPUT_PATH, 'wq.guidelines.RData'))
@@ -486,9 +579,11 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
   ## ---- gam changes
     MMP_tryCatch(
     {
-      GAM_OUTPUT_PATH <- paste0(DATA_PATH, "/models/")
-        load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo.gams.RData'))
-        wq.aims.jcu.omo.gams <- wq.aims.jcu.omo.gams %>%
+        load(file=paste0(PARAMS_INPUT_PATH, 'wq.units.RData'))
+        GAM_OUTPUT_PATH <- paste0(DATA_PATH, "/models/")
+        ## load(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo.gams.RData'))
+        wq.aims.jcu.omo_gp <- readRDS(file=paste0(GAM_OUTPUT_PATH, 'wq.aims.jcu.omo_gp.rds'))
+        wq.aims.jcu.omo_gp <- wq.aims.jcu.omo_gp %>%
             mutate(Subregion = factor(Subregion, levels = c("Pascoe",
                                                             "Stewart",
                                                             "Normanby",
@@ -499,32 +594,42 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
                                                             "Burdekin",
                                                             "Mackay Whitsunday",
                                                             "Fitzroy"))) %>%
-          dplyr::select(Subregion, Measure, Change) %>%
-          unnest(Change) %>% 
+          dplyr::select(Subregion, Measure, periods_of_change) %>%
+          mutate(periods_of_change = map(.x = periods_of_change, readRDS)) |> 
+          unnest(periods_of_change) %>% 
           left_join(wq.units %>%
+                      mutate(Measure = str_replace(Measure, ".wm", "")) |> 
                     dplyr::select(Measure, Name.tab.abbr) %>%
                     distinct() %>%
                     mutate(Order = 1:n())) %>%
+          ## as.data.frame() |> head()
           dplyr::select(-Measure) %>%
           arrange(Subregion, Order) %>%
-          dplyr::select(-Order) %>%
-          dplyr::select(Subregion, Measure = Name.tab.abbr, everything()) %>%
+          dplyr::select(-Order, -start, -end) %>%
+          dplyr::select(Subregion, Measure = Name.tab.abbr,
+            trend, start_dt, end_dt, n_ints, n_days,
+            everything()) %>%
           filter(!is.na(Measure)) %>%
-          mutate(`Significant Trend` = ifelse(lower.CL > 1, "Increase",
-                                              ifelse(upper.CL < 1, "Decrease", ""))) %>% 
+          ## mutate(`Significant Trend` = ifelse(lower.CL > 1, "Increase",
+          ##                                     ifelse(upper.CL < 1, "Decrease", ""))) %>% 
           suppressMessages() %>%
           suppressWarnings()
-      headers <- rbind(c('Sub-region','Measure','Date Range',
-                         colnames(wq.aims.jcu.omo.gams)[4],
-                         colnames(wq.aims.jcu.omo.gams)[5],
-                         'Ratio','Lower','Upper', 'Significant Trend'))
+      headers <- rbind(c('Sub-region','Measure','Trend',
+        'Start Date', 'End Date',
+        'Number of intervals', 'Number of days',
+        'Start median', 'Start lower', 'Start upper',
+        'End median', 'End lower', 'End upper',
+        'Change (abs)', 'Change lower', 'Change upper',
+        'Change (frac)', 'Change (frac) lower', 'Change (frac) upper'
+        ))
+        
       nRows <- nrow(headers)
       nCols <- ncol(headers)
-      sheet <- paste0("GAM (AIMS & JCU OMO)")
+      sheet <- paste0("GP (AIMS & JCU OMO)")
       ## wb <- createWorkbook()
       addWorksheet(wb, sheet)
       writeData(wb, sheet, headers, startRow = 1, colNames = FALSE, borderColour = 'black') 
-      writeData(wb, sheet, wq.aims.jcu.omo.gams, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 
+      writeData(wb, sheet, wq.aims.jcu.omo_gp, startRow = nRows + 1, colNames = FALSE, borderColour = 'black') 
 
       ## setColWidths(wb, sheet, cols = 1:nCols, widths = "auto")
       addStyle(wb, sheet, cols = 1:nCols, rows = 1:nRows,
@@ -539,7 +644,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
       freezePane(wb, sheet, firstActiveRow = nRows + 1, firstActiveCol = 1)
       ## saveWorkbook(wb, "test.xlsx", overwrite = TRUE)
     },
-    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export GAM change tables', return=TRUE)
+    LOG_FILE, item = CURRENT_ITEM, Category = 'Excel:', msg='Export GP change tables', return=TRUE)
     ## ----end
 
     saveWorkbook(wb, XLS_OUTPUT_FILE, overwrite = TRUE)
@@ -677,16 +782,19 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/mmp.xlsx"))) &
 <li>sampling station info</li>\n
 <li>guideline values</li>\n
 <li>niskin summaries</li>\n
-<li>indices - historical</li>\n
-<li>indices - version 8.1 (Long-term)</li>\n
-<li>indices - version 8.2 (Long-term)</li>\n
-<li>indices - version 8.3 (Long-term)</li>\n
-<li>indices - version 8.4 (Long-term)</li>\n
+<li>indices - version 9.1 (Long-term)</li>\n
+<li>indices - version 9.2 (Long-term)</li>\n
+<li>indices - version 9.3 (Long-term)</li>\n
+<li>indices - version 9.4 (Long-term)</li>\n
+<li>indices - version 9.5 (Long-term)</li>\n
+<li>indices - version 9.6 (Long-term)</li>\n
 <li>indices - version 7.1 (Annual)</li>\n
 <li>indices - version 7.2 (Annual)</li>\n
 <li>indices - version 7.3 (Annual)</li>\n
 <li>indices - version 7.4 (Annual)</li>\n
 <li>indices - version 7.5 (Annual)</li>\n
+<li>indices - version 7.6 (Annual)</li>\n
+<li>GP (AIMS & JCU OMO) Changes</li>\n
 <li>FLNTU</li>\n
 </ul>\n
 </p>\n"), 

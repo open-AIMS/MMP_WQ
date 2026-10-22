@@ -15,6 +15,10 @@ model_data_prep <- function(x, Measure) {
                 .groups = "drop") |>
       ## mutate(sample =  paste(MMP_SITE_NAME)) |>
       mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none")) |>
+      mutate(Month = month(Date)) |>
+      mutate(Season = factor(ifelse(Month %in% c(11, 12, 1, 2, 3, 4), "Wet", "Dry"))) |>
+      mutate(Month1 = cos(2 * pi * Month / 12),
+        Month2 = sin(2 * pi * Month / 12)) |> 
       mutate(RESP = ifelse(RESP == 0, 0.1, RESP))  ## This is a temp while the real values in the data base a fixed
   } else if (Measure %in% c("CHL", "NTU")) {
     dat <- x |>
@@ -25,7 +29,11 @@ model_data_prep <- function(x, Measure) {
                          MMP_SITE_NAME, DUPLICATE, DEPTH_CODE, DEPTH_CODE
                        ) |>
       mutate(sample =  paste(MMP_SITE_NAME, Date, DEPTH_CODE)) |>
-      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none"))
+      mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none")) |> 
+      mutate(Month = month(Date)) |>
+      mutate(Season = factor(ifelse(Month %in% c(11, 12, 1, 2, 3, 4), "Wet", "Dry"))) |>
+      mutate(Month1 = cos(2 * pi * Month / 12),
+        Month2 = sin(2 * pi * Month / 12))
   } else {
     dat <- x |>
       filter(!is.na(RESP)) |>
@@ -36,6 +44,10 @@ model_data_prep <- function(x, Measure) {
                        ) |>
       mutate(sample =  paste(MMP_SITE_NAME, Date, DEPTH_CODE)) |>
       mutate(lod_flag =  ifelse(!is.na(LOD), "left", "none")) |>
+      mutate(Month = month(Date)) |>
+      mutate(Season = factor(ifelse(Month %in% c(11, 12, 1, 2, 3, 4), "Wet", "Dry"))) |>
+      mutate(Month1 = cos(2 * pi * Month / 12),
+        Month2 = sin(2 * pi * Month / 12)) |> 
       filter(RESP > 0)   ## take this out once Renee fixes the database
   }
   return(dat)
@@ -44,7 +56,7 @@ model_data_prep <- function(x, Measure) {
 model_make_formula <- function(x, Measure) {
   if (Measure == "SECCHI") {
     dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
-                     (1 | MMP_SITE_NAME),
+                     (1 | MMP_SITE_NAME) + (1 | Season),
                    family =  Gamma(link =  "log"))
   } else if (Measure %in% c("CHL", "NTU")) {
       dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
@@ -53,11 +65,11 @@ model_make_formula <- function(x, Measure) {
   } else {
     if (sum(!is.na(x$LOD)) == 0) {  ## No limit of detection values
       dat_form <- bf(RESP ~ gp(Dt.num, k =  20, c =  5/4) +
-                       (1 | MMP_SITE_NAME) + (1 | sample), #(1 | DUPLICATE),
+                       (1 | MMP_SITE_NAME) + (1 | sample) + (1 | Season), #(1 | DUPLICATE),
                      family =  Gamma(link =  "log"))
     } else {
       dat_form <- bf(RESP | cens(lod_flag, LOD) ~ gp(Dt.num, k =  20, c =  5/4) +
-                       (1 | MMP_SITE_NAME) + (1 | sample), #(1 | DUPLICATE),
+                       (1 | MMP_SITE_NAME) + (1 | sample) + (1 | Season), #(1 | DUPLICATE),
                      family =  Gamma(link =  "log"))
     }
   }
@@ -77,9 +89,113 @@ model_make_priors <- function(x) {
     prior_string(paste0("student_t(3, 0, ", summ[1,2],")"),
                  class =  "sd") +
     prior_string(paste0("student_t(3, 0, ", summ[1,2],")"),
-                 class =  "sdgp")
+      class =  "sdgp") #+
+    ## prior_string(paste0("inv_gamma(1.494197, 0.056607)"), class = "lscale", coef = "gpDt.num")
+    ## prior_string(paste0("inv_gamma(5.6, 0.4)"), class = "lscale", coef = "gpDt.num")
   return(priors)
 }
+
+
+invgamma_from_weak_distance <- function(
+  lower_distance,
+  upper_distance,
+  weak_correlation = 0.10,
+  probability = 0.90
+) {
+
+  stopifnot(
+    lower_distance > 0,
+    upper_distance > lower_distance,
+    weak_correlation > 0,
+    weak_correlation < 1,
+    probability > 0,
+    probability < 1
+  )
+
+  # Equal-tail probabilities
+  p_lower <- (1 - probability) / 2
+  p_upper <- 1 - p_lower
+
+  # Convert ecological correlation distances to lscale
+  correlation_multiplier <- sqrt(
+    -2 * log(weak_correlation)
+  )
+
+  lower_lscale <- lower_distance /
+    correlation_multiplier
+
+  upper_lscale <- upper_distance /
+    correlation_multiplier
+
+  target_ratio <- upper_lscale / lower_lscale
+
+  # Solve for inverse-gamma shape
+  shape_equation <- function(shape) {
+
+    qgamma(
+      1 - p_lower,
+      shape = shape,
+      rate = 1
+    ) /
+      qgamma(
+        1 - p_upper,
+        shape = shape,
+        rate = 1
+      ) -
+      target_ratio
+  }
+
+  shape <- uniroot(
+    shape_equation,
+    interval = c(0.01, 1e5)
+  )$root
+
+  # Solve for inverse-gamma scale
+  scale <- lower_lscale * qgamma(
+    1 - p_lower,
+    shape = shape,
+    rate = 1
+  )
+
+  # Inverse-gamma quantile function
+  qinvgamma <- function(p) {
+    scale / qgamma(
+      1 - p,
+      shape = shape,
+      rate = 1
+    )
+  }
+
+  lscale_quantiles <- qinvgamma(
+    c(p_lower, 0.5, p_upper)
+  )
+
+  weak_distance_quantiles <-
+    correlation_multiplier *
+    lscale_quantiles
+
+  list(
+    shape = shape,
+    scale = scale,
+    weak_correlation = weak_correlation,
+    probability = probability,
+    lscale_quantiles = setNames(
+      lscale_quantiles,
+      c("lower", "median", "upper")
+    ),
+    weak_distance_quantiles = setNames(
+      weak_distance_quantiles,
+      c("lower", "median", "upper")
+    ),
+    prior = sprintf(
+      "inv_gamma(%.6f, %.6f)",
+      shape,
+      scale
+    )
+  )
+}
+
+
 
 
 
@@ -109,6 +225,23 @@ model_draws_sum <- function(draws) {
   return(draws_sum)
 }
 
+model_fill_gaps <- function(draws, dat, max_span = 365.25 * 1.5) {
+  if (!exists("max_span")) max_span <- 365.25 * 1.5   # 1.5 years
+  dts <- dat$Date |> unique() |> sort()
+  wch <- which(diff(dts) > max_span)
+  if (length(wch) > 0) {
+    gaps <- lapply(wch, \(i) dts[i:(i+1)]) 
+    for (gap in gaps) {
+      draws <- draws |>
+        mutate(Gap = between(Date, left = gap[1], right = gap[2]),
+          .epred = ifelse(Gap, NA, .epred)) |>
+        dplyr::select(-Gap)
+    }
+  }
+  return(draws)
+}
+
+
 model_regions_of_change <- function(draws) {
   step_30d <- 30 / 365.25
   n_out <- draws |> filter(.draw == 1) |> nrow()
@@ -120,6 +253,7 @@ model_regions_of_change <- function(draws) {
     draws |>
     ungroup() |>
     dplyr::select(.draw, Dt.num, .epred) |>
+    ## filter(.draw == 1) |> 
     arrange(.draw, Dt.num) |>
     group_by(.draw) |>
     mutate(
@@ -127,13 +261,13 @@ model_regions_of_change <- function(draws) {
       deriv =  (.epred - lag(.epred, lag_n)) / (Dt.num - lag(Dt.num, lag_n)),
       Dt.mid =  (Dt.num + lag(Dt.num, lag_n)) / 2          # midpoint where deriv applies
     ) |>
-    ungroup() |>
-    filter(!is.na(deriv)) |>
+    ## as.data.frame()
+    ungroup() |> 
+    ## filter(!is.na(deriv)) |>
     ## mutate(Date =  lubridate::date_decimal(Dt.mid))
     mutate(Date =  lubridate::date_decimal(Dt.num))
   return(deriv_draws)
 }
-
 
 model_deriv_sums <- function(deriv_draws) {
   sum <- deriv_draws |>
@@ -145,6 +279,7 @@ model_deriv_sums <- function(deriv_draws) {
       trend =  case_when(
         .lower > 0 ~ "increasing",
         .upper < 0 ~ "decreasing",
+        is.na(.epred) ~ "gap",
         TRUE ~ "ns"
       )
     ) |>
@@ -152,6 +287,108 @@ model_deriv_sums <- function(deriv_draws) {
     mutate(Date =  lubridate::date_decimal(Dt.num))
   return(sum)
 }
+
+
+## ## wq.aims.jcu.omo_gp |> filter(Subregion == "Barron Daintree")
+## i <- 1
+## wq.aims.jcu.omo_gp$Measure[[i]]
+## dat <- wq.aims.jcu.omo_gp$dat[[i]]
+## deriv_draws <- readRDS(wq.aims.jcu.omo_gp$deriv_draws[[i]])
+## deriv_sums <- readRDS(wq.aims.jcu.omo_gp$deriv_sums[[i]])
+## measure <- wq.aims.jcu.omo_gp$Measure[[i]]
+## subregion <- wq.aims.jcu.omo_gp$Subregion[[i]]
+## label <- wq.aims.jcu.omo_gp$label[[i]]
+## fname <- paste0(GAM_OUTPUT_PATH, "gp_plot_", label, ".rds")
+## rrange1 <- range(c(dat$RESP, deriv_draws$.epred), na.rm = TRUE)
+## rrange1
+## ## rrange1[1] <- rrange[1] -1
+## rrange <- range(pretty(rrange1))
+## ## rrange[1] <- rrange[1] - 1
+## if (rrange[1] == 0) rrange[1] <- rrange1[1]
+## v <- log10(rrange)
+## sprintf("%.3f", 10^seq(floor(v[1]),ceiling(v[2])))
+## sprintf("%.3f", 1^seq(floor(v[1]),ceiling(v[2])))
+## pretty_log10_breaks()(rrange1)
+## pretty_log10_breaks()(rrange)
+
+## ## ggsave(file = str_replace(fname, ".rds", ".png"),
+## ##   p, width = 6, height = 4)
+
+
+
+## unique(sort(as.vector(outer(c(0.1, 1, 2, 10), 10^seq(-3,5), "*"))))
+## v <- log10(rrange)
+## sprintf("%.3f", 10^seq(floor(v[1]),ceiling(v[2])))
+## sprintf("%.3f", outer(c(1,2,5), 10^seq(floor(v[1]),ceiling(v[2])), "*"))
+## sprintf("%.2f", axisTicks(log10(rrange1), log = TRUE, nint = 5))
+## sprintf("%.2f", axisTicks(log(rrange1), log = TRUE, nint = 3))
+
+## rrange1 <- range(c(dat$RESP, deriv_draws$.epred), na.rm = TRUE)
+## rrange <- range(pretty(rrange1))
+## v <- log10(rrange)
+## sprintf("%.3f", 10^seq(floor(v[1]),ceiling(v[2])))
+## rrange[2] <- 52
+## if (rrange[1] == 0) rrange[1] <- rrange1[1]
+## pretty_log10_breaks <- function(rrange, n_ideal = 5, n_min = 4, n_max = 7) {
+##   init <- 0
+##   pretty_y_labels <- NULL
+##   for (nint in seq(2,10)) {
+##     print(paste("nint:", nint))
+##     pretty_y_labels_1 <- axisTicks(usr = log10(rrange),
+##       log = TRUE, n = nint)
+##     ## pretty_y_labels_1 <- pretty_y_labels_1[between(pretty_y_labels_1, rrange[1], rrange[2])]
+##     print(paste("pretty_y_labels_1:", paste(pretty_y_labels_1, collapse = ",")))
+##     ## If ideal, stop
+##     if (length(pretty_y_labels_1) == n_ideal) {
+##       pretty_y_labels <- pretty_y_labels_1
+##       print("found ideal")
+##       break
+##     }
+##     ## Otherwise, try log version
+##     pretty_y_labels_2 <- axisTicks(usr = log(rrange),
+##       log = TRUE, n = nint)
+##     ## pretty_y_labels_2 <- pretty_y_labels_2[between(pretty_y_labels_2, rrange[1], rrange[2])]
+##     print(paste("pretty_y_labels_2:", paste(pretty_y_labels_2, collapse = ",")))
+##     ## If ideal, stop
+##     if (length(pretty_y_labels_2) == n_ideal) {
+##       print("It did")
+##       pretty_y_labels <- pretty_y_labels_2
+##       break
+##     }
+
+##     v <- log10(rrange)
+##     pretty_y_labels_3 <- 10^seq(floor(v[1]),ceiling(v[2]), len = nint)
+##     if (length(pretty_y_labels_3) == n_ideal) {
+##       print("It did again")
+##       pretty_y_labels <- pretty_y_labels_3
+##       break
+##     }
+
+##     print(pretty_y_labels)
+    
+##     ## ## If acceptable
+##     ## if (length(pretty_y_labels) < (n_max + 1)) {
+##     ##   init <- 1
+##     ##   old_pretty_y_labels <- pretty_y_labels
+##     ## }
+##     ## if (length(pretty_y_labels) > (n_max - 1) & init == 0) {
+##     ##   pretty_y_labels <- axisTicks(usr = log(rrange),
+##     ##     log = TRUE, n = nint)
+##     ##   pretty_y_labels <- pretty_y_labels[between(pretty_y_labels, rrange[1], rrange[2])]
+##     ## }
+##     ## if (length(pretty_y_labels) > (n_min + 1) & length(pretty_y_labels) < (n_max - 1)) {
+##     ##   old_pretty_y_labels <- pretty_y_labels
+##     ## }
+##     ## if (length(pretty_y_labels) > n_max) {
+##     ##   pretty_y_labels <- old_pretty_y_labels
+##     ##   break
+##     ## }
+##   }
+##   return(pretty_y_labels)
+## }
+## sprintf("%.3f", pretty_log10_breaks(rrange1, n_ideal = 5))
+## sprintf("%.3f", pretty_log10_breaks(rrange))
+
 
 gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_guidelines = FALSE) {
   old.wq.guidelines <- read.csv('../parameters/old.wq.guidelines.csv', strip.white=TRUE) |>
@@ -177,6 +414,36 @@ gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_gu
     ungroup() |>
     group_by(Date) |>
     median_hdci(.epred, width = 0.95)
+
+  ## ## Generate pretty y labels
+  ## pretty_y_labels <- pretty_log_breaks(rrange)
+  ## init <- 0
+  ## for (nint in c(2, 10)) {
+  ##   rrange1 <- range(c(dat$RESP, deriv_draws$.epred), na.rm = TRUE)
+  ##   rrange <- range(pretty(rrange1))
+  ##   if (rrange[1] == 0) rrange[1] <- rrange1[1]
+  ##   pretty_y_labels <- axisTicks(usr = log10(rrange),
+  ##     log = TRUE, n = nint)
+  ##   pretty_y_labels <- pretty_y_labels[between(pretty_y_labels, rrange[1], rrange[2])]
+  ##   ## If acceptable
+  ##   if (length(pretty_y_labels) < 8) {
+  ##     init <- 1
+  ##     old_pretty_y_labels <- pretty_y_labels
+  ##   }
+  ##   if (length(pretty_y_labels) > 6 & init == 0) {
+  ##     pretty_y_labels <- axisTicks(usr = log(rrange),
+  ##       log = TRUE, n = nint)
+  ##     pretty_y_labels <- pretty_y_labels[between(pretty_y_labels, rrange[1], rrange[2])]
+  ##   }
+  ##   if (length(pretty_y_labels) > 3 & length(pretty_y_labels) < 8) {
+  ##     old_pretty_y_labels <- pretty_y_labels
+  ##   }
+  ##   if (length(pretty_y_labels) > 7) {
+  ##     pretty_y_labels <- old_pretty_y_labels
+  ##     break
+  ##   }
+  ## }
+
   p <- deriv_draws |>
     ## filter(.draw < 100) |>
     ggplot()
@@ -206,7 +473,11 @@ gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_gu
     ## scale_y_log10(parse(text = wq.units)) +
     scale_y_continuous(parse(text = wq.units),
       trans=scales::log_trans(),
-      breaks=base_breaks(n=5), labels=prettyNum) +
+      breaks=base_breaks(n=5),
+      ## breaks = pretty_y_labels,
+      ## breaks = pretty_log10_breaks(),
+      labels=prettyNum,
+      expand = expansion(mult = 0.05)) +
     scale_color_manual(values =  c("increasing" =  "red", "decreasing" =  "blue", "ns" =  "grey")) +
     theme_classic() +
     theme(axis.title.x = element_blank(),
@@ -217,7 +488,7 @@ gp_plot <- function(dat, deriv_draws, deriv_sums, measure, subregion, include_gu
 }
 
 
-periods_of_change <- function(deriv_sums, mod) {
+periods_of_change <- function(deriv_sums, mod, newdata, type = "niskin") {
   conv <- 30
   periods <- deriv_sums |>
     arrange(Dt.num) |>
@@ -246,7 +517,7 @@ periods_of_change <- function(deriv_sums, mod) {
     dplyr::select(-run_id)
 
   ## Get the list of start dates
-  change_stats <- change_stats(periods, mod)
+  change_stats <- change_stats(periods, mod, type = "niskin")
   ## Combine them with periods
   periods <-
     periods |>
@@ -262,9 +533,9 @@ periods_of_change <- function(deriv_sums, mod) {
     left_join(
       change_stats |>
         dplyr::select(Dt.num,
-          start_val = .epred,
-          start_lower = .epred.lower,
-          start_upper = .epred.upper,
+          end_val = .epred,
+          end_lower = .epred.lower,
+          end_upper = .epred.upper,
           diff,
           diff_lower = diff.lower,
           diff_upper = diff.upper,
@@ -277,15 +548,38 @@ periods_of_change <- function(deriv_sums, mod) {
   return(periods)
 }
 
-change_stats <- function(periods, mod) {
-  newdata <- data.frame(
-    Dt.num = periods$start,
-    MMP_SITE_NAME = NA,
-    DUPLICATE = NA,
-    DEPTH_CODE = NA,
-    sample = NA
-  )
-  draws <- epred_draws(mod, newdata = newdata, re_formula = NA)
+change_stats <- function(periods, mod, type) {
+  ## newdata <- data.frame(
+  ##   Dt.num = periods$start,
+  ##   MMP_SITE_NAME = NA,
+  ##   DUPLICATE = NA,
+  ##   DEPTH_CODE = NA,
+  ##   sample = NA
+  ## )
+  if (type == "niskin") {
+    newdata <- data.frame(
+      Dt.num = periods$start,
+      MMP_SITE_NAME = NA,
+      DUPLICATE = NA,
+      DEPTH_CODE = NA,
+      sample = NA
+    ) |> 
+      mutate(Date =  lubridate::date_decimal(Dt.num)) |> 
+      crossing(Season = c("Wet", "Dry")) 
+    draws <- epred_draws(mod, newdata =  newdata, re_formula = ~ (1|Season)) |>
+      ungroup() |>
+      group_by(Dt.num, Date, MMP_SITE_NAME, DUPLICATE, DEPTH_CODE, sample, .draw) |>
+      summarise(.epred = mean(.epred), .groups = "drop_last")
+  } else {
+    newdata <- data.frame(
+      Dt.num = periods$start,
+      MMP_SITE_NAME = NA,
+      DUPLICATE = NA,
+      DEPTH_CODE = NA,
+      sample = NA
+    )
+    draws <- epred_draws(mod, newdata = newdata, re_formula = NA)
+  }
   draws |> median_hdci(.epred)
   change_stats <- draws |>
     ## filter(.draw == 1) |>
@@ -887,6 +1181,55 @@ MMP__gp_plot1 <- function(subr, index_plot, chl_plot, ntu_plot, wq_gp) {
             chl_plot +
             annotate(geom = 'text',
                      x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "NOx", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "PO4", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "TSS", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "SECCHI", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "PN", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "PP", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "POC", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "DOC", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
                      y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
           )
     }
@@ -1105,11 +1448,16 @@ MMP__worm_alt_2026 <- function(hist.idx, subregion.worm, alt.idx, subregion.worm
       filter(Year < 2016)
     subregion.worm <- subregion.worm |>
       filter(reportCardYear < as.Date("2016-01-01")) |>
+      ## mutate(Measure = forcats::fct_recode(Measure,
+      ##                                      "Chlorophyll*'-'*italic(a)" = "Chl-a",
+      ##                                      "Nitrate/Nitrite" = "NOx",
+      ##                                      "Particulate~phosphorus" = "PP",
+      ##                                      "Particulate~nitrogen" =  "PN")) |>
       mutate(Measure = forcats::fct_recode(Measure,
-                                           "Chlorophyll*'-'*italic(a)" = "Chl-a",
-                                           "Nitrate/Nitrite" = "NOx",
-                                           "Particulate~phosphorus" = "PP",
-                                           "Particulate~nitrogen" =  "PN")) |>
+                                           "Chlorophyll*'-'*italic(a)" = "Chlorophyll-a",
+                                           "Nitrate/Nitrite" = "Nitrate/Nitrite",
+                                           "Particulate~phosphorus" = "Particulate phosphorus",
+                                           "Particulate~nitrogen" =  "Particulate nitrogen")) |>
       mutate(Indicator = Measure) |>
       ## mutate(Indicator = str_replace_all(Indicator, " ", "~")) |>
       filter(reportCardYear > as.Date("2007-12-30")) |>
@@ -1163,6 +1511,131 @@ MMP__worm_alt_2026 <- function(hist.idx, subregion.worm, alt.idx, subregion.worm
 
 }
 
+
+MMP__gp_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq_gp) {
+    cnt <- 1
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
+      p.list <- list(
+        index_hist_plot,
+        index_alt_plot,
+        chl_plot +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "NOx", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PO4", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        ntu_plot + annotate(geom = 'text',
+                            x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                            y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PN", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PP", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "POC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "DOC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    } else {
+        p.list <- list(
+            index_hist_plot,
+            index_alt_plot,
+            chl_plot +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "NOx", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "PO4", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "TSS", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "SECCHI", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "PN", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "PP", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "POC", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "DOC", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+          )
+    }
+    patchwork::wrap_plots(p.list, ncol = 2)
+}
 
 MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 2
@@ -1274,6 +1747,55 @@ MMP__gam_plot2 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
     patchwork::wrap_plots(p.list, ncol = 2)
 }
 
+MMP__gp_plot3a <- function(subr, index_plot, chl_plot, ntu_plot, wq_gp) {
+    cnt <- 1
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
+      p.list <- list(
+        index_plot,
+        ntu_plot + annotate(geom = 'text',
+          x = as.POSIXct(paste0(minDate,' 12:00:00')),
+          y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        chl_plot +
+          annotate(geom = 'text',
+            x = as.POSIXct(paste0(minDate,' 12:00:00')),
+            y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    } else {
+        p.list <- list(
+            index_plot,
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "SECCHI", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            wq_gp %>% MMP__gam_extract(subregion = subr,
+                                         measure = "TSS", field = "plot") |>
+              _[[1]] |> readRDS() +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+            chl_plot +
+            annotate(geom = 'text',
+                     x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                     y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+          )
+    }
+    patchwork::wrap_plots(p.list, ncol = 2)
+}
+
 MMP__gam_plot3a <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
     cnt <- 1
     ## if (subr != "Barron Daintree") {
@@ -1321,6 +1843,50 @@ MMP__gam_plot3a <- function(subr, index_plot, chl_plot, ntu_plot, wq.gams) {
     }
 }
 
+MMP__gp_plot3b <- function(subr, wq_gp) {
+    cnt <- 0
+      p.list <- list(
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "NOx", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PO4", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PN", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PP", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "POC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "DOC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    patchwork::wrap_plots(p.list, ncol = 2)
+}
+
 MMP__gam_plot3b <- function(subr, wq.gams) {
     cnt <- 0
     patchwork::wrap_plots(
@@ -1357,6 +1923,58 @@ MMP__gam_plot3b <- function(subr, wq.gams) {
                             y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
                ) +
         patchwork::plot_layout(ncol = 2)
+}
+
+
+MMP__gp_plot4 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq_gp) {
+    cnt <- 1
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
+      p.list <- list(
+        index_hist_plot,
+        index_alt_plot,
+        ntu_plot + annotate(geom = 'text',
+                            x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                            y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        chl_plot +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    } else {
+      p.list <- list(
+        index_hist_plot,
+        index_alt_plot,
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        chl_plot +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    }
+    patchwork::wrap_plots(p.list, ncol = 2)
 }
 
 MMP__gam_plot4 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_plot, wq.gams) {
@@ -1408,6 +2026,127 @@ MMP__gam_plot4 <- function(subr, index_hist_plot, index_alt_plot, chl_plot, ntu_
     }
 }
 
+
+MMP__gp_plot2023 <- function(subr, chl_plot, ntu_plot, wq_gp) {
+    cnt <- 0
+    if (!subr %in% c("Pascoe", "Stewart", "Normanby", "Endeavour", "Barron Daintree")) {
+      p.list <- list(
+        chl_plot +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        ntu_plot + annotate(geom = 'text',
+                            x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                            y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "NOx", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PO4", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PN", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PP", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "POC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "DOC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    } else {
+      p.list <- list(
+        chl_plot +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "SECCHI", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                     measure = "TSS", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "NOx", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PO4", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PN", field = "plot") |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "PP", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "POC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1),
+        wq_gp %>% MMP__gam_extract(subregion = subr,
+                                   measure = "DOC", field = "plot")  |>
+        _[[1]] |> readRDS() +
+        annotate(geom = 'text',
+                 x = as.POSIXct(paste0(minDate,' 12:00:00')),
+                 y = Inf, label = paste0(letters[inc(cnt)],')'), vjust = 1)
+      )
+    }
+    patchwork::wrap_plots(p.list, ncol = 2)
+}
 
 MMP__gam_plot2023 <- function(subr, chl_plot, ntu_plot, wq.gams) {
     cnt <- 0

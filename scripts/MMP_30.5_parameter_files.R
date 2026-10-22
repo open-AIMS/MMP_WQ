@@ -8,7 +8,10 @@ if (MMP_isParent()) {
 
 ## ---- PARAMS
 CURRENT_ITEM <<- 'Parameter files'
-unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", "ParamFiles", "_.RData")) 
+
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
+
+if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", "ParamFiles", "_.RData")) 
 MMP_add_to_report_list(CURRENT_STAGE, 'ParamFiles',
                        SECTION = paste0("# ", CURRENT_ITEM, "\n\n"),
                                TABSET = paste0("::: panel-tabset \n\n"),

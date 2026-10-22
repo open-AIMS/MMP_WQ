@@ -44,7 +44,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                            TABSET_10_END = structure(paste0("\n:::: \n"),
                                                        parent = 'SUBSECTION_10')
                            )
-
+  if (1 == 2) {
+    
     ## 1. Regional worms
     ## ---- Regional worms
     MMP_tryCatch(
@@ -729,6 +730,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index).', return=TRUE)
     ## ----end
 
+  }
     ## 3c. Regional Index no rolling mean
     ## ---- Regional Index
     MMP_tryCatch(
@@ -743,6 +745,8 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
             droplevels()
 
         point_mult <- 1.5
+        wq.alt9.idx.region <- wq.alt9.idx.region |>
+          mutate(Region = factor(Region, levels = levels(wq.alt7.idx.region$Region)))
 
         ## wq.comb.region.g1 <- ggplot(wq.historic.idx.region %>%
         wq.comb.region.g1 <- ggplot(wq.alt9.idx.region %>%
@@ -806,7 +810,7 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                                fig.width = 10, fig.height = 2.5, pt.size = 10)
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
-                           Section = "Regional Index (new)", fig_name_suffix = "wq_worms_comb_region_new_noroll",
+                           Section = "Regional Index (new, no rolling mean)", fig_name_suffix = "wq_worms_comb_region_new_noroll",
                            label_suffix = "_10_idx3bbt", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 (no rolling mean) formulations conditional on Region.\n")) 
 
@@ -816,25 +820,26 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
                                fig.width = 10, fig.height = 2.5, pt.size = 10)
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
-                           Section = "Regional Index alt. (new)", fig_name_suffix = "wq_worms_comb_region1_new_noroll",
+                           Section = "Regional Index alt. (new, no rolling mean)", fig_name_suffix = "wq_worms_comb_region1_new_noroll",
                            label_suffix = "_10_idx3abbt", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 formulations conditional on Region.\n")) 
 
-        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region2_new",
+        MMP__figure_export_dev(FIGURE_OUTPUT_PATH, fig_name_suffix = "wq_worms_comb_region2_new_noroll",
                                Plot = wq.comb.region.g1 +
                                  facet_wrap(~Region,as.table=TRUE, nrow = 2, scales = "free"),
                                units = "in",
                                fig.width = 7, fig.height = 4.5, pt.size = 10)
 
         MMP__figure_quarto(CURRENT_STAGE, "calculate indices", FIGURE_OUTPUT_PATH,
-                           Section = "Regional Index alt.2 (new)", fig_name_suffix = "wq_worms_comb_region2_new",
+                           Section = "Regional Index alt.2 (new, no rolling mean)", fig_name_suffix = "wq_worms_comb_region2_new_noroll",
                            label_suffix = "_10_idx3bbbt", tabset_parent = "TABSET_10",
                            fig.caption = paste0("\nComparison of temporal trends in the water quality index for the historic and alt 9 formulations conditional on Region.\n")) 
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (Regional Index, no rolling mean).', return=TRUE)
     ## ----end
 
-  
+ if (1 == 2) {
+   
     ## 3. No Cape York (old)
     ## ---- No Cape York
     MMP_tryCatch(
@@ -1504,106 +1509,173 @@ if ((alwaysExtract | !file.exists(paste0(OUTPUT_PATH,"/figures/Plots4Renee.zip")
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Comparing indices (subregions, no Cape York, new).', return=TRUE)
     ## ----end
 
+ }
     ## 7. Zip figures 
     ## ---- Zip figures 
     MMP_tryCatch(
     {
         files <- paste0(FIGURE_OUTPUT_PATH,
                        c(
-                           'wq_historic_idx_region.pdf',
-                           'wq_historic_idx_region_large.png',
-                           'wq_historic_idx_region1.pdf',
-                           'wq_historic_idx_region1_large.png',
-                           'wq_historic_idx_subregion.pdf',
-                           'wq_historic_idx_subregion_large.png',
-                           'wq_historic_idx_subregion1.pdf',
-                           'wq_historic_idx_subregion1_large.png',
-                           'wq_old_idx_region.pdf',
-                           'wq_old_idx_region_large.png',
-                           'wq_old_idx_region1.pdf',
-                           'wq_old_idx_region1_large.png',
-                           'wq_old_idx_subregion.pdf',
-                           'wq_old_idx_subregion_large.png',
-                           'wq_old_idx_subregion1.pdf',
-                           'wq_old_idx_subregion1_large.png',
-                           'wq_alt5_qaqc.pdf',
-                           'wq_alt5_qaqc_large.png',
-                           'wq_alt5_qaqc1.pdf',
-                           'wq_alt5_qaqc1_large.png',
-                           'wq_alt5_qaqc2.pdf',
-                           'wq_alt5_qaqc2_large.png',
-                           'wq_alt5_idx_region.pdf',
-                           'wq_alt5_idx_region_large.png',
-                           'wq_alt5_idx_region1.pdf',
-                           'wq_alt5_idx_region1_large.png',
-                           'wq_alt5_idx_subregion.pdf',
-                           'wq_alt5_idx_subregion_large.png',
-                           'wq_alt5_idx_subregion1.pdf',
-                           'wq_alt5_idx_subregion1_large.png',
-                           'wq_alt6_qaqc.pdf',
-                           'wq_alt6_qaqc_large.png',
-                           'wq_alt6_qaqc1.pdf',
-                           'wq_alt6_qaqc1_large.png',
-                           'wq_alt6_qaqc2.pdf',
-                           'wq_alt6_qaqc2_large.png',
-                           'wq_alt6_idx_site_measure.pdf',
-                           'wq_alt6_idx_site_measure_large.png',
-                           'wq_alt6_idx_subregion_measure.pdf',
-                           'wq_alt6_idx_subregion_measure_large.png',
-                           'wq_alt6_idx_subregion_measure_CI.pdf',
-                           'wq_alt6_idx_subregion_measure_CI_large.png',
-                           'wq_alt6_idx_region_measure.pdf',
-                           'wq_alt6_idx_region_measure_large.png',
-                           'wq_alt6_idx_region_measure_CI.pdf',
-                           'wq_alt6_idx_region_measure_CI_large.png',
-                           'wq_alt6_idx_subregion_subindicator.pdf',
-                           'wq_alt6_idx_subregion_subindicator_large.png',
-                           'wq_alt6_idx_subregion_subindicator_CI.pdf',
-                           'wq_alt6_idx_subregion_subindicator_CI_large.png',
-                           'wq_alt6_idx_subregion_indicator.pdf',
-                           'wq_alt6_idx_subregion_indicator_large.png',
-                           'wq_alt6_idx_subregion_indicator_CI.pdf',
-                           'wq_alt6_idx_subregion_indicator_CI_large.png',
-                           'wq_alt6_idx_region_indicator.pdf',
-                           'wq_alt6_idx_region_indicator_large.png',
-                           'wq_alt6_idx_region_indicator_CI.pdf',
-                           'wq_alt6_idx_region_indicator_CI_large.png',
-                           'wq_alt6_qaqc.pdf',
-                           'wq_alt6_qaqc_large.png',
-                           'wq_alt6_qaqc1.pdf',
-                           'wq_alt6_qaqc1_large.png',
-                           'wq_alt6_qaqc2.pdf',
-                           'wq_alt6_qaqc2_large.png',
-                           'wq_alt6_idx_site_measure.pdf',
-                           'wq_alt6_idx_site_measure_large.png',
-                           'wq_alt6_idx_subregion_measure.pdf',
-                           'wq_alt6_idx_subregion_measure_large.png',
-                           'wq_alt6_idx_subregion_measure_CI.pdf',
-                           'wq_alt6_idx_subregion_measure_CI_large.png',
-                           'wq_alt6_idx_region_measure.pdf',
-                           'wq_alt6_idx_region_measure_large.png',
-                           'wq_alt6_idx_region_measure_CI.pdf',
-                           'wq_alt6_idx_region_measure_CI_large.png',
-                           'wq_alt6_idx_subregion_subindicator.pdf',
-                           'wq_alt6_idx_subregion_subindicator_large.png',
-                           'wq_alt6_idx_subregion_subindicator_CI.pdf',
-                           'wq_alt6_idx_subregion_subindicator_CI_large.png',
-                           'wq_alt6_idx_subregion_indicator.pdf',
-                           'wq_alt6_idx_subregion_indicator_large.png',
-                           'wq_alt6_idx_subregion_indicator_CI.pdf',
-                           'wq_alt6_idx_subregion_indicator_CI_large.png',
-                           'wq_alt6_idx_region_indicator.pdf',
-                           'wq_alt6_idx_region_indicator_large.png',
-                           'wq_alt6_idx_region_indicator_CI.pdf',
-                           'wq_alt6_idx_region_indicator_CI_large.png',
-                           "wq_worms_comb_region.pdf",
-                           "wq_worms_comb_region_large.png",
-                           "wq_worms_comb_region_NoFitzroy.pdf",
-                           "wq_worms_comb_region_NoFitzroy_large.png",
-                           "wq_worms_comb_region_new.pdf",
-                           "wq_worms_comb_region_new_large.png",
-                           "wq_worms_comb_region_NoFitzroy_new.pdf",
-                           "wq_worms_comb_region_NoFitzroy_new_large.png"
+                           ## 'wq_historic_idx_region.pdf',
+                           ## 'wq_historic_idx_region_large.png',
+                           ## 'wq_historic_idx_region1.pdf',
+                           ## 'wq_historic_idx_region1_large.png',
+                           ## 'wq_historic_idx_subregion.pdf',
+                           ## 'wq_historic_idx_subregion_large.png',
+                           ## 'wq_historic_idx_subregion1.pdf',
+                           ## 'wq_historic_idx_subregion1_large.png',
+                           ## 'wq_old_idx_region.pdf',
+                           ## 'wq_old_idx_region_large.png',
+                           ## 'wq_old_idx_region1.pdf',
+                           ## 'wq_old_idx_region1_large.png',
+                           ## 'wq_old_idx_subregion.pdf',
+                           ## 'wq_old_idx_subregion_large.png',
+                           ## 'wq_old_idx_subregion1.pdf',
+                           ## 'wq_old_idx_subregion1_large.png',
+                           ## 'wq_alt5_qaqc.pdf',
+                           ## 'wq_alt5_qaqc_large.png',
+                           ## 'wq_alt5_qaqc1.pdf',
+                           ## 'wq_alt5_qaqc1_large.png',
+                           ## 'wq_alt5_qaqc2.pdf',
+                           ## 'wq_alt5_qaqc2_large.png',
+                           ## 'wq_alt5_idx_region.pdf',
+                           ## 'wq_alt5_idx_region_large.png',
+                           ## 'wq_alt5_idx_region1.pdf',
+                           ## 'wq_alt5_idx_region1_large.png',
+                           ## 'wq_alt5_idx_subregion.pdf',
+                           ## 'wq_alt5_idx_subregion_large.png',
+                           ## 'wq_alt5_idx_subregion1.pdf',
+                           ## 'wq_alt5_idx_subregion1_large.png',
+
+                           ## 'wq_alt6_qaqc.pdf',
+                           ## 'wq_alt6_qaqc_large.png',
+                           ## 'wq_alt6_qaqc1.pdf',
+                           ## 'wq_alt6_qaqc1_large.png',
+                           ## 'wq_alt6_qaqc2.pdf',
+                           ## 'wq_alt6_qaqc2_large.png',
+                           ## 'wq_alt6_idx_site_measure.pdf',
+                           ## 'wq_alt6_idx_site_measure_large.png',
+                           ## 'wq_alt6_idx_subregion_measure.pdf',
+                           ## 'wq_alt6_idx_subregion_measure_large.png',
+                           ## 'wq_alt6_idx_subregion_measure_CI.pdf',
+                           ## 'wq_alt6_idx_subregion_measure_CI_large.png',
+                           ## 'wq_alt6_idx_region_measure.pdf',
+                           ## 'wq_alt6_idx_region_measure_large.png',
+                           ## 'wq_alt6_idx_region_measure_CI.pdf',
+                           ## 'wq_alt6_idx_region_measure_CI_large.png',
+                           ## 'wq_alt6_idx_subregion_subindicator.pdf',
+                           ## 'wq_alt6_idx_subregion_subindicator_large.png',
+                           ## 'wq_alt6_idx_subregion_subindicator_CI.pdf',
+                           ## 'wq_alt6_idx_subregion_subindicator_CI_large.png',
+                           ## 'wq_alt6_idx_subregion_indicator.pdf',
+                           ## 'wq_alt6_idx_subregion_indicator_large.png',
+                           ## 'wq_alt6_idx_subregion_indicator_CI.pdf',
+                           ## 'wq_alt6_idx_subregion_indicator_CI_large.png',
+                           ## 'wq_alt6_idx_region_indicator.pdf',
+                           ## 'wq_alt6_idx_region_indicator_large.png',
+                           ## 'wq_alt6_idx_region_indicator_CI.pdf',
+                           ## 'wq_alt6_idx_region_indicator_CI_large.png',
+                           ## 'wq_alt6_qaqc.pdf',
+                           ## 'wq_alt6_qaqc_large.png',
+                           ## 'wq_alt6_qaqc1.pdf',
+                           ## 'wq_alt6_qaqc1_large.png',
+                           ## 'wq_alt6_qaqc2.pdf',
+                           ## 'wq_alt6_qaqc2_large.png',
+                           ## 'wq_alt6_idx_site_measure.pdf',
+                           ## 'wq_alt6_idx_site_measure_large.png',
+                           ## 'wq_alt6_idx_subregion_measure.pdf',
+                           ## 'wq_alt6_idx_subregion_measure_large.png',
+                           ## 'wq_alt6_idx_subregion_measure_CI.pdf',
+                           ## 'wq_alt6_idx_subregion_measure_CI_large.png',
+                           ## 'wq_alt6_idx_region_measure.pdf',
+                           ## 'wq_alt6_idx_region_measure_large.png',
+                           ## 'wq_alt6_idx_region_measure_CI.pdf',
+                           ## 'wq_alt6_idx_region_measure_CI_large.png',
+                           ## 'wq_alt6_idx_subregion_subindicator.pdf',
+                           ## 'wq_alt6_idx_subregion_subindicator_large.png',
+                           ## 'wq_alt6_idx_subregion_subindicator_CI.pdf',
+                           ## 'wq_alt6_idx_subregion_subindicator_CI_large.png',
+                           ## 'wq_alt6_idx_subregion_indicator.pdf',
+                           ## 'wq_alt6_idx_subregion_indicator_large.png',
+                           ## 'wq_alt6_idx_subregion_indicator_CI.pdf',
+                           ## 'wq_alt6_idx_subregion_indicator_CI_large.png',
+                           ## 'wq_alt6_idx_region_indicator.pdf',
+                           ## 'wq_alt6_idx_region_indicator_large.png',
+                           ## 'wq_alt6_idx_region_indicator_CI.pdf',
+                           ## 'wq_alt6_idx_region_indicator_CI_large.png',
+
+                           'wq_alt7_qaqc.pdf',
+                           'wq_alt7_qaqc_large.png',
+                           'wq_alt7_qaqc1.pdf',
+                           'wq_alt7_qaqc1_large.png',
+                           'wq_alt7_qaqc2.pdf',
+                           'wq_alt7_qaqc2_large.png',
+                           'wq_alt7_idx_site_measure.pdf',
+                           'wq_alt7_idx_site_measure_large.png',
+                           'wq_alt7_idx_subregion_measure.pdf',
+                           'wq_alt7_idx_subregion_measure_large.png',
+                           'wq_alt7_idx_subregion_measure_CI.pdf',
+                           'wq_alt7_idx_subregion_measure_CI_large.png',
+                           'wq_alt7_idx_region_measure.pdf',
+                           'wq_alt7_idx_region_measure_large.png',
+                           'wq_alt7_idx_region_measure_CI.pdf',
+                           'wq_alt7_idx_region_measure_CI_large.png',
+                           'wq_alt7_idx_subregion_subindicator.pdf',
+                           'wq_alt7_idx_subregion_subindicator_large.png',
+                           'wq_alt7_idx_subregion_subindicator_CI.pdf',
+                           'wq_alt7_idx_subregion_subindicator_CI_large.png',
+                           'wq_alt7_idx_subregion_indicator.pdf',
+                           'wq_alt7_idx_subregion_indicator_large.png',
+                           'wq_alt7_idx_subregion_indicator_CI.pdf',
+                           'wq_alt7_idx_subregion_indicator_CI_large.png',
+                           'wq_alt7_idx_region_indicator.pdf',
+                           'wq_alt7_idx_region_indicator_large.png',
+                           'wq_alt7_idx_region_indicator_CI.pdf',
+                           'wq_alt7_idx_region_indicator_CI_large.png',
+                           'wq_alt9_qaqc.pdf',
+                           'wq_alt9_qaqc_large.png',
+                           'wq_alt9_qaqc1.pdf',
+                           'wq_alt9_qaqc1_large.png',
+                           'wq_alt9_qaqc2.pdf',
+                           'wq_alt9_qaqc2_large.png',
+                           'wq_alt9_idx_site_measure.pdf',
+                           'wq_alt9_idx_site_measure_large.png',
+                           'wq_alt9_idx_subregion_measure.pdf',
+                           'wq_alt9_idx_subregion_measure_large.png',
+                           'wq_alt9_idx_subregion_measure_CI.pdf',
+                           'wq_alt9_idx_subregion_measure_CI_large.png',
+                           'wq_alt9_idx_region_measure.pdf',
+                           'wq_alt9_idx_region_measure_large.png',
+                           'wq_alt9_idx_region_measure_CI.pdf',
+                           'wq_alt9_idx_region_measure_CI_large.png',
+                           'wq_alt9_idx_subregion_subindicator.pdf',
+                           'wq_alt9_idx_subregion_subindicator_large.png',
+                           'wq_alt9_idx_subregion_subindicator_CI.pdf',
+                           'wq_alt9_idx_subregion_subindicator_CI_large.png',
+                           'wq_alt9_idx_subregion_indicator.pdf',
+                           'wq_alt9_idx_subregion_indicator_large.png',
+                           'wq_alt9_idx_subregion_indicator_CI.pdf',
+                           'wq_alt9_idx_subregion_indicator_CI_large.png',
+                           'wq_alt9_idx_region_indicator.pdf',
+                           'wq_alt9_idx_region_indicator_large.png',
+                           'wq_alt9_idx_region_indicator_CI.pdf',
+                           'wq_alt9_idx_region_indicator_CI_large.png',
+
+                           ## "wq_worms_comb_region.pdf",
+                           ## "wq_worms_comb_region_large.png",
+                           ## "wq_worms_comb_region_NoFitzroy.pdf",
+                           ## "wq_worms_comb_region_NoFitzroy_large.png",
+                           ## "wq_worms_comb_region_new.pdf",
+                           ## "wq_worms_comb_region_new_large.png",
+                           ## "wq_worms_comb_region_NoFitzroy_new.pdf",
+                           ## "wq_worms_comb_region_NoFitzroy_new_large.png"
+
+                           "wq_worms_comb_region_new_noroll.pdf",
+                           "wq_worms_comb_region_new_noroll_large.png",
+                           "wq_worms_comb_region1_new_noroll.pdf",
+                           "wq_worms_comb_region1_new_noroll_large.png",
+                           "wq_worms_comb_region2_new_noroll.pdf",
+                           "wq_worms_comb_region2_new_noroll_large.png"
                        )
                        )
         files=paste(files, collapse =' ')

@@ -8,6 +8,7 @@ if (MMP_isParent()) {
 
 assign("CURRENT_STAGE", 3, env = globalenv())
 
+
 ## assign("DOC_REPORT_LIST", list(), env = globalenv())
 
 ## - wq.sites
@@ -41,11 +42,31 @@ source("MMP_34_waterQuality_process_timeseries.R")
 ## Preapare data for indices
 source("MMP_35_processedData_indices_data.R")
 
-## Prepare data for GAMMs
+## Prepare data for GAMMs - note these are now for GPs (I need to change the names)
 source("MMP_36_processedData_gam_data.R")
 
 ## Produce report
 source("MMP_35_processedData_report.R")
 
+if (1 == 2) {
+  
 ## Package up all the data that go into analyses
 source("MMP_38_package_up_data.R")
+
+}
+
+if (length(list.files("../data/reports", pattern = "STAGE3", full.names = TRUE)) == 0) {
+  if (length(list.files("../data/reports/backup", pattern = "STAGE3", full.names = TRUE)) != 0) {
+    report_files <- list.files("../data/reports/backup", pattern = "STAGE3", full.names = TRUE)
+    fname <- basename(report_files)
+    for (f in 1:length(fname))
+      file.copy(from = report_files[f], paste0("../data/reports/", fname[f]),
+        recursive = TRUE)
+    }
+} else {
+  report_files <- list.files("../data/reports", pattern = "STAGE3", full.names = TRUE)
+  fname <- basename(report_files)
+  for (f in 1:length(fname))
+    file.copy(from = report_files[f], paste0("../data/reports/backup/", fname[f]),
+      recursive = TRUE)
+}

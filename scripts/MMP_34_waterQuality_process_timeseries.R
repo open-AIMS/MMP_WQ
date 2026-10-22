@@ -16,6 +16,7 @@ START_DATE <<- MAXDATE - years(5)
 
 ## ---- timeseries plots 
 CURRENT_ITEM <- "timeseries"
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_", CURRENT_ITEM,"_.RData"))
 mmp__change_status(stage = paste0("STAGE", CURRENT_STAGE), item = CURRENT_ITEM, status = "progress")
 MMP_openning_banner()
 
@@ -33,7 +34,7 @@ if (alwaysExtract &
       load(file=paste0(DATA_PATH, '/primary/other/river.lookup.RData'))
       lookup <- read.csv(paste0(PARAMS_PATH, '/lookup.csv'), strip.white = TRUE) %>% suppressMessages()
 
-      unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+      if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
       MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                              SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                   item = CURRENT_ITEM),"\n\n"),

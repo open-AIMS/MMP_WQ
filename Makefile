@@ -68,7 +68,7 @@ singularity_stage_3_4:
 	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=3:4 --alwaysExtract=TRUE --clearDirs=FALSE
 
 singularity_stage_4:
-	rm -f data/reports/*.*
+	# rm -f data/reports/*.*
 	#module load singularity
 	singularity exec -B .:/home/Project mmp2.sif Rscript scripts/MMP_00_main.R --reportYear=2026 --runStage=4 --alwaysExtract=FALSE --clearDirs=FALSE
 

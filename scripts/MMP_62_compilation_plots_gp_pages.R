@@ -665,8 +665,8 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
   ## 15. 2023 Renee would like the historical and recent worms presented in a single top and bottom
   ## figure
   ## ---- Hist vs Alt7 2023 part 2
-  MMP_tryCatch(
-  {
+  ## MMP_tryCatch(
+  ## {
     if (!reportOnly) {
       gp.aims.jcu.omo_tbl <- gp.aims.jcu.omo_tbl %>%
         mutate(GAM_plots_2023 = pmap(.l = list(Subregion,
@@ -680,9 +680,9 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
         file = paste0(GAM_OUTPUT_PATH, "gp.aims.jcu.omo_tbl_6a.rds"))
 
       pwalk(list(Subregion = gp.aims.jcu.omo_tbl$Subregion,
-        GAM_plots_2023 = gp.aims.jcu.omo_tbl$GAM_plots_2023,
+        IndexPlots.AIMS.JCU.OMO.2023.part2 = gp.aims.jcu.omo_tbl$GAM_plots_2023,
         Cnt = 1:length(gp.aims.jcu.omo_tbl$Subregion)),
-        .f = function(Subregion, GAM_plots_2023, Cnt) { 
+        .f = function(Subregion, IndexPlots.AIMS.JCU.OMO.2023.part2, Cnt) { 
           MMP__comp_figure_export(FIGURE_OUTPUT_PATH, Subregion,
             fig_name_suffix = ".AIMS_JCU_OMO_2023_summary_part2",
             Plot = IndexPlots.AIMS.JCU.OMO.2023.part2,
@@ -713,9 +713,9 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"gam.tbl.RData"))) &
       }
     )          
 
-  },
-  LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist9 vs Alt7 (separate worms, AIMS & JCU, OMO 2023 part 2).', return=TRUE)
-  ## ----end
+  ## },
+  ## LOG_FILE, item = CURRENT_ITEM, Category = 'Compilations (GAM pages):', msg='Hist9 vs Alt7 (separate worms, AIMS & JCU, OMO 2023 part 2).', return=TRUE)
+  ## ## ----end
   
   ## 16. 2026 Renee would like the historical and recent worms presented in a single 
   ## figure in which the long-term trend stops < 2016 and the annual trend is

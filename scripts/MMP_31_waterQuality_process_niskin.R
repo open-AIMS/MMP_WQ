@@ -27,7 +27,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
         niskin.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'niskin.csv')) %>%
             suppressMessages()
         save(niskin.reef, file=paste0(NISKIN_OUTPUT_PATH, 'niskin.reef.RData'))
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -54,7 +54,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
     },
     LOG_FILE, item = CURRENT_NISKIN, Category = 'Data processing:', msg='Reading in Water Quality (Niskin) data', return=TRUE)
     ## ----end
-    
+   
     ## 1. First level of data processing
     ## ---- AIMS niskin process level 1
     MMP_tryCatch(
@@ -94,6 +94,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
                   PATH = NISKIN_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
+
     ## ----end
     ## 2. Correct the PN data for instrument transition
     ## ---- AIMS niskin process level 2
@@ -113,6 +114,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
                   PATH = NISKIN_OUTPUT_PATH,
                   progressive = TRUE)
     MMP_openning_banner()
+
     ## ----end
     ## 3. Further processing
     ## ---- AIMS niskin process level 3
@@ -181,31 +183,33 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
     ## ---- AIMS niskin outputs - **note these are based on depth weighted averages**
     MMP_tryCatch(
     {
-        load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
-        p <- ggplot(niskin.aims.reef.av %>% 
+      load(file=paste0(NISKIN_OUTPUT_PATH, 'niskin.aims.reef.av.RData'))
+      p <- ggplot(niskin.aims.reef.av %>% 
                     dplyr:::select(SHORT_NAME, MMP_SITE_NAME,LATITUDE,Date,Subregion,Season) %>%
                     distinct %>%
                     arrange(desc(LATITUDE)) %>%
                     mutate(MMP_SITE_NAME=factor(MMP_SITE_NAME,levels=rev(unique(MMP_SITE_NAME))),
-                           nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
-                           nms = forcats::fct_reorder(nms, LATITUDE)),
+                      nms = paste0(MMP_SITE_NAME, ' (', SHORT_NAME,')'), 
+                      nms = forcats::fct_reorder(nms, LATITUDE)),
                     aes(y=(nms), x=Date))+
-            geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
-            geom_point(aes(color=Season),show.legend=FALSE)+ggtitle('Water quality niskin data (AIMS)')+
-                                        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
-            scale_y_discrete('') +
-            scale_x_date('',date_breaks='2 years', date_labels='%Y')+
-            scale_color_manual('',values=c('red','blue')) +
-            facet_grid(Subregion~., scales='free', space = 'free') +
-            ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
-                  strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+        geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=MINDATE,xmax=MAXDATE), fill='grey', color=NA) +
+        geom_point(aes(color=Season),show.legend=FALSE) +
+        ggtitle('Water quality niskin data (AIMS)') +
+        #geom_rect(aes(ymin=-Inf,ymax=Inf,xmin=minDate,xmax=maxDate), color='black', fill=NA) +    
+        scale_y_discrete('') +
+        scale_x_date('',date_breaks='2 years', date_labels='%Y')+
+        scale_color_manual('',values=c('red','blue')) +
+        facet_grid(Subregion~., scales='free', space = 'free') +
+        ggplot2::theme_grey() +
+        theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
+          strip.text.x=element_blank(),
+          panel.border=element_rect(fill=NA,color='black',linewidth=0.5)
+        ) 
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_aims_reef_av.png'),
                p,
                width=12, height=10, dpi = 100)
-
+  
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SUBSECTION_DESIGN = structure(paste0("## Sampling design\n"),
                                                              parent = 'TABSET'),
@@ -221,7 +225,6 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM)
         ## ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% str()
         ## MMP_get_report_list(CURRENT_STAGE, CURRENT_ITEM) %>% unlist() %>% paste(collapse = '')
-
         
     }, LOG_FILE, Category = "Data processing:", msg='Preparing report outputs for Water Quality (Niskin) data', return=TRUE)
 
@@ -327,7 +330,8 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH,"niskin.aims.reef.RD
 } else {
 }
 
-
+if (1 == 2) {
+  
 MMP_checkData(name = "niskin.aims.reef.av.RData",
               stage = paste0("STAGE", CURRENT_STAGE),
               item = CURRENT_ITEM,
@@ -335,6 +339,12 @@ MMP_checkData(name = "niskin.aims.reef.av.RData",
               PATH = NISKIN_OUTPUT_PATH)
 MMP_openning_banner()
 ## ----end
+
+}
+
+  
+
+if (1 == 1) {
 
 ## ---- AIMS Cairns Transect process
 ## **Note, since the Cairns transect is not part of the GAMS, there is only depth weighted averages**
@@ -351,7 +361,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RDa
         cairns.reef <- read_csv(paste0(NISKIN_INPUT_PATH, 'cairns.csv')) %>%
             suppressMessages()
         save(cairns.reef, file=paste0(NISKIN_OUTPUT_PATH, 'cairns.reef.RData'))
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -495,9 +505,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "cairns.reef.av.RDa
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/cairns_reef_av.png'),
                p,
@@ -553,7 +563,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
         jcu_lookup = read_csv(paste0(PARAMS_PATH, '/jcu_location_lookup.csv'), trim_ws = TRUE) %>%
             suppressMessages()
 
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -703,9 +713,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.reef.av
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_jcu_reef_av1.png'),
                p,
@@ -886,7 +896,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
             suppressMessages()
 
         save(cy.reef, file=paste0(NISKIN_OUTPUT_PATH, 'cy.reef.RData'))
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -1034,9 +1044,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.reef.av.
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
     
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_cy_reef_av.png'),
                p,
@@ -1191,7 +1201,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
             suppressMessages()
 
         save(niskin.reef, file=paste0(NISKIN_OUTPUT_PATH, 'jcu.event.reef.RData'))
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -1313,9 +1323,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.jcu.event.r
             scale_color_manual('',values=c('red','blue')) +
             facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_jcu_event_reef_av1.png'),
                p,
@@ -1374,7 +1384,7 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.re
             suppressMessages()
 
         save(cy.event.reef, file=paste0(NISKIN_OUTPUT_PATH, 'cy.event.reef.RData'))
-        unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
+        if (clearDirs) unlink(paste0(DATA_PATH, "/reports/STAGE",CURRENT_STAGE, "_", CURRENT_ITEM, "_.RData")) 
         MMP_add_to_report_list(CURRENT_STAGE, CURRENT_ITEM,
                                SECTION = paste0("# ", mmp__get_name(stage = paste0("STAGE",CURRENT_STAGE),
                                                                     item = CURRENT_ITEM),"\n\n"),
@@ -1496,9 +1506,9 @@ if ((alwaysExtract | !file.exists(paste0(NISKIN_OUTPUT_PATH, "niskin.cy.event.re
             scale_color_manual('',values=c('red','blue'), limits = c('Dry','Wet')) +
             facet_grid(Subregion~., scales='free', space = 'free') +
             ggplot2:::theme_grey() +
-            theme(strip.background=element_rect(fill=NA,color='black',size=0.5),
+            theme(strip.background=element_rect(fill=NA,color='black',linewidth=0.5),
                   strip.text.x=element_blank(),
-                  panel.border=element_rect(fill=NA,color='black',size=0.5))
+                  panel.border=element_rect(fill=NA,color='black',linewidth=0.5))
         
         ggsave(file=paste0(OUTPUT_PATH, '/figures/processed/niskin_cy_event_reef_av1.png'),
                p,
@@ -1538,3 +1548,5 @@ MMP_checkData(name = "niskin.cy.event.reef.av1.RData",
 MMP_openning_banner()
 
 ## ----end
+
+}

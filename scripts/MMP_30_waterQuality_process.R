@@ -8,6 +8,7 @@ if (MMP_isParent()) {
 
 assign("CURRENT_STAGE", 3, env = globalenv())
 
+unlink(paste0(DATA_PATH, "/reports/STAGE", CURRENT_STAGE, "_*.RData"))
 
 ## assign("DOC_REPORT_LIST", list(), env = globalenv())
 

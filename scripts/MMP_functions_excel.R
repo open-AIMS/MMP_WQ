@@ -137,7 +137,8 @@ MMP_prepare_table_niskin_summaries <- function() {
                   dplyr::select(MMP_SITE_NAME, Measure, GL,
                                 DirectionOfFailure, Location,
                                 GL.Season) %>%
-                  distinct() %>%
+                    distinct() %>%
+                    filter(!is.na(GL)) |> 
                   spread(GL.Season,GL)) %>%
         ungroup() %>%
         left_join(wq.sites %>%
@@ -162,8 +163,8 @@ MMP_prepare_table_niskin_summaries <- function() {
     data.summary1 = data.summary1 %>%
         mutate(Site=gsub('\\(',' (', Site))
     data.summary1 <- data.summary1[,is.na(colnames(data.summary1))==FALSE]
-    data.summary1 <- data.summary1 %>%
-        dplyr::select(-`<NA>`)
+    ## data.summary1 <- data.summary1 %>%
+    ##     dplyr::select(-`<NA>`)
 
     is_triggered <- function(x,DoF,Annual, color = 'red') {
         ifelse(is.na(DoF), 'white',

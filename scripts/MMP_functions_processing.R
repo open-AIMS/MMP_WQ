@@ -176,6 +176,7 @@ MMP_convertUnits <- function(data) {
     "POC", 12.001,
     "DRIFTCHL", 1,
     "TSS", 1,
+    "SI", 28.09,
     )
   get_conv <- function(col) {
     prefix <- str_remove(col, "_(UM|LOD|MGPERL|UGPERL|temp)$")          # TP_UM -> TP, TP_LOD -> TP

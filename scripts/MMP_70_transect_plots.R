@@ -271,16 +271,17 @@ if ((alwaysExtract | !file.exists(paste0(GAM_OUTPUT_PATH,"wq.gams.RData"))) &
                                               fig.caption = paste0("\nVarious measures against distance (conditional on season) from major river(s) within the ",Subregion," Subregion. The Water bodies (EC: enclosed coastal, OC: open coastal, MS: midshelf, OS: offshore) associated with each sampling location are indicated via a shaded series of bars on the x-axis.\n")) 
               }
               )
+        saveRDS(transect.tbl.plots, file = paste0(DATA_PATH, "/models/", "transect_gams.rds"))
     },
     LOG_FILE, item = CURRENT_ITEM, Category = 'Indices:', msg='Reading in data for old indices.', return=TRUE)
     ## ----end
 
     source("MMP_35_processedData_report.R")
 
-    MMP_checkData(name = "wq.gams.RData",
+    MMP_checkData(name = "transect_gams.rds",
                   stage = paste0("STAGE", CURRENT_STAGE),
                   item = CURRENT_ITEM,
-                  label = "fit GAMMs",
+                  label = "fit transect GAMMs",
                   PATH = paste0(DATA_PATH, "/models/"))
     MMP_openning_banner()
 }
